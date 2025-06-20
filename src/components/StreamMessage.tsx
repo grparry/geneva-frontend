@@ -49,12 +49,14 @@ interface StreamMessageProps {
   message: Message;
   isLast?: boolean;
   highlight?: boolean;
+  showMetadata?: boolean;
 }
 
 export const StreamMessage: React.FC<StreamMessageProps> = ({ 
   message, 
   isLast = false,
-  highlight = false 
+  highlight = false,
+  showMetadata = false
 }) => {
   const [expanded, setExpanded] = useState(isLast);
   const [showRaw, setShowRaw] = useState(false);
@@ -356,7 +358,7 @@ export const StreamMessage: React.FC<StreamMessageProps> = ({
         )}
 
         {/* Metadata Display */}
-        {expanded && message.metadata && Object.keys(message.metadata).length > 0 && (
+        {expanded && showMetadata && message.metadata && Object.keys(message.metadata).length > 0 && (
           <>
             <Divider sx={{ my: 1 }} />
             <Box>

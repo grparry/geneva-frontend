@@ -18,8 +18,10 @@ import {
   Refresh as RefreshIcon,
   Search as SearchIcon,
 } from '@mui/icons-material';
-import { api } from '../api/client';
 import { StreamMessage } from './StreamMessage';
+import { useObservabilityStore } from '../store/observabilityStore';
+import { useUIStore } from '../store/uiStore';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 interface Message {
   message_id: string;
@@ -38,75 +40,67 @@ interface Message {
 export const StreamViewer: React.FC<{ conversationId?: string }> = ({ 
   conversationId: propConversationId 
 }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [conversationId, setConversationId] = useState(propConversationId || '');
+  // Local state
   const [filter, setFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [newMessageCount, setNewMessageCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const loadMessages = useCallback(async () => {
-    if (!conversationId) return;
-    
-    setLoading(true);
-    try {
-      const data = await api.getStream(conversationId, filter || undefined);
-      setMessages(data.messages || []);
-      setNewMessageCount(0);
-    } catch (error) {
-      console.error('Failed to load messages:', error);
-      setMessages([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [conversationId, filter]);
+  
+  // Store hooks
+  const {
+    streamCache,
+    selectedConversation,
+    selectConversation,
+    loadStreamMessages,
+    loading
+  } = useObservabilityStore();
+  
+  const { addNotification } = useUIStore();
+  
+  // Get current conversation ID from props or store
+  const conversationId = propConversationId || selectedConversation || '';
+  
+  // Get messages from store cache
+  const messages = streamCache.get(conversationId) || [];
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
+  // Load messages when conversation changes
   useEffect(() => {
-    loadMessages();
-  }, [loadMessages]);
+    if (conversationId) {
+      loadStreamMessages(conversationId, filter || undefined);
+      setNewMessageCount(0);
+    }
+  }, [conversationId, filter, loadStreamMessages]);
 
-  // WebSocket connection for real-time updates
+  // Auto-scroll when messages update
   useEffect(() => {
-    if (!conversationId) return;
-    
-    const ws = new WebSocket('ws://localhost:8000/ws/communication-stream');
-    
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-    };
-    
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'stream.update' && data.conversation_id === conversationId) {
-          setMessages(prev => [...prev, data.message]);
-          setNewMessageCount(prev => prev + 1);
-          // Auto-scroll after a short delay to allow render
-          setTimeout(scrollToBottom, 100);
-        }
-      } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
-      }
-    };
+    if (messages.length > 0) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [messages.length, scrollToBottom]);
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-    };
-
-    return () => {
-      ws.close();
-    };
-  }, [conversationId, scrollToBottom]);
+  // Initialize WebSocket connection
+  useWebSocket({
+    url: 'ws://localhost:8000/ws/communication-stream',
+    onConnect: () => {
+      console.log('StreamViewer: WebSocket connected');
+    },
+    onDisconnect: () => {
+      console.log('StreamViewer: WebSocket disconnected');
+    },
+    onError: (error) => {
+      console.error('StreamViewer: WebSocket error:', error);
+      addNotification({
+        type: 'error',
+        title: 'Connection Error',
+        message: 'Failed to connect to real-time updates'
+      });
+    }
+  });
 
   // Filter messages based on search term
   const filteredMessages = messages.filter(message => {
@@ -123,8 +117,14 @@ export const StreamViewer: React.FC<{ conversationId?: string }> = ({
   });
 
   const handleRefresh = () => {
-    loadMessages();
-    setNewMessageCount(0);
+    if (conversationId) {
+      loadStreamMessages(conversationId, filter || undefined);
+      setNewMessageCount(0);
+    }
+  };
+
+  const handleConversationIdChange = (newId: string) => {
+    selectConversation(newId);
   };
 
   return (
@@ -139,7 +139,7 @@ export const StreamViewer: React.FC<{ conversationId?: string }> = ({
           <Stack direction="row" spacing={1}>
             <Badge badgeContent={newMessageCount} color="primary">
               <Tooltip title="Refresh">
-                <IconButton size="small" onClick={handleRefresh} disabled={loading}>
+                <IconButton size="small" onClick={handleRefresh} disabled={loading.conversations}>
                   <RefreshIcon />
                 </IconButton>
               </Tooltip>
@@ -151,7 +151,7 @@ export const StreamViewer: React.FC<{ conversationId?: string }> = ({
           <TextField
             label="Conversation ID"
             value={conversationId}
-            onChange={(e) => setConversationId(e.target.value)}
+            onChange={(e) => handleConversationIdChange(e.target.value)}
             size="small"
             sx={{ flex: 1 }}
             placeholder="Enter conversation ID to view stream..."
@@ -195,7 +195,7 @@ export const StreamViewer: React.FC<{ conversationId?: string }> = ({
 
       {/* Content */}
       <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {loading ? (
+        {loading.conversations ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1 }}>
             <CircularProgress />
           </Box>
