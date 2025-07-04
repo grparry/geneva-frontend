@@ -22,6 +22,7 @@ import {
   AccountTree as WorkflowIcon,
   Assignment as TaskIcon,
   Group as TeamIcon,
+  Forum as ForumIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -46,6 +47,7 @@ const navigationItems = [
       { path: '/acorn/team', label: 'Team Overview', icon: <TeamIcon /> },
       { path: '/acorn/workflows', label: 'Workflows', icon: <WorkflowIcon /> },
       { path: '/acorn/tasks', label: 'Tasks', icon: <TaskIcon /> },
+      { path: '/acorn/chat', label: 'Executive Chat', icon: <ForumIcon /> },
     ]
   }
 ];

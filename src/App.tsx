@@ -27,6 +27,7 @@ import { AgentsPage } from './pages/AgentsPage';
 import { ACORNTeamPage } from './pages/ACORNTeamPage';
 import { ACORNWorkflowPage } from './pages/ACORNWorkflowPage';
 import { ACORNTaskPage } from './pages/ACORNTaskPage';
+import { ACORNChatPage } from './pages/ACORNChatPage';
 
 const DRAWER_WIDTH = 280;
 
@@ -133,6 +134,7 @@ const AppContent: React.FC = () => {
             <Route path="/acorn/team" element={<ACORNTeamPage />} />
             <Route path="/acorn/workflows" element={<ACORNWorkflowPage />} />
             <Route path="/acorn/tasks" element={<ACORNTaskPage />} />
+            <Route path="/acorn/chat" element={<ACORNChatPage />} />
             <Route path="/acorn/*" element={<Navigate to="/acorn/team" replace />} />
           </Routes>
         </Box>
