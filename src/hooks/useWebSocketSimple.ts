@@ -8,17 +8,21 @@ interface SimpleWebSocketConfig {
   enabled?: boolean;
 }
 
-export const useWebSocketSimple = (config: SimpleWebSocketConfig) => {
+export const useWebSocketSimple = (config: SimpleWebSocketConfig | string) => {
   const wsRef = useRef<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [lastMessage, setLastMessage] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   
+  // Handle both string and config object
+  const configObj = typeof config === 'string' ? { url: config } : config;
   const {
     url,
     onConnect,
     onDisconnect,
     onMessage,
     enabled = true
-  } = config;
+  } = configObj;
 
   const connect = useCallback(() => {
     // Don't connect if disabled or no URL
@@ -46,16 +50,19 @@ export const useWebSocketSimple = (config: SimpleWebSocketConfig) => {
         onDisconnect?.();
       };
 
-      wsRef.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
+      wsRef.current.onerror = (errorEvent) => {
+        console.error('WebSocket error:', errorEvent);
+        setError('WebSocket connection error');
       };
 
       wsRef.current.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          setLastMessage(data);
           onMessage?.(data);
         } catch (error) {
           console.error('Failed to parse WebSocket message:', error);
+          setError('Failed to parse message');
         }
       };
 
@@ -93,8 +100,11 @@ export const useWebSocketSimple = (config: SimpleWebSocketConfig) => {
 
   return {
     send,
+    sendMessage: send,
     disconnect,
     reconnect: connect,
-    isConnected
+    isConnected,
+    lastMessage,
+    error
   };
 };

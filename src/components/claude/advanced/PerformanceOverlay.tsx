@@ -10,7 +10,6 @@ import {
   LinearProgress,
   Card,
   CardContent,
-  Grid,
   Switch,
   FormControlLabel,
   Menu,
@@ -23,7 +22,9 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  ListItemSecondaryAction
+  ListItemSecondaryAction,
+  Button,
+  Grid
 } from '@mui/material';
 import {
   Speed as SpeedIcon,
@@ -104,6 +105,7 @@ interface PerformanceOverlayProps {
     cpu: number;
     memory: number;
     responseTime: number;
+    errorRate: number;
   };
 }
 
@@ -137,8 +139,9 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
   const [settingsAnchor, setSettingsAnchor] = useState<null | HTMLElement>(null);
   const [alerts, setAlerts] = useState<string[]>([]);
   const [showDetailedView, setShowDetailedView] = useState(false);
+  const [showAlertsState, setShowAlertsState] = useState(showAlerts);
   const [historicalData, setHistoricalData] = useState<PerformanceMetrics[]>([]);
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Mock data generator for demonstration
   const generateMockMetrics = (): PerformanceMetrics => {
@@ -297,7 +300,7 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
                 Performance Monitor
               </Typography>
             )}
-            {alerts.length > 0 && showAlerts && (
+            {alerts.length > 0 && showAlertsState && (
               <Badge badgeContent={alerts.length} color="error">
                 <WarningIcon />
               </Badge>
@@ -328,7 +331,7 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
         </Box>
 
         {/* Alerts */}
-        {!isMinimized && alerts.length > 0 && showAlerts && (
+        {!isMinimized && alerts.length > 0 && showAlertsState && (
           <Alert severity="warning" sx={{ mb: 2 }}>
             <Typography variant="body2">
               {alerts.join(', ')}
@@ -339,7 +342,7 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
         {/* Quick Metrics (Minimized View) */}
         {isMinimized ? (
           <Grid container spacing={1}>
-            <Grid item xs={3}>
+            <Grid size={3}>
               <Tooltip title={`CPU: ${metrics.cpu.usage.toFixed(1)}%`}>
                 <Box sx={{ textAlign: 'center' }}>
                   <ComputerIcon sx={{ fontSize: 20, color: getStatusColor(metrics.cpu.usage, thresholds.cpu) }} />
@@ -349,7 +352,7 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
                 </Box>
               </Tooltip>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={3}>
               <Tooltip title={`Memory: ${((metrics.memory.used / metrics.memory.total) * 100).toFixed(1)}%`}>
                 <Box sx={{ textAlign: 'center' }}>
                   <MemoryIcon sx={{ fontSize: 20, color: getStatusColor((metrics.memory.used / metrics.memory.total) * 100, thresholds.memory) }} />
@@ -359,7 +362,7 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
                 </Box>
               </Tooltip>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={3}>
               <Tooltip title={`Network: ${metrics.network.latency.toFixed(0)}ms`}>
                 <Box sx={{ textAlign: 'center' }}>
                   <NetworkIcon sx={{ fontSize: 20, color: metrics.network.latency > 100 ? 'error.main' : 'success.main' }} />
@@ -369,7 +372,7 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
                 </Box>
               </Tooltip>
             </Grid>
-            <Grid item xs={3}>
+            <Grid size={3}>
               <Tooltip title={`Response: ${metrics.application.responseTime}ms`}>
                 <Box sx={{ textAlign: 'center' }}>
                   <CodeIcon sx={{ fontSize: 20, color: getStatusColor(metrics.application.responseTime, thresholds.responseTime) }} />
@@ -455,12 +458,12 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
                   </Typography>
                 </Box>
                 <Grid container spacing={1}>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <Typography variant="caption" color="success.main">
                       ↓ {metrics.network.download.toFixed(0)} KB/s
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <Typography variant="caption" color="info.main">
                       ↑ {metrics.network.upload.toFixed(0)} KB/s
                     </Typography>
@@ -482,22 +485,22 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
                   </Typography>
                 </Box>
                 <Grid container spacing={1}>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <Typography variant="caption">
                       Render: {metrics.application.renderTime.toFixed(1)}ms
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <Typography variant="caption">
                       Bundle: {metrics.application.bundleSize.toFixed(1)}MB
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <Typography variant="caption" color={metrics.application.errorRate > thresholds.errorRate ? 'error.main' : 'text.secondary'}>
                       Errors: {metrics.application.errorRate.toFixed(1)}%
                     </Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={6}>
                     <Typography variant="caption" color={metrics.application.memoryLeaks > 0 ? 'warning.main' : 'text.secondary'}>
                       Leaks: {metrics.application.memoryLeaks}
                     </Typography>
@@ -527,17 +530,17 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
                       System Information
                     </Typography>
                     <Grid container spacing={1}>
-                      <Grid item xs={6}>
+                      <Grid size={6}>
                         <Typography variant="caption">
                           Uptime: {formatUptime(metrics.system.uptime)}
                         </Typography>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid size={6}>
                         <Typography variant="caption">
                           Processes: {metrics.system.processes}
                         </Typography>
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={12}>
                         <Typography variant="caption">
                           Load Average: {metrics.system.loadAverage.map(l => l.toFixed(2)).join(', ')}
                         </Typography>
@@ -560,12 +563,12 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
                       value={(metrics.storage.used / metrics.storage.total) * 100}
                     />
                     <Grid container spacing={1} sx={{ mt: 0.5 }}>
-                      <Grid item xs={6}>
+                      <Grid size={6}>
                         <Typography variant="caption">
                           Read: {metrics.storage.readSpeed.toFixed(0)} MB/s
                         </Typography>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid size={6}>
                         <Typography variant="caption">
                           Write: {metrics.storage.writeSpeed.toFixed(0)} MB/s
                         </Typography>
@@ -586,7 +589,7 @@ export const PerformanceOverlay: React.FC<PerformanceOverlayProps> = ({
         >
           <MenuItem onClick={() => setSettingsAnchor(null)}>
             <FormControlLabel
-              control={<Switch checked={showAlerts} onChange={(e) => setShowAlerts} />}
+              control={<Switch checked={showAlertsState} onChange={(e) => setShowAlertsState(e.target.checked)} />}
               label="Show Alerts"
             />
           </MenuItem>

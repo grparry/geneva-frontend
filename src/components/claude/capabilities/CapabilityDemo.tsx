@@ -119,13 +119,13 @@ export const CapabilityDemo: React.FC = () => {
                   </Typography>
                   
                   <Grid container spacing={2}>
-                    <Grid item xs={6}>
+                    <Grid size={6}>
                       <Typography variant="subtitle2">Category:</Typography>
                       <Typography variant="body2">
                         {selectedCapability.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </Typography>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid size={6}>
                       <Typography variant="subtitle2">Confidence:</Typography>
                       <Typography variant="body2" color={
                         selectedCapability.confidence === 'HIGH' ? 'success.main' :
@@ -134,7 +134,7 @@ export const CapabilityDemo: React.FC = () => {
                         {selectedCapability.confidence}
                       </Typography>
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={12}>
                       <Typography variant="subtitle2">Example Tasks:</Typography>
                       <ul>
                         {selectedCapability.examples.map((example, index) => (

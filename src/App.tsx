@@ -28,6 +28,14 @@ import { ACORNTeamPage } from './pages/ACORNTeamPage';
 import { ACORNWorkflowPage } from './pages/ACORNWorkflowPage';
 import { ACORNTaskPage } from './pages/ACORNTaskPage';
 import { ACORNChatPage } from './pages/ACORNChatPage';
+import Phase6Dashboard from './components/phase6/Phase6Dashboard';
+import { Phase6CheckpointsPage } from './pages/Phase6CheckpointsPage';
+import { Phase6RecoveryPage } from './pages/Phase6RecoveryPage';
+import { Phase6ResultsPage } from './pages/Phase6ResultsPage';
+import { AdminHealthPage } from './pages/AdminHealthPage';
+import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
+import { OCLPage } from './pages/OCLPage';
+import { CognitiveMemoryPage } from './pages/CognitiveMemoryPage';
 
 const DRAWER_WIDTH = 280;
 
@@ -38,6 +46,14 @@ const AppContent: React.FC = () => {
 
   const getPageTitle = () => {
     const path = location.pathname;
+    if (path.startsWith('/phase6/dashboard')) return 'Multi-Agent Coordination';
+    if (path.startsWith('/phase6/checkpoints')) return 'Checkpoint Manager';
+    if (path.startsWith('/phase6/recovery')) return 'Recovery Console';
+    if (path.startsWith('/phase6/results')) return 'Result Aggregation';
+    if (path.startsWith('/admin/health')) return 'System Health';
+    if (path.startsWith('/admin/analytics')) return 'Analytics & Reports';
+    if (path.startsWith('/ocl')) return 'OCL Messages';
+    if (path.startsWith('/cognitive')) return 'Cognitive Memory';
     if (path.startsWith('/observability/dashboard')) return 'Dashboard';
     if (path.startsWith('/observability/communications')) return 'Communications';
     if (path.startsWith('/observability/multi-stream')) return 'Multi-Stream';
@@ -53,6 +69,10 @@ const AppContent: React.FC = () => {
 
   const getPageSection = () => {
     const path = location.pathname;
+    if (path.startsWith('/phase6')) return 'Phase 6';
+    if (path.startsWith('/admin')) return 'Administration';
+    if (path.startsWith('/ocl')) return 'Communication';
+    if (path.startsWith('/cognitive')) return 'Memory';
     if (path.startsWith('/observability')) return 'Observability';
     if (path.startsWith('/acorn')) return 'ACORN';
     return '';
@@ -117,9 +137,27 @@ const AppContent: React.FC = () => {
         }}
       >
         <Toolbar />
-        <Box sx={{ flex: 1, overflow: 'hidden' }}>
+        <Box sx={{ flex: 1, overflow: 'auto' }}>
           <Routes>
-            <Route path="/" element={<Navigate to="/observability/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/phase6/dashboard" replace />} />
+            
+            {/* Phase 6 routes */}
+            <Route path="/phase6/dashboard" element={<Phase6Dashboard />} />
+            <Route path="/phase6/checkpoints" element={<Phase6CheckpointsPage />} />
+            <Route path="/phase6/recovery" element={<Phase6RecoveryPage />} />
+            <Route path="/phase6/results" element={<Phase6ResultsPage />} />
+            
+            {/* Admin routes */}
+            <Route path="/admin/health" element={<AdminHealthPage />} />
+            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+            
+            {/* OCL routes */}
+            <Route path="/ocl" element={<OCLPage />} />
+            
+            {/* Cognitive Memory routes */}
+            <Route path="/cognitive" element={<CognitiveMemoryPage />} />
+            
+            {/* Observability routes */}
             <Route path="/observability/dashboard" element={<ObservabilityDashboard />} />
             <Route path="/observability/communications" element={<CommunicationsPage />} />
             <Route path="/observability/multi-stream" element={<MultiStreamPage />} />

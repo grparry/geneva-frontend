@@ -5,10 +5,12 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@hello-pangea/dnd": "^18.0.1",
     "@mui/icons-material": "^7.1.2",
     "@mui/lab": "^7.0.0-beta.14",
     "@mui/material": "^7.1.2",
-    "@mui/x-date-pickers": "^8.5.3",
+    "@mui/x-date-pickers": "^8.7.0",
+    "@reduxjs/toolkit": "^2.8.2",
     "@tanstack/react-query": "^5.80.10",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -24,16 +26,20 @@
     "date-fns": "^4.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-force-graph": "^1.48.0",
     "react-markdown": "^10.1.0",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.2",
     "react-scripts": "5.0.1",
     "react-syntax-highlighter": "^15.6.1",
+    "react-tagcloud": "^2.3.3",
+    "recharts": "^3.0.2",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
     "zustand": "^5.0.5"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=8401 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -56,5 +62,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/recharts": "^1.8.29"
   }
 }

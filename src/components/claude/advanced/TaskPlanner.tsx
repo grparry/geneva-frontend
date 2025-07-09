@@ -26,11 +26,10 @@ import {
   LinearProgress,
   Alert,
   Badge,
-  Grid,
   Slider,
   Switch,
   FormControlLabel,
-  DatePicker
+  Grid
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -53,11 +52,11 @@ import {
   Merge as MergeIcon,
   Schedule as ScheduleIcon,
   Person as PersonIcon,
-  Priority as PriorityIcon,
+  Flag as PriorityIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Link as LinkIcon,
-  Unlink as UnlinkIcon,
+  LinkOff as UnlinkIcon,
   Visibility as ViewIcon,
   Share as ShareIcon
 } from '@mui/icons-material';
@@ -539,25 +538,25 @@ export const TaskPlanner: React.FC<TaskPlannerProps> = ({
 
         {/* Quick Stats */}
         <Grid container spacing={2}>
-          <Grid item xs={3}>
+          <Grid size={3}>
             <Card sx={{ textAlign: 'center', py: 1 }}>
               <Typography variant="h6">{plan.nodes.length}</Typography>
               <Typography variant="caption">Total Tasks</Typography>
             </Card>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={3}>
             <Card sx={{ textAlign: 'center', py: 1 }}>
               <Typography variant="h6">{plan.nodes.filter(n => n.status === 'completed').length}</Typography>
               <Typography variant="caption">Completed</Typography>
             </Card>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={3}>
             <Card sx={{ textAlign: 'center', py: 1 }}>
               <Typography variant="h6">{plan.nodes.filter(n => n.status === 'in_progress').length}</Typography>
               <Typography variant="caption">In Progress</Typography>
             </Card>
           </Grid>
-          <Grid item xs={3}>
+          <Grid size={3}>
             <Card sx={{ textAlign: 'center', py: 1 }}>
               <Typography variant="h6">{plan.nodes.filter(n => n.status === 'blocked').length}</Typography>
               <Typography variant="caption">Blocked</Typography>
@@ -787,7 +786,7 @@ export const TaskPlanner: React.FC<TaskPlannerProps> = ({
             </Box>
             
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <Typography variant="caption" color="text.secondary">
                   Assigned To
                 </Typography>
@@ -795,7 +794,7 @@ export const TaskPlanner: React.FC<TaskPlannerProps> = ({
                   {selectedNode.assignedTo || 'Unassigned'}
                 </Typography>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <Typography variant="caption" color="text.secondary">
                   Estimated Hours
                 </Typography>
@@ -804,7 +803,7 @@ export const TaskPlanner: React.FC<TaskPlannerProps> = ({
                 </Typography>
               </Grid>
               {selectedNode.actualHours && (
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Typography variant="caption" color="text.secondary">
                     Actual Hours
                   </Typography>
@@ -814,7 +813,7 @@ export const TaskPlanner: React.FC<TaskPlannerProps> = ({
                 </Grid>
               )}
               {selectedNode.dueDate && (
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Typography variant="caption" color="text.secondary">
                     Due Date
                   </Typography>
@@ -897,7 +896,7 @@ export const TaskPlanner: React.FC<TaskPlannerProps> = ({
             />
             
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <FormControl fullWidth>
                   <InputLabel>Priority</InputLabel>
                   <Select
@@ -912,7 +911,7 @@ export const TaskPlanner: React.FC<TaskPlannerProps> = ({
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField
                   fullWidth
                   label="Estimated Hours"

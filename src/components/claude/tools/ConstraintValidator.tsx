@@ -322,7 +322,7 @@ export const ConstraintValidator: React.FC<ConstraintValidatorProps> = ({
 
       {/* Summary Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={3}>
+        <Grid size={{ xs: 12, sm: 3 }}>
           <Card sx={{ bgcolor: 'primary.light', color: 'white' }}>
             <CardContent sx={{ textAlign: 'center', py: 2 }}>
               <Typography variant="h4">{effectiveConstraints.length}</Typography>
@@ -330,7 +330,7 @@ export const ConstraintValidator: React.FC<ConstraintValidatorProps> = ({
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={3}>
+        <Grid size={{ xs: 12, sm: 3 }}>
           <Card sx={{ bgcolor: unresolvedViolations.length > 0 ? 'error.light' : 'success.light', color: 'white' }}>
             <CardContent sx={{ textAlign: 'center', py: 2 }}>
               <Typography variant="h4">{unresolvedViolations.length}</Typography>
@@ -338,7 +338,7 @@ export const ConstraintValidator: React.FC<ConstraintValidatorProps> = ({
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={3}>
+        <Grid size={{ xs: 12, sm: 3 }}>
           <Card sx={{ bgcolor: criticalViolations.length > 0 ? 'error.dark' : 'success.light', color: 'white' }}>
             <CardContent sx={{ textAlign: 'center', py: 2 }}>
               <Typography variant="h4">{criticalViolations.length}</Typography>
@@ -346,7 +346,7 @@ export const ConstraintValidator: React.FC<ConstraintValidatorProps> = ({
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={3}>
+        <Grid size={{ xs: 12, sm: 3 }}>
           <Card sx={{ bgcolor: 'info.light', color: 'white' }}>
             <CardContent sx={{ textAlign: 'center', py: 2 }}>
               <Typography variant="h4">

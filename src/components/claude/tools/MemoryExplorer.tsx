@@ -3,12 +3,6 @@ import {
   Box,
   Paper,
   Typography,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
   Card,
   CardContent,
   Chip,
@@ -40,6 +34,14 @@ import {
   CheckCircle as SuccessIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
+import {
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot
+} from '@mui/lab';
 import {
   MemoryAccess
 } from '../../../types/geneva-tools';

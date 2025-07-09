@@ -226,7 +226,7 @@ export const CodeSnippetViewer: React.FC<CodeSnippetViewerProps> = ({
         </IconButton>
         <Tooltip title={showLineNumbers ? "Hide line numbers" : "Show line numbers"}>
           <IconButton onClick={() => setShowLineNumbers(!showLineNumbers)}>
-            {showLineNumbers ? <VisibilityOffIcon /> : <ViewIcon />}
+            {showLineNumbers ? <ViewOffIcon /> : <ViewIcon />}
           </IconButton>
         </Tooltip>
       </CardActions>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Paper, Button, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, Chip, Avatar } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import { Grid } from '@mui/material';
 import { Chat as ChatIcon, Add as AddIcon, Group as GroupIcon } from '@mui/icons-material';
 import { ACORNChatRoom } from '../components/ACORNChatRoom';
 
@@ -149,7 +149,7 @@ export const ACORNChatPage: React.FC = () => {
       ) : (
         <Grid container spacing={3}>
           {rooms.map((room) => (
-            <Grid item xs={12} sm={6} md={4} key={room.room_id} {...{} as any}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={room.room_id}>
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

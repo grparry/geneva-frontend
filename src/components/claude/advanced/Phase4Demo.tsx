@@ -3,7 +3,6 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   Card,
   CardContent,
   CardActions,
@@ -11,7 +10,8 @@ import {
   Stack,
   Chip,
   Alert,
-  AlertTitle
+  AlertTitle,
+  Grid
 } from '@mui/material';
 import {
   Security as SecurityIcon,
@@ -97,7 +97,7 @@ export const Phase4Demo: React.FC = () => {
           const isActive = activeDemo === feature.id || (feature.id === 'performance-overlay' && performanceOverlayVisible);
           
           return (
-            <Grid item xs={12} sm={6} md={3} key={feature.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={feature.id}>
               <Card 
                 sx={{ 
                   height: '100%',
@@ -170,7 +170,7 @@ export const Phase4Demo: React.FC = () => {
         </Typography>
         
         <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="h6" gutterBottom>
               ✅ Completed Components
             </Typography>
@@ -182,7 +182,7 @@ export const Phase4Demo: React.FC = () => {
             </Stack>
           </Grid>
           
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="h6" gutterBottom>
               🎯 Key Features Delivered
             </Typography>

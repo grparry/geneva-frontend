@@ -23,10 +23,46 @@ import {
   Assignment as TaskIcon,
   Group as TeamIcon,
   Forum as ForumIcon,
+  Rocket as RocketIcon,
+  History as HistoryIcon,
+  RestoreFromTrash as RecoveryIcon,
+  Assessment as ResultsIcon,
+  HealthAndSafety as HealthIcon,
+  BarChart as ChartsIcon,
+  Mail as MailIcon,
+  Psychology as PsychologyIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const navigationItems = [
+  {
+    section: 'Phase 6 - Multi-Agent',
+    items: [
+      { path: '/phase6/dashboard', label: 'Coordination Dashboard', icon: <RocketIcon /> },
+      { path: '/phase6/checkpoints', label: 'Checkpoint Manager', icon: <HistoryIcon /> },
+      { path: '/phase6/recovery', label: 'Recovery Console', icon: <RecoveryIcon /> },
+      { path: '/phase6/results', label: 'Result Aggregation', icon: <ResultsIcon /> },
+    ]
+  },
+  {
+    section: 'Administration',
+    items: [
+      { path: '/admin/health', label: 'System Health', icon: <HealthIcon /> },
+      { path: '/admin/analytics', label: 'Analytics & Reports', icon: <ChartsIcon /> },
+    ]
+  },
+  {
+    section: 'Communication',
+    items: [
+      { path: '/ocl', label: 'OCL Messages', icon: <MailIcon /> },
+    ]
+  },
+  {
+    section: 'Memory',
+    items: [
+      { path: '/cognitive', label: 'Cognitive Memory', icon: <PsychologyIcon /> },
+    ]
+  },
   {
     section: 'Observability',
     items: [

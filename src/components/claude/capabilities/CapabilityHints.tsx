@@ -187,8 +187,6 @@ export const CapabilityHints: React.FC<CapabilityHintsProps> = ({
               return (
                 <ListItem
                   key={hint.id}
-                  button
-                  selected={isSelected}
                   onClick={() => handleHintSelect(hint)}
                   sx={{
                     cursor: 'pointer',

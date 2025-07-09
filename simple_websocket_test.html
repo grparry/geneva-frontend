@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Geneva Phase 6 WebSocket Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; height: 400px; overflow-y: scroll; border: 1px solid #ddd; }
+        .controls { margin: 10px 0; }
+        button { margin: 5px; padding: 10px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Geneva Phase 6 WebSocket Test</h1>
+    
+    <div class="controls">
+        <button onclick="connectWebSocket()">Connect WebSocket</button>
+        <button onclick="testSubscription()">Test Subscription</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <button onclick="disconnectWebSocket()">Disconnect</button>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script>
+        let ws = null;
+        let messageCount = 0;
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logElement.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function connectWebSocket() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                log('WebSocket already connected', 'info');
+                return;
+            }
+            
+            log('Connecting to Geneva backend...', 'info');
+            
+            // Try different WebSocket endpoints that might exist
+            const endpoints = [
+                'ws://localhost:8080/ws/coordination',
+                'ws://localhost:8080/ws',
+                'ws://localhost:8080/api/ws/coordination',
+                'ws://localhost:8080/api/coordination/ws'
+            ];
+            
+            let currentEndpoint = 0;
+            
+            function tryConnect() {
+                if (currentEndpoint >= endpoints.length) {
+                    log('❌ All WebSocket endpoints failed', 'error');
+                    return;
+                }
+                
+                const endpoint = endpoints[currentEndpoint];
+                log(`Trying endpoint: ${endpoint}`, 'info');
+                
+                ws = new WebSocket(endpoint);
+                
+                ws.onopen = function() {
+                    log(`✅ WebSocket connected to ${endpoint}`, 'success');
+                };
+                
+                ws.onmessage = function(event) {
+                    messageCount++;
+                    try {
+                        const data = JSON.parse(event.data);
+                        log(`📨 Message ${messageCount}: ${JSON.stringify(data, null, 2)}`, 'success');
+                    } catch (e) {
+                        log(`📨 Message ${messageCount}: ${event.data}`, 'info');
+                    }
+                };
+                
+                ws.onerror = function(error) {
+                    log(`❌ WebSocket error on ${endpoint}: ${error}`, 'error');
+                    currentEndpoint++;
+                    setTimeout(tryConnect, 1000);
+                };
+                
+                ws.onclose = function() {
+                    log(`🔌 WebSocket closed on ${endpoint}`, 'info');
+                    if (currentEndpoint < endpoints.length - 1) {
+                        currentEndpoint++;
+                        setTimeout(tryConnect, 1000);
+                    }
+                };
+            }
+            
+            tryConnect();
+        }
+        
+        function testSubscription() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('❌ WebSocket not connected', 'error');
+                return;
+            }
+            
+            // Test subscription to coordination events
+            const subscription = {
+                action: 'subscribe',
+                scope: 'global',
+                scope_id: '*',
+                event_types: ['coordination_event', 'tool_progress', 'agent_communication']
+            };
+            
+            log(`🔔 Sending subscription: ${JSON.stringify(subscription)}`, 'info');
+            ws.send(JSON.stringify(subscription));
+        }
+        
+        function disconnectWebSocket() {
+            if (ws) {
+                ws.close();
+                ws = null;
+                log('🔌 Disconnected', 'info');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            messageCount = 0;
+        }
+        
+        // Auto-connect on page load
+        window.onload = function() {
+            log('🌐 Geneva Phase 6 WebSocket Test initialized', 'info');
+            log('Ready to test Phase 6 backend capabilities', 'info');
+        };
+    </script>
+</body>
+</html>

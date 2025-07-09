@@ -5,7 +5,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   LinearProgress,
   Chip,
   Stack,
@@ -14,7 +13,8 @@ import {
   ListItem,
   ListItemText,
   ListItemAvatar,
-  Tooltip
+  Tooltip,
+  Grid
 } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,
@@ -118,7 +118,7 @@ export const CollaborationTrends: React.FC<CollaborationTrendsProps> = ({
 
       {/* Key Metrics Grid */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -133,7 +133,7 @@ export const CollaborationTrends: React.FC<CollaborationTrendsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -154,11 +154,11 @@ export const CollaborationTrends: React.FC<CollaborationTrendsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <Psychology color="info" />
+                <PsychologyIcon color="info" />
                 <Typography variant="subtitle2">Clarifications</Typography>
               </Box>
               <Typography variant="h4">{Math.round(clarificationRate)}%</Typography>
@@ -175,7 +175,7 @@ export const CollaborationTrends: React.FC<CollaborationTrendsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -199,7 +199,7 @@ export const CollaborationTrends: React.FC<CollaborationTrendsProps> = ({
 
       <Grid container spacing={3}>
         {/* Trend Analysis */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Trend Analysis
@@ -239,7 +239,7 @@ export const CollaborationTrends: React.FC<CollaborationTrendsProps> = ({
         </Grid>
 
         {/* Top Performing Agents */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Top Performing Agents
@@ -296,7 +296,7 @@ export const CollaborationTrends: React.FC<CollaborationTrendsProps> = ({
         </Grid>
 
         {/* Team Skill Development */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Team Skill Development
@@ -333,7 +333,7 @@ export const CollaborationTrends: React.FC<CollaborationTrendsProps> = ({
         </Grid>
 
         {/* Capability Usage */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Most Used Capabilities

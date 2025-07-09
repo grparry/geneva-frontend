@@ -132,7 +132,7 @@ export const TeamLearningHeatmap: React.FC<TeamLearningHeatmapProps> = ({
         </Typography>
         <Grid container spacing={2}>
           {topPerformers.map((performer, index) => (
-            <Grid item xs={12} sm={4} key={performer.userId}>
+            <Grid size={{ xs: 12, sm: 4 }} key={performer.userId}>
               <Card variant="outlined">
                 <CardContent sx={{ textAlign: 'center' }}>
                   <Avatar sx={{ 

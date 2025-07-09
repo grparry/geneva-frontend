@@ -101,7 +101,7 @@ export const LearningDemo: React.FC = () => {
 
           <Grid container spacing={2} sx={{ mb: 3 }}>
             {demoScenarios.map((scenario, index) => (
-              <Grid item xs={12} md={4} key={index}>
+              <Grid size={{ xs: 12, md: 4 }} key={index}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="subtitle2" gutterBottom>

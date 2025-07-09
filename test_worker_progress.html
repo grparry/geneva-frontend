@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Worker Progress WebSocket</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; height: 400px; overflow-y: scroll; border: 1px solid #ddd; }
+        .controls { margin: 10px 0; }
+        button { margin: 5px; padding: 10px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Worker Progress WebSocket Test</h1>
+    
+    <div class="controls">
+        <button onclick="testGlobalProgress()">Test Global Progress</button>
+        <button onclick="testTaskProgress()">Test Task Progress</button>
+        <button onclick="testChatWebSocket()">Test Chat WebSocket</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script>
+        let ws = null;
+        let messageCount = 0;
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            logElement.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function connectToEndpoint(endpoint, testName) {
+            if (ws) {
+                ws.close();
+            }
+            
+            log(`${testName}: Connecting to ${endpoint}`, 'info');
+            
+            ws = new WebSocket(endpoint);
+            
+            ws.onopen = function() {
+                log(`✅ ${testName}: Connected successfully`, 'success');
+            };
+            
+            ws.onmessage = function(event) {
+                messageCount++;
+                try {
+                    const data = JSON.parse(event.data);
+                    log(`📨 ${testName} Message ${messageCount}: ${JSON.stringify(data, null, 2)}`, 'success');
+                } catch (e) {
+                    log(`📨 ${testName} Message ${messageCount}: ${event.data}`, 'info');
+                }
+            };
+            
+            ws.onerror = function(error) {
+                log(`❌ ${testName}: WebSocket error: ${error}`, 'error');
+            };
+            
+            ws.onclose = function(event) {
+                log(`🔌 ${testName}: WebSocket closed (code: ${event.code})`, 'info');
+            };
+            
+            // Test for 10 seconds then close
+            setTimeout(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    log(`⏰ ${testName}: Closing connection after 10 seconds`, 'info');
+                    ws.close();
+                }
+            }, 10000);
+        }
+        
+        function testGlobalProgress() {
+            connectToEndpoint('ws://localhost:8080/api/workers/progress', 'Global Progress');
+        }
+        
+        function testTaskProgress() {
+            const taskId = 'test-task-123';
+            connectToEndpoint(`ws://localhost:8080/api/workers/progress/${taskId}`, 'Task Progress');
+        }
+        
+        function testChatWebSocket() {
+            const roomId = 'test-room-123';
+            connectToEndpoint(`ws://localhost:8080/api/chat/ws/${roomId}`, 'Chat WebSocket');
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            messageCount = 0;
+        }
+        
+        // Auto-log on page load
+        window.onload = function() {
+            log('🌐 Worker Progress WebSocket Test initialized', 'info');
+            log('Available endpoints to test:', 'info');
+            log('• /api/workers/progress (global)', 'info');
+            log('• /api/workers/progress/{task_id} (task-specific)', 'info');
+            log('• /api/chat/ws/{room_id} (chat)', 'info');
+        };
+    </script>
+</body>
+</html>

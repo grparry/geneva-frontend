@@ -227,11 +227,6 @@ export const useUIStore = create<UIStore>()(
         
         setWebSocketStatus: (status) => {
           set({ websocketStatus: status });
-          
-          // Update heartbeat when connected
-          if (status === 'connected') {
-            get().updateHeartbeat();
-          }
         },
         
         updateHeartbeat: () => {

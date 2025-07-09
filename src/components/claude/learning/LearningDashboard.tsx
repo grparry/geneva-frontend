@@ -19,12 +19,12 @@ import {
   Select,
   MenuItem,
   TextField,
-  DatePicker,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   IconButton
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
   Refresh as RefreshIcon,
   Download as DownloadIcon,
@@ -115,7 +115,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
       case 1: return <TrendingUpIcon />;
       case 2: return <GroupIcon />;
       case 3: return <PsychologyIcon />;
-      default: return null;
+      default: return <InsightsIcon />;
     }
   };
 
@@ -191,7 +191,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
           </AccordionSummary>
           <AccordionDetails>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Insight Type</InputLabel>
                   <Select
@@ -212,7 +212,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
                 </FormControl>
               </Grid>
               
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Severity</InputLabel>
                   <Select
@@ -233,7 +233,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
                   fullWidth
                   size="small"
@@ -246,7 +246,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <Stack direction="row" spacing={1}>
                   <Button variant="contained" onClick={handleFilterSubmit} size="small">
                     Apply
@@ -280,7 +280,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
         <>
           {/* Summary Cards */}
           <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" color="primary">
@@ -293,7 +293,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
               </Card>
             </Grid>
             
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" color="error">
@@ -306,7 +306,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
               </Card>
             </Grid>
             
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" color="warning.main">
@@ -319,7 +319,7 @@ export const LearningDashboard: React.FC<LearningDashboardProps> = ({
               </Card>
             </Grid>
             
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" color="success.main">

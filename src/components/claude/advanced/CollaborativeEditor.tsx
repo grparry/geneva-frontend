@@ -480,10 +480,16 @@ The application uses:
             {effectiveFiles.map(file => (
               <ListItem
                 key={file.id}
-                button
-                selected={activeFileId === file.id}
+                component="div"
+                sx={{ 
+                  py: 0.5,
+                  cursor: 'pointer',
+                  backgroundColor: activeFileId === file.id ? 'action.selected' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'action.hover'
+                  }
+                }}
                 onClick={() => setActiveFileId(file.id)}
-                sx={{ py: 0.5 }}
               >
                 <ListItemIcon>
                   <CodeIcon sx={{ fontSize: 20 }} />

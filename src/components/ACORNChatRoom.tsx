@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Box, Paper, Typography, TextField, Button, Avatar, Chip, List, ListItem, ListItemAvatar, ListItemText, Divider, IconButton, CircularProgress, Tabs, Tab, Snackbar, Alert } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import { Box, Paper, Typography, TextField, Button, Avatar, Chip, List, ListItem, ListItemAvatar, ListItemText, Divider, IconButton, CircularProgress, Tabs, Tab, Snackbar, Alert, Stack } from '@mui/material';
 import { 
   Send as SendIcon, 
   Add as AddIcon, 
@@ -782,9 +781,9 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   };
 
   return (
-    <Grid container spacing={2} sx={{ height: '100vh', p: 2 }}>
+    <Box sx={{ display: 'flex', gap: 2, height: '100vh', p: 2 }}>
       {/* Agent Selection Panel */}
-      <Grid item xs={3} {...{} as any}>
+      <Box sx={{ width: '25%' }}>
         <Paper sx={{ p: 2, height: '100%', overflow: 'auto' }}>
           <Typography variant="h6" gutterBottom>
             ACORN Executives
@@ -905,10 +904,10 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
             })}
           </List>
         </Paper>
-      </Grid>
+      </Box>
 
       {/* Chat and Infrastructure Panel */}
-      <Grid item xs={9} {...{} as any}>
+      <Box sx={{ flex: 1 }}>
         <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={selectedTab} onChange={(_, newValue) => setSelectedTab(newValue)} variant="scrollable" scrollButtons="auto">
@@ -1062,14 +1061,14 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                     disabled={!isConnected || (participants.size === 0 && systemParticipants.size === 0)}
-                    inputRef={inputRef}
+                    inputRef={inputRef as any}
                   />
                   
                   {/* Capability Hints */}
                   <CapabilityHints
                     hints={getCapabilityHints(inputMessage)}
                     inputValue={inputMessage}
-                    inputRef={inputRef}
+                    inputRef={inputRef as any}
                     onHintSelect={handleCapabilityHintSelect}
                     maxHints={3}
                   />
@@ -1133,7 +1132,6 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                   console.log('Selection changed:', fileId, selection);
                 }}
                 showCollaborators={true}
-                enableCollaboration={true}
                 height={600}
               />
             </Box>
@@ -1160,7 +1158,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
             </Box>
           )}
         </Paper>
-      </Grid>
+      </Box>
       
       {/* Clarification Dialog */}
       <ClarificationDialog
@@ -1223,10 +1221,11 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
           thresholds={{
             cpu: 80,
             memory: 85,
-            responseTime: 1000
+            responseTime: 1000,
+            errorRate: 5
           }}
         />
       )}
-    </Grid>
+    </Box>
   );
 };
