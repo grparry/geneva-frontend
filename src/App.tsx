@@ -36,6 +36,26 @@ import { AdminHealthPage } from './pages/AdminHealthPage';
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
 import { OCLPage } from './pages/OCLPage';
 import { CognitiveMemoryPage } from './pages/CognitiveMemoryPage';
+import { FederationPage } from './pages/FederationPage';
+
+// Federation pages
+import { FederationOverviewPage } from './pages/federation/FederationOverviewPage';
+import { FederationTopologyPage } from './pages/federation/FederationTopologyPage';
+
+// Ontology pages
+import { OntologyVisualizationPage } from './pages/ontology/OntologyVisualizationPage';
+import { AgentSchemaPage } from './pages/ontology/AgentSchemaPage';
+import { OntologyProposalsPage } from './pages/ontology/OntologyProposalsPage';
+
+// Codex pages
+import { MemoryFieldsPage } from './pages/codex/MemoryFieldsPage';
+import { CognitiveProcessingPage } from './pages/codex/CognitiveProcessingPage';
+
+// Topology pages
+import { TopologyOverviewPage } from './pages/topology/TopologyOverviewPage';
+import { SubstrateMapPage } from './pages/topology/SubstrateMapPage';
+import { DelegationFlowPage } from './pages/topology/DelegationFlowPage';
+import { InfrastructurePage } from './pages/topology/InfrastructurePage';
 
 const DRAWER_WIDTH = 280;
 
@@ -46,14 +66,40 @@ const AppContent: React.FC = () => {
 
   const getPageTitle = () => {
     const path = location.pathname;
+    // Federation
+    if (path === '/federation') return 'Federation Overview';
+    if (path.startsWith('/federation/topology')) return 'Federation Topology';
+    
+    // Ontology
+    if (path.startsWith('/ontology/visualization')) return 'Ontology Visualization';
+    if (path.startsWith('/ontology/schemas')) return 'Agent Schemas';
+    if (path.startsWith('/ontology/proposals')) return 'Ontology Proposals';
+    
+    // Codex
+    if (path.startsWith('/codex/fields')) return 'Memory Field Mappings';
+    if (path.startsWith('/codex/processing')) return 'Cognitive Processing';
+    
+    // Topology
+    if (path.startsWith('/topology/overview')) return 'Topology Dashboard';
+    if (path.startsWith('/topology/substrate-map')) return 'Substrate Map';
+    if (path.startsWith('/topology/delegation')) return 'Delegation Flow';
+    if (path.startsWith('/topology/infrastructure')) return 'Infrastructure Map';
+    
+    // Phase 6
     if (path.startsWith('/phase6/dashboard')) return 'Multi-Agent Coordination';
     if (path.startsWith('/phase6/checkpoints')) return 'Checkpoint Manager';
     if (path.startsWith('/phase6/recovery')) return 'Recovery Console';
     if (path.startsWith('/phase6/results')) return 'Result Aggregation';
+    
+    // Admin
     if (path.startsWith('/admin/health')) return 'System Health';
     if (path.startsWith('/admin/analytics')) return 'Analytics & Reports';
+    
+    // Others
     if (path.startsWith('/ocl')) return 'OCL Messages';
     if (path.startsWith('/cognitive')) return 'Cognitive Memory';
+    
+    // Observability
     if (path.startsWith('/observability/dashboard')) return 'Dashboard';
     if (path.startsWith('/observability/communications')) return 'Communications';
     if (path.startsWith('/observability/multi-stream')) return 'Multi-Stream';
@@ -63,12 +109,19 @@ const AppContent: React.FC = () => {
     if (path.startsWith('/observability/alerts')) return 'Alerts';
     if (path.startsWith('/observability/executions')) return 'Executions';
     if (path.startsWith('/observability/agents')) return 'Agents';
+    
+    // ACORN
     if (path.startsWith('/acorn')) return 'ACORN Platform';
+    
     return 'Geneva Platform';
   };
 
   const getPageSection = () => {
     const path = location.pathname;
+    if (path.startsWith('/federation')) return 'Federation';
+    if (path.startsWith('/ontology')) return 'Ontology';
+    if (path.startsWith('/codex')) return 'Codex';
+    if (path.startsWith('/topology')) return 'Topology';
     if (path.startsWith('/phase6')) return 'Phase 6';
     if (path.startsWith('/admin')) return 'Administration';
     if (path.startsWith('/ocl')) return 'Communication';
@@ -139,7 +192,26 @@ const AppContent: React.FC = () => {
         <Toolbar />
         <Box sx={{ flex: 1, overflow: 'auto' }}>
           <Routes>
-            <Route path="/" element={<Navigate to="/phase6/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/federation" replace />} />
+            
+            {/* Federation routes */}
+            <Route path="/federation" element={<FederationOverviewPage />} />
+            <Route path="/federation/topology" element={<FederationTopologyPage />} />
+            
+            {/* Ontology routes */}
+            <Route path="/ontology/visualization" element={<OntologyVisualizationPage />} />
+            <Route path="/ontology/schemas" element={<AgentSchemaPage />} />
+            <Route path="/ontology/proposals" element={<OntologyProposalsPage />} />
+            
+            {/* Codex routes */}
+            <Route path="/codex/fields" element={<MemoryFieldsPage />} />
+            <Route path="/codex/processing" element={<CognitiveProcessingPage />} />
+            
+            {/* Topology routes */}
+            <Route path="/topology/overview" element={<TopologyOverviewPage />} />
+            <Route path="/topology/substrate-map" element={<SubstrateMapPage />} />
+            <Route path="/topology/delegation" element={<DelegationFlowPage />} />
+            <Route path="/topology/infrastructure" element={<InfrastructurePage />} />
             
             {/* Phase 6 routes */}
             <Route path="/phase6/dashboard" element={<Phase6Dashboard />} />

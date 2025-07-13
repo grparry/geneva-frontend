@@ -31,10 +31,52 @@ import {
   BarChart as ChartsIcon,
   Mail as MailIcon,
   Psychology as PsychologyIcon,
+  Hub as HubIcon,
+  Schema as SchemaIcon,
+  BubbleChart as BubbleChartIcon,
+  DeviceHub as DeviceHubIcon,
+  Memory as MemoryIcon,
+  Insights as InsightsIcon,
+  AccountTreeOutlined as OntologyIcon,
+  Compare as CompareIcon,
+  Layers as LayersIcon,
+  Route as RouteIcon,
+  Storage as StorageIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const navigationItems = [
+  {
+    section: 'Federation',
+    items: [
+      { path: '/federation', label: 'Overview', icon: <DashboardIcon /> },
+      { path: '/federation/topology', label: 'Topology Graph', icon: <BubbleChartIcon /> },
+    ]
+  },
+  {
+    section: 'Ontology',
+    items: [
+      { path: '/ontology/visualization', label: 'Ontology Graph', icon: <OntologyIcon /> },
+      { path: '/ontology/schemas', label: 'Agent Schemas', icon: <SchemaIcon /> },
+      { path: '/ontology/proposals', label: 'Proposals', icon: <CompareIcon /> },
+    ]
+  },
+  {
+    section: 'Codex Memory',
+    items: [
+      { path: '/codex/fields', label: 'Field Mappings', icon: <MemoryIcon /> },
+      { path: '/codex/processing', label: 'Processing Pipeline', icon: <InsightsIcon /> },
+    ]
+  },
+  {
+    section: 'Topology',
+    items: [
+      { path: '/topology/overview', label: 'Dashboard', icon: <LayersIcon /> },
+      { path: '/topology/substrate-map', label: 'Substrate Map', icon: <DeviceHubIcon /> },
+      { path: '/topology/delegation', label: 'Delegation Flow', icon: <RouteIcon /> },
+      { path: '/topology/infrastructure', label: 'Infrastructure', icon: <StorageIcon /> },
+    ]
+  },
   {
     section: 'Phase 6 - Multi-Agent',
     items: [
