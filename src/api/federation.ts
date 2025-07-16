@@ -1,202 +1,434 @@
-import { apiClient } from './client';
+/**
+ * Federation API Service
+ * 
+ * RTK Query API service for all federation-related endpoints.
+ * Extends existing Geneva API patterns for consistency.
+ */
+
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import {
-  Substrate,
   SubstratePeer,
+  Delegation,
+  DelegationResult,
+  TrustRelationship,
+  TrustAuditEntry,
+  CertificateInfo,
   FederationMetrics,
+  FederationHealth,
+  DelegateTaskRequest,
+  TrustUpgradeRequest,
+  AuditLogEntry,
+  CertificateValidation,
+  FederationApiResponse,
+  PaginatedResponse,
+  PeerStatus,
+  DelegationStatus,
   TrustLevel,
-  DelegationRequest,
-  DelegationResponse,
-  FederationEvent
 } from '../types/federation';
 
-export const federationApi = {
-  // Substrate Management
-  getCurrentSubstrate: async (): Promise<Substrate> => {
-    const response = await apiClient.get('/federation/substrate/current');
-    return response.data;
-  },
+// Base query with retry logic (following existing Geneva patterns)
+const baseQueryWithRetry: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  const baseQuery = fetchBaseQuery({
+    baseUrl: '/api',
+    prepareHeaders: (headers, { getState }) => {
+      // Add authentication headers if available
+      const token = (getState() as any).auth?.token;
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+      headers.set('content-type', 'application/json');
+      return headers;
+    },
+  });
 
-  updateSubstrate: async (updates: Partial<Substrate>): Promise<Substrate> => {
-    // This endpoint doesn't exist in the backend yet
-    throw new Error('Update substrate not implemented');
-  },
-
-  // Peer Management
-  getPeers: async (): Promise<SubstratePeer[]> => {
-    const response = await apiClient.get('/federation/peers');
-    return response.data;
-  },
-
-  getPeerDetails: async (peerId: string): Promise<SubstratePeer> => {
-    const response = await apiClient.get(`/federation/peers/${peerId}`);
-    return response.data;
-  },
-
-  addPeer: async (data: {
-    url: string;
-    name: string;
-    trust_level: TrustLevel;
-    api_key?: string;
-  }): Promise<SubstratePeer> => {
-    // First discover the peer
-    const response = await apiClient.post('/federation/discover', { peer_url: data.url });
-    return response.data;
-  },
-
-  removePeer: async (peerId: string): Promise<void> => {
-    // This endpoint doesn't exist in the backend yet
-    throw new Error('Remove peer not implemented');
-  },
-
-  updateTrustLevel: async (peerId: string, trustLevel: TrustLevel): Promise<SubstratePeer> => {
-    const response = await apiClient.post('/federation/trust/upgrade', {
-      peer_id: peerId,
-      new_level: trustLevel,
-      reason: 'Manual trust update'
-    });
-    return response.data;
-  },
-
-  // Discovery & Testing
-  discoverPeer: async (url: string): Promise<{
-    substrate: Substrate;
-    capabilities: string[];
-    isCompatible: boolean;
-  }> => {
-    const response = await apiClient.post('/federation/discover', { peer_url: url });
-    return {
-      substrate: response.data,
-      capabilities: response.data.capabilities || [],
-      isCompatible: true
-    };
-  },
-
-  testConnection: async (peerId: string): Promise<{
-    success: boolean;
-    latency_ms: number;
-    error?: string;
-  }> => {
-    const response = await apiClient.post('/federation/heartbeat', {
-      substrate_id: peerId
-    });
-    return {
-      success: response.data.status === 'healthy',
-      latency_ms: response.data.latency_ms || 0,
-      error: response.data.error
-    };
-  },
-
-  // Capabilities
-  getPeerCapabilities: async (peerId: string): Promise<{
-    capabilities: string[];
-    supported_task_types: string[];
-    resource_limits?: {
-      max_concurrent_tasks: number;
-      max_task_duration_ms: number;
-    };
-  }> => {
-    const response = await apiClient.get(`/federation/peers/${peerId}`);
-    return {
-      capabilities: response.data.capabilities || [],
-      supported_task_types: response.data.supported_task_types || [],
-      resource_limits: response.data.resource_limits
-    };
-  },
-
-  // Task Delegation
-  delegateTask: async (request: DelegationRequest): Promise<DelegationResponse> => {
-    const response = await apiClient.post('/federation/delegate/task', {
-      target_substrate: request.target_peer_id,
-      task_type: request.task_type,
-      task_data: request.task_data,
-      priority: request.priority || 5
-    });
-    return response.data;
-  },
-
-  getDelegationStatus: async (delegationId: string): Promise<DelegationResponse> => {
-    const response = await apiClient.get(`/federation/delegations/${delegationId}`);
-    return response.data;
-  },
-
-  cancelDelegation: async (delegationId: string): Promise<void> => {
-    // This endpoint doesn't exist in the backend yet
-    throw new Error('Cancel delegation not implemented');
-  },
-
-  getDelegationHistory: async (limit = 50): Promise<DelegationResponse[]> => {
-    // This endpoint doesn't exist in the backend yet
-    return [];
-  },
-
-  // Metrics & Monitoring
-  getMetrics: async (): Promise<FederationMetrics> => {
-    const response = await apiClient.get('/federation/metrics');
-    return response.data;
-  },
-
-  getMetricsHistory: async (period: '1h' | '24h' | '7d' | '30d' = '24h'): Promise<{
-    timestamps: string[];
-    metrics: FederationMetrics[];
-  }> => {
-    // This endpoint doesn't exist in the backend yet
-    return { timestamps: [], metrics: [] };
-  },
-
-  // Events
-  getRecentEvents: async (limit = 100): Promise<FederationEvent[]> => {
-    const response = await apiClient.get('/federation/events', {
-      params: { limit }
-    });
-    return response.data;
-  },
-
-  // Security & Trust
-  revokePeerAccess: async (peerId: string, reason: string): Promise<void> => {
-    await apiClient.post('/federation/trust/revoke', { 
-      peer_id: peerId,
-      reason 
-    });
-  },
-
-  reportTrustViolation: async (peerId: string, violation: {
-    type: string;
-    description: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
-  }): Promise<void> => {
-    // This endpoint doesn't exist in the backend yet
-    throw new Error('Report trust violation not implemented');
-  },
-
-  getTrustViolations: async (peerId?: string): Promise<Array<{
-    id: string;
-    peer_id: string;
-    type: string;
-    description: string;
-    severity: string;
-    timestamp: string;
-    resolved: boolean;
-  }>> => {
-    // This endpoint doesn't exist in the backend yet
-    return [];
-  },
-
-  // Batch Operations
-  batchUpdateTrustLevels: async (updates: Array<{
-    peer_id: string;
-    trust_level: TrustLevel;
-  }>): Promise<void> => {
-    // This endpoint doesn't exist in the backend yet
-    throw new Error('Batch update trust levels not implemented');
-  },
-
-  batchTestConnections: async (peerIds: string[]): Promise<Array<{
-    peer_id: string;
-    success: boolean;
-    latency_ms?: number;
-    error?: string;
-  }>> => {
-    // This endpoint doesn't exist in the backend yet
-    return peerIds.map(id => ({ peer_id: id, success: false, error: 'Not implemented' }));
+  let result = await baseQuery(args, api, extraOptions);
+  
+  // Retry logic for network errors
+  if (result.error && result.error.status === 'FETCH_ERROR') {
+    // Retry once after 1 second
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    result = await baseQuery(args, api, extraOptions);
   }
+  
+  return result;
 };
+
+export const federationApi = createApi({
+  reducerPath: 'federationApi',
+  baseQuery: baseQueryWithRetry,
+  tagTypes: ['Peers', 'Delegations', 'Trust', 'Metrics', 'Audit', 'Health'],
+  endpoints: (builder) => ({
+    
+    // ===================
+    // PEER MANAGEMENT
+    // ===================
+    
+    getPeers: builder.query<SubstratePeer[], { 
+      status?: PeerStatus;
+      trustLevel?: TrustLevel;
+      limit?: number;
+      offset?: number;
+    }>({
+      query: ({ status, trustLevel, limit, offset }) => ({
+        url: '/federation/peers',
+        params: {
+          ...(status && { status }),
+          ...(trustLevel && { trust_level: trustLevel }),
+          ...(limit && { limit }),
+          ...(offset && { offset }),
+        },
+      }),
+      providesTags: ['Peers'],
+      transformResponse: (response: FederationApiResponse<SubstratePeer[]>) => response.data,
+    }),
+    
+    getPeer: builder.query<SubstratePeer, string>({
+      query: (peerId) => `/federation/peers/${peerId}`,
+      providesTags: (result, error, id) => [{ type: 'Peers', id }],
+      transformResponse: (response: FederationApiResponse<SubstratePeer>) => response.data,
+    }),
+    
+    discoverPeer: builder.mutation<SubstratePeer, { peer_url: string }>({
+      query: (body) => ({
+        url: '/federation/discover',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Peers'],
+      transformResponse: (response: FederationApiResponse<SubstratePeer>) => response.data,
+    }),
+    
+    updatePeerStatus: builder.mutation<void, { 
+      peer_id: string; 
+      status: PeerStatus;
+      reason?: string;
+    }>({
+      query: ({ peer_id, status, reason }) => ({
+        url: `/federation/peers/${peer_id}/status`,
+        method: 'PUT',
+        body: { status, reason },
+      }),
+      invalidatesTags: (result, error, { peer_id }) => [
+        'Peers',
+        { type: 'Peers', id: peer_id },
+      ],
+    }),
+    
+    refreshPeer: builder.mutation<SubstratePeer, string>({
+      query: (peerId) => ({
+        url: `/federation/peers/${peerId}/refresh`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, peerId) => [
+        'Peers',
+        { type: 'Peers', id: peerId },
+      ],
+      transformResponse: (response: FederationApiResponse<SubstratePeer>) => response.data,
+    }),
+    
+    getPeerCapabilities: builder.query<Record<string, any>, string>({
+      query: (peerId) => `/federation/peers/${peerId}/capabilities`,
+      providesTags: (result, error, id) => [{ type: 'Peers', id: `${id}-capabilities` }],
+      transformResponse: (response: FederationApiResponse<Record<string, any>>) => response.data,
+    }),
+    
+    // ===================
+    // DELEGATION MANAGEMENT
+    // ===================
+    
+    getDelegations: builder.query<PaginatedResponse<Delegation>, {
+      status?: DelegationStatus;
+      source_substrate?: string;
+      target_substrate?: string;
+      task_type?: string;
+      limit?: number;
+      offset?: number;
+    }>({
+      query: (params) => ({
+        url: '/federation/delegations',
+        params,
+      }),
+      providesTags: ['Delegations'],
+      transformResponse: (response: FederationApiResponse<PaginatedResponse<Delegation>>) => response.data,
+    }),
+    
+    getDelegation: builder.query<Delegation, string>({
+      query: (delegationId) => `/federation/delegations/${delegationId}`,
+      providesTags: (result, error, id) => [{ type: 'Delegations', id }],
+      transformResponse: (response: FederationApiResponse<Delegation>) => response.data,
+    }),
+    
+    delegateTask: builder.mutation<Delegation, DelegateTaskRequest>({
+      query: (body) => ({
+        url: '/federation/delegate/task',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Delegations', 'Metrics'],
+      transformResponse: (response: FederationApiResponse<Delegation>) => response.data,
+    }),
+    
+    retryDelegation: builder.mutation<Delegation, { 
+      delegation_id: string;
+      target_substrate?: string;
+    }>({
+      query: ({ delegation_id, target_substrate }) => ({
+        url: `/federation/delegations/${delegation_id}/retry`,
+        method: 'POST',
+        body: { target_substrate },
+      }),
+      invalidatesTags: (result, error, { delegation_id }) => [
+        'Delegations',
+        { type: 'Delegations', id: delegation_id },
+      ],
+      transformResponse: (response: FederationApiResponse<Delegation>) => response.data,
+    }),
+    
+    cancelDelegation: builder.mutation<void, string>({
+      query: (delegationId) => ({
+        url: `/federation/delegations/${delegationId}/cancel`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, delegationId) => [
+        'Delegations',
+        { type: 'Delegations', id: delegationId },
+      ],
+    }),
+    
+    getDelegationResult: builder.query<DelegationResult, string>({
+      query: (delegationId) => `/federation/delegations/${delegationId}/result`,
+      providesTags: (result, error, id) => [{ type: 'Delegations', id: `${id}-result` }],
+      transformResponse: (response: FederationApiResponse<DelegationResult>) => response.data,
+    }),
+    
+    // ===================
+    // TRUST MANAGEMENT
+    // ===================
+    
+    getTrustRelationships: builder.query<TrustRelationship[], {
+      source_substrate?: string;
+      target_substrate?: string;
+      trust_level?: TrustLevel;
+    }>({
+      query: (params) => ({
+        url: '/federation/trust/relationships',
+        params,
+      }),
+      providesTags: ['Trust'],
+      transformResponse: (response: FederationApiResponse<TrustRelationship[]>) => response.data,
+    }),
+    
+    getTrustRelationship: builder.query<TrustRelationship, {
+      source_substrate: string;
+      target_substrate: string;
+    }>({
+      query: ({ source_substrate, target_substrate }) => 
+        `/federation/trust/relationships/${source_substrate}/${target_substrate}`,
+      providesTags: (result, error, { source_substrate, target_substrate }) => [
+        { type: 'Trust', id: `${source_substrate}-${target_substrate}` },
+      ],
+      transformResponse: (response: FederationApiResponse<TrustRelationship>) => response.data,
+    }),
+    
+    updateTrustLevel: builder.mutation<void, { peer_id: string; trust_level: TrustLevel; reason?: string }>({
+      query: (body) => ({
+        url: '/federation/trust/update',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Trust', 'Peers', 'Audit'],
+    }),
+
+    upgradeTrust: builder.mutation<void, TrustUpgradeRequest>({
+      query: (body) => ({
+        url: '/federation/trust/upgrade',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Trust', 'Peers'],
+    }),
+
+    getTrustAudit: builder.query<PaginatedResponse<TrustAuditEntry>, {
+      limit?: number;
+      offset?: number;
+      timeRange?: { start: string; end: string };
+    }>({
+      query: (params) => ({
+        url: '/federation/trust/audit',
+        params,
+      }),
+      providesTags: ['Audit'],
+      transformResponse: (response: FederationApiResponse<PaginatedResponse<TrustAuditEntry>>) => response.data,
+    }),
+    
+    revokeTrust: builder.mutation<void, { 
+      peer_id: string; 
+      reason: string;
+    }>({
+      query: (body) => ({
+        url: '/federation/trust/revoke',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Trust', 'Peers'],
+    }),
+    
+    establishTrust: builder.mutation<TrustRelationship, {
+      target_substrate: string;
+      initial_trust_level?: TrustLevel;
+      mutual?: boolean;
+    }>({
+      query: (body) => ({
+        url: '/federation/trust/establish',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Trust', 'Peers'],
+      transformResponse: (response: FederationApiResponse<TrustRelationship>) => response.data,
+    }),
+    
+    // ===================
+    // CERTIFICATE MANAGEMENT
+    // ===================
+    
+    getCertificateInfo: builder.query<CertificateInfo, string>({
+      query: (peerId) => `/federation/peers/${peerId}/certificate`,
+      providesTags: (result, error, id) => [{ type: 'Peers', id: `${id}-certificate` }],
+      transformResponse: (response: FederationApiResponse<CertificateInfo>) => response.data,
+    }),
+    
+    validateCertificate: builder.mutation<CertificateValidation, string>({
+      query: (peerId) => ({
+        url: `/federation/peers/${peerId}/certificate/validate`,
+        method: 'POST',
+      }),
+      transformResponse: (response: FederationApiResponse<CertificateValidation>) => response.data,
+    }),
+    
+    renewCertificate: builder.mutation<CertificateInfo, string>({
+      query: (peerId) => ({
+        url: `/federation/peers/${peerId}/certificate/renew`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, peerId) => [
+        { type: 'Peers', id: `${peerId}-certificate` },
+      ],
+      transformResponse: (response: FederationApiResponse<CertificateInfo>) => response.data,
+    }),
+    
+    // ===================
+    // METRICS AND MONITORING
+    // ===================
+    
+    getFederationMetrics: builder.query<FederationMetrics, {
+      timeRange?: { start: string; end: string };
+    }>({
+      query: (params) => ({
+        url: '/federation/metrics',
+        params,
+      }),
+      providesTags: ['Metrics'],
+      transformResponse: (response: FederationApiResponse<FederationMetrics>) => response.data,
+    }),
+    
+    getFederationHealth: builder.query<FederationHealth, void>({
+      query: () => '/federation/health',
+      providesTags: ['Health'],
+      transformResponse: (response: FederationApiResponse<FederationHealth>) => response.data,
+    }),
+    
+    // ===================
+    // AUDIT AND SECURITY
+    // ===================
+    
+    getAuditLog: builder.query<PaginatedResponse<AuditLogEntry>, {
+      resource?: string;
+      action?: string;
+      userId?: string;
+      outcome?: 'success' | 'failure';
+      timeRange?: { start: string; end: string };
+      limit?: number;
+      offset?: number;
+    }>({
+      query: (params) => ({
+        url: '/federation/audit',
+        params,
+      }),
+      providesTags: ['Audit'],
+      transformResponse: (response: FederationApiResponse<PaginatedResponse<AuditLogEntry>>) => response.data,
+    }),
+    
+    // ===================
+    // UTILITY ENDPOINTS
+    // ===================
+    
+    getWellKnownMcp: builder.query<Record<string, any>, string>({
+      query: (peerUrl) => ({
+        url: `${peerUrl}/.well-known/mcp-context`,
+        // This is an external call, so we need to handle CORS
+      }),
+      transformResponse: (response: any) => response,
+    }),
+    
+    testPeerConnection: builder.mutation<{ success: boolean; latency: number }, string>({
+      query: (peerUrl) => ({
+        url: '/federation/test-connection',
+        method: 'POST',
+        body: { peer_url: peerUrl },
+      }),
+      transformResponse: (response: FederationApiResponse<{ success: boolean; latency: number }>) => response.data,
+    }),
+    
+  }),
+});
+
+// Export hooks for all endpoints
+export const {
+  // Peer management hooks
+  useGetPeersQuery,
+  useGetPeerQuery,
+  useDiscoverPeerMutation,
+  useUpdatePeerStatusMutation,
+  useRefreshPeerMutation,
+  useGetPeerCapabilitiesQuery,
+  
+  // Delegation management hooks
+  useGetDelegationsQuery,
+  useGetDelegationQuery,
+  useDelegateTaskMutation,
+  useRetryDelegationMutation,
+  useCancelDelegationMutation,
+  useGetDelegationResultQuery,
+  
+  // Trust management hooks
+  useGetTrustRelationshipsQuery,
+  useGetTrustRelationshipQuery,
+  useUpdateTrustLevelMutation,
+  useUpgradeTrustMutation,
+  useRevokeTrustMutation,
+  useEstablishTrustMutation,
+  
+  // Certificate management hooks
+  useGetCertificateInfoQuery,
+  useValidateCertificateMutation,
+  useRenewCertificateMutation,
+  
+  // Metrics and monitoring hooks
+  useGetFederationMetricsQuery,
+  useGetFederationHealthQuery,
+  
+  // Audit and security hooks
+  useGetAuditLogQuery,
+  
+  // Utility hooks
+  useGetWellKnownMcpQuery,
+  useTestPeerConnectionMutation,
+} = federationApi;
+
+// Export the API for store configuration
+export default federationApi;
