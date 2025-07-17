@@ -396,14 +396,14 @@ export const NetworkTopology: React.FC = () => {
       {/* Controls Header */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={3}>
+          <Grid xs={12} md={3}>
             <Typography variant="h6">Network Topology</Typography>
             <Typography variant="caption" color="text.secondary">
               {networkStats.totalNodes} nodes, {networkStats.totalEdges} connections
             </Typography>
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid xs={12} md={2}>
             <FormControl size="small" fullWidth>
               <InputLabel>Layout</InputLabel>
               <Select
@@ -419,7 +419,7 @@ export const NetworkTopology: React.FC = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid xs={12} md={2}>
             <ToggleButtonGroup
               value={viewMode}
               exclusive
@@ -444,7 +444,7 @@ export const NetworkTopology: React.FC = () => {
             </ToggleButtonGroup>
           </Grid>
 
-          <Grid item xs={12} md={3}>
+          <Grid xs={12} md={3}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="caption">Zoom:</Typography>
               <IconButton size="small" onClick={handleZoomOut}>
@@ -465,7 +465,7 @@ export const NetworkTopology: React.FC = () => {
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={2}>
+          <Grid xs={12} md={2}>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Tooltip title="Center view">
                 <IconButton size="small" onClick={handleCenterView}>

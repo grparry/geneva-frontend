@@ -294,7 +294,7 @@ export const AdvancedMonitoring: React.FC = () => {
     <Box>
       {/* Header with System Status */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Card variant="outlined">
             <CardContent sx={{ py: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -344,7 +344,7 @@ export const AdvancedMonitoring: React.FC = () => {
           </Card>
         </Grid>
         
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Card variant="outlined">
             <CardContent sx={{ py: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

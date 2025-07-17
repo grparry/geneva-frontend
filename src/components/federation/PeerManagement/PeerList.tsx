@@ -81,7 +81,7 @@ const PeerList: React.FC<PeerListProps> = ({
     return (
       <Grid container spacing={3}>
         {peers.map((peer) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={peer.id}>
+          <Grid xs={12} sm={6} md={4} lg={3} key={peer.id}>
             <PeerCard
               peer={peer}
               onRefresh={() => handleRefreshPeer(peer.id)}

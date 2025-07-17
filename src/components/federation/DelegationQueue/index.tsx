@@ -201,7 +201,7 @@ export const DelegationQueue: React.FC = () => {
     <Box>
       {/* Header with Statistics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={2.4}>
+        <Grid xs={12} md={2.4}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="primary" fontWeight="bold">
               {delegationStats.total}
@@ -211,7 +211,7 @@ export const DelegationQueue: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={2.4}>
+        <Grid xs={12} md={2.4}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="warning.main" fontWeight="bold">
               {delegationStats.pending}
@@ -221,7 +221,7 @@ export const DelegationQueue: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={2.4}>
+        <Grid xs={12} md={2.4}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="info.main" fontWeight="bold">
               {delegationStats.executing}
@@ -231,7 +231,7 @@ export const DelegationQueue: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={2.4}>
+        <Grid xs={12} md={2.4}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="success.main" fontWeight="bold">
               {delegationStats.completed}
@@ -241,7 +241,7 @@ export const DelegationQueue: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={2.4}>
+        <Grid xs={12} md={2.4}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="error.main" fontWeight="bold">
               {delegationStats.failed}

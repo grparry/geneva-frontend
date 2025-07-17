@@ -163,7 +163,7 @@ const PerformanceAnalytics: React.FC<PerformanceAnalyticsProps> = ({
     <Box>
       {/* Performance Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -180,7 +180,7 @@ const PerformanceAnalytics: React.FC<PerformanceAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -197,7 +197,7 @@ const PerformanceAnalytics: React.FC<PerformanceAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -214,7 +214,7 @@ const PerformanceAnalytics: React.FC<PerformanceAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -234,7 +234,7 @@ const PerformanceAnalytics: React.FC<PerformanceAnalyticsProps> = ({
 
       {/* Performance Details */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} lg={6}>
+        <Grid xs={12} lg={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Peer Performance ({timeRange})
@@ -297,7 +297,7 @@ const PerformanceAnalytics: React.FC<PerformanceAnalyticsProps> = ({
           </Paper>
         </Grid>
 
-        <Grid item xs={12} lg={6}>
+        <Grid xs={12} lg={6}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Task Type Performance ({timeRange})

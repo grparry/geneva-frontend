@@ -218,7 +218,7 @@ export const TrustManagement: React.FC = () => {
     <Box>
       {/* Header with Statistics */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={2}>
+        <Grid xs={12} md={2}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="primary" fontWeight="bold">
               {trustStats.total}
@@ -228,7 +228,7 @@ export const TrustManagement: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={6} md={2}>
+        <Grid xs={6} md={2}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="text.secondary" fontWeight="bold">
               {trustStats.none}
@@ -238,7 +238,7 @@ export const TrustManagement: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={6} md={2}>
+        <Grid xs={6} md={2}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="info.main" fontWeight="bold">
               {trustStats.basic}
@@ -248,7 +248,7 @@ export const TrustManagement: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={6} md={2}>
+        <Grid xs={6} md={2}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="warning.main" fontWeight="bold">
               {trustStats.verified}
@@ -258,7 +258,7 @@ export const TrustManagement: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={6} md={2}>
+        <Grid xs={6} md={2}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="success.main" fontWeight="bold">
               {trustStats.trusted}
@@ -268,7 +268,7 @@ export const TrustManagement: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={6} md={2}>
+        <Grid xs={6} md={2}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="primary.main" fontWeight="bold">
               {trustStats.full}

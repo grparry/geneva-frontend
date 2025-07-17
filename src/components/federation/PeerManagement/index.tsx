@@ -162,7 +162,7 @@ export const PeerManagement: React.FC = () => {
     <Box>
       {/* Header with Statistics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={3}>
+        <Grid xs={12} md={3}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="primary" fontWeight="bold">
               {peerStats.total}
@@ -172,7 +172,7 @@ export const PeerManagement: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid xs={12} md={3}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="success.main" fontWeight="bold">
               {peerStats.connected}
@@ -182,7 +182,7 @@ export const PeerManagement: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid xs={12} md={3}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="info.main" fontWeight="bold">
               {peerStats.trusted}
@@ -192,7 +192,7 @@ export const PeerManagement: React.FC = () => {
             </Typography>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={3}>
+        <Grid xs={12} md={3}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="error.main" fontWeight="bold">
               {peerStats.issues}

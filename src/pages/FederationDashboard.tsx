@@ -39,23 +39,23 @@ import { FederationTab } from '../../types/federation';
 
 // Federation components
 const PeerManagement = React.lazy(() => 
-  import('../../components/federation/PeerManagement').then(module => ({ default: module.PeerManagement }))
+  import('../../components/federation/PeerManagement')
 );
 
 const DelegationQueue = React.lazy(() => 
-  import('../../components/federation/DelegationQueue').then(module => ({ default: module.DelegationQueue }))
+  import('../../components/federation/DelegationQueue')
 );
 
 const TrustManagement = React.lazy(() => 
-  import('../../components/federation/TrustManagement').then(module => ({ default: module.TrustManagement }))
+  import('../../components/federation/TrustManagement')
 );
 
 const NetworkTopology = React.lazy(() => 
-  import('../../components/federation/NetworkTopology').then(module => ({ default: module.NetworkTopology }))
+  import('../../components/federation/NetworkTopology')
 );
 
 const FederationMetrics = React.lazy(() => 
-  import('../../components/federation/FederationMetrics').then(module => ({ default: module.FederationMetrics }))
+  import('../../components/federation/FederationMetrics')
 );
 
 interface TabConfig {
@@ -136,7 +136,7 @@ export const FederationDashboard: React.FC = () => {
       id: 'monitoring',
       label: 'Advanced Monitoring',
       icon: <Analytics />,
-      component: React.lazy(() => import('../../components/federation/AdvancedMonitoring').then(module => ({ default: module.AdvancedMonitoring }))),
+      component: React.lazy(() => import('../../components/federation/AdvancedMonitoring')),
       description: 'Comprehensive system monitoring',
     },
   ];

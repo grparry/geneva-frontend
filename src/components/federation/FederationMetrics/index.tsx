@@ -220,7 +220,7 @@ export const FederationMetrics: React.FC = () => {
       {/* Overall Health Status */}
       {health && (
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12}>
+          <Grid xs={12}>
             <Paper sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <Typography variant="h6">Overall Health</Typography>
@@ -235,7 +235,7 @@ export const FederationMetrics: React.FC = () => {
               </Box>
               
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={3}>
+                <Grid xs={12} sm={3}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h4" color="primary" fontWeight="bold">
                       {formatPercentage(health.network_health)}
@@ -246,7 +246,7 @@ export const FederationMetrics: React.FC = () => {
                   </Box>
                 </Grid>
                 
-                <Grid item xs={12} sm={3}>
+                <Grid xs={12} sm={3}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h4" color="success.main" fontWeight="bold">
                       {formatPercentage(health.peer_connectivity)}
@@ -257,7 +257,7 @@ export const FederationMetrics: React.FC = () => {
                   </Box>
                 </Grid>
                 
-                <Grid item xs={12} sm={3}>
+                <Grid xs={12} sm={3}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h4" color="info.main" fontWeight="bold">
                       {formatPercentage(health.delegation_success_rate)}
@@ -268,7 +268,7 @@ export const FederationMetrics: React.FC = () => {
                   </Box>
                 </Grid>
                 
-                <Grid item xs={12} sm={3}>
+                <Grid xs={12} sm={3}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h4" color="error.main" fontWeight="bold">
                       {health.trust_violations}
@@ -316,7 +316,7 @@ export const FederationMetrics: React.FC = () => {
       {/* Key Metrics Cards */}
       {metrics && (
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={3}>
             <MetricCard
               title="Total Peers"
               value={metrics.total_peers}
@@ -327,7 +327,7 @@ export const FederationMetrics: React.FC = () => {
             />
           </Grid>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={3}>
             <MetricCard
               title="Delegations"
               value={metrics.total_delegations}
@@ -338,7 +338,7 @@ export const FederationMetrics: React.FC = () => {
             />
           </Grid>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={3}>
             <MetricCard
               title="Trusted Peers"
               value={metrics.trusted_peers}
@@ -349,7 +349,7 @@ export const FederationMetrics: React.FC = () => {
             />
           </Grid>
           
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid xs={12} sm={6} md={3}>
             <MetricCard
               title="Avg Response Time"
               value={formatDuration(metrics.avg_delegation_time_ms)}
@@ -364,7 +364,7 @@ export const FederationMetrics: React.FC = () => {
       {/* Performance Breakdown */}
       {metrics && (
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
                 Delegation Performance
@@ -386,7 +386,7 @@ export const FederationMetrics: React.FC = () => {
               </Box>
               
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid xs={6}>
                   <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
                     <Typography variant="h5" color="success.contrastText" fontWeight="bold">
                       {metrics.successful_delegations}
@@ -397,7 +397,7 @@ export const FederationMetrics: React.FC = () => {
                   </Box>
                 </Grid>
                 
-                <Grid item xs={6}>
+                <Grid xs={6}>
                   <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'error.light', borderRadius: 1 }}>
                     <Typography variant="h5" color="error.contrastText" fontWeight="bold">
                       {metrics.failed_delegations}
@@ -411,7 +411,7 @@ export const FederationMetrics: React.FC = () => {
             </Paper>
           </Grid>
           
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
                 Network Status
@@ -433,7 +433,7 @@ export const FederationMetrics: React.FC = () => {
               </Box>
               
               <Grid container spacing={2}>
-                <Grid item xs={4}>
+                <Grid xs={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" color="primary" fontWeight="bold">
                       {metrics.total_peers}
@@ -444,7 +444,7 @@ export const FederationMetrics: React.FC = () => {
                   </Box>
                 </Grid>
                 
-                <Grid item xs={4}>
+                <Grid xs={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" color="success.main" fontWeight="bold">
                       {metrics.connected_peers}
@@ -455,7 +455,7 @@ export const FederationMetrics: React.FC = () => {
                   </Box>
                 </Grid>
                 
-                <Grid item xs={4}>
+                <Grid xs={4}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h6" color="info.main" fontWeight="bold">
                       {metrics.trusted_peers}

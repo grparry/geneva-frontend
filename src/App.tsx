@@ -36,7 +36,6 @@ import { AdminHealthPage } from './pages/AdminHealthPage';
 import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
 import { OCLPage } from './pages/OCLPage';
 import { CognitiveMemoryPage } from './pages/CognitiveMemoryPage';
-import { FederationPage } from './pages/FederationPage';
 
 // Federation pages
 import { FederationOverviewPage } from './pages/federation/FederationOverviewPage';
