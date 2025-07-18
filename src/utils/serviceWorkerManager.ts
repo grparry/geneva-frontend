@@ -117,10 +117,14 @@ class ServiceWorkerManager {
         resolve(event.data.size || 0);
       };
 
-      this.registration.active.postMessage(
-        { type: 'GET_CACHE_SIZE' },
-        [messageChannel.port2]
-      );
+      if (this.registration?.active) {
+        this.registration.active.postMessage(
+          { type: 'GET_CACHE_SIZE' },
+          [messageChannel.port2]
+        );
+      } else {
+        resolve(0);
+      }
 
       // Timeout after 5 seconds
       setTimeout(() => resolve(0), 5000);
@@ -138,10 +142,14 @@ class ServiceWorkerManager {
         resolve(event.data.cleared || false);
       };
 
-      this.registration.active.postMessage(
-        { type: 'CLEAR_CACHE' },
-        [messageChannel.port2]
-      );
+      if (this.registration?.active) {
+        this.registration.active.postMessage(
+          { type: 'CLEAR_CACHE' },
+          [messageChannel.port2]
+        );
+      } else {
+        resolve(false);
+      }
 
       // Timeout after 5 seconds
       setTimeout(() => resolve(false), 5000);

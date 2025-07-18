@@ -55,7 +55,7 @@ import {
   Area,
   BarChart,
   Bar,
-  TreeMap,
+  Treemap,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -255,7 +255,7 @@ const ProviderBreakdown: React.FC<{ providers: any[] }> = ({ providers }) => {
           </TableContainer>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <TreeMap
+            <Treemap
               data={providers}
               dataKey="cost"
               aspectRatio={4/3}
@@ -278,7 +278,7 @@ const ProviderBreakdown: React.FC<{ providers: any[] }> = ({ providers }) => {
                   return null;
                 }}
               />
-            </TreeMap>
+            </Treemap>
           </ResponsiveContainer>
         )}
       </CardContent>
@@ -432,38 +432,38 @@ export const CostAnalysis: React.FC = () => {
 
         {/* Summary Cards */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CostSummaryCard
               title="Total Cost"
               value={costData?.totalFormatted || '$0'}
               subtitle={`${timeRange} period`}
-              change={costData?.costTrendsFormatted?.[0]?.change}
+              change={costData?.cost_trends?.[0]?.change}
               icon={<AttachMoneyRounded />}
             />
           </Grid>
-          <Grid xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CostSummaryCard
               title="LLM Costs"
-              value={costData?.llm_costs?.formatted || '$0'}
+              value={costData?.llm_costs?.totalFormatted || '$0'}
               subtitle={`${costData?.distribution?.[0]?.percentage.toFixed(0)}% of total`}
               icon={<CloudRounded />}
               color="info.main"
             />
           </Grid>
-          <Grid xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CostSummaryCard
               title="Resource Costs"
-              value={costData?.resource_costs?.formatted || '$0'}
+              value={costData?.resource_costs?.totalFormatted || '$0'}
               subtitle={`${costData?.distribution?.[1]?.percentage.toFixed(0)}% of total`}
               icon={<StorageRounded />}
               color="success.main"
             />
           </Grid>
-          <Grid xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CostSummaryCard
               title="Avg per Workflow"
-              value={costData?.avgPerWorkflowFormatted || '$0'}
-              change={costTrend?.summaryFormatted?.changePercentage}
+              value={costData?.topWorkflowsFormatted || '$0'}
+              change={undefined}
               icon={<ApiRounded />}
               color="warning.main"
             />
@@ -473,7 +473,7 @@ export const CostAnalysis: React.FC = () => {
         {/* Main Content */}
         <Grid container spacing={3}>
           {/* Cost Trends */}
-          <Grid xs={12} lg={8}>
+          <Grid size={{ xs: 12, lg: 8 }}>
             <Card sx={{ mb: 3 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -524,7 +524,7 @@ export const CostAnalysis: React.FC = () => {
           </Grid>
 
           {/* Right Column */}
-          <Grid xs={12} lg={4}>
+          <Grid size={{ xs: 12, lg: 4 }}>
             <Stack spacing={3}>
               {/* Cost Distribution */}
               <CostDistributionChart data={costData} />

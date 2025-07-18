@@ -28,12 +28,12 @@ import {
   Timer as TimerIcon,
   Speed as SpeedIcon
 } from '@mui/icons-material';
-import { DelegationResponse, DelegationStatus } from '../../types/federation';
-import { useFederationEvents } from '../../hooks/useFederationWebSocket';
+import { Delegation, DelegationStatus } from '../../types/federation';
+import { useFederationWebSocket } from '../../hooks/useFederationWebSocket';
 import { formatDistanceToNow } from 'date-fns';
 
 interface DelegationStatusCardProps {
-  delegation: DelegationResponse;
+  delegation: Delegation;
   onRefresh?: () => void;
   onCancel?: (delegationId: string) => void;
   expanded?: boolean;
@@ -55,22 +55,19 @@ export const DelegationStatusCard: React.FC<DelegationStatusCardProps> = ({
   }>>([]);
 
   // Subscribe to delegation events
-  const { events } = useFederationEvents(
-    [`delegation.${delegation.id}.*`],
-    (event) => {
-      if (event.type === `delegation.${delegation.id}.status`) {
-        setLiveStatus(event.data.status);
+  const { isConnected } = useFederationWebSocket({
+    subscriptions: ['delegations'],
+    onDelegationUpdate: (updatedDelegation) => {
+      if (updatedDelegation.id === delegation.id) {
+        setLiveStatus(updatedDelegation.status);
         setStatusHistory(prev => [...prev, {
-          status: event.data.status,
-          timestamp: event.timestamp,
-          message: event.data.message
+          status: updatedDelegation.status,
+          timestamp: new Date().toISOString(),
+          message: `Status changed to ${updatedDelegation.status}`
         }]);
       }
-      if (event.type === `delegation.${delegation.id}.progress`) {
-        setProgress(event.data.progress);
-      }
     }
-  );
+  });
 
   const getStatusIcon = (status: DelegationStatus) => {
     switch (status) {
@@ -82,7 +79,7 @@ export const DelegationStatusCard: React.FC<DelegationStatusCardProps> = ({
         return <PendingIcon color="warning" />;
       case DelegationStatus.EXECUTING:
         return <ExecutingIcon color="primary" />;
-      case DelegationStatus.CANCELLED:
+      case DelegationStatus.REJECTED:
         return <CancelIcon color="disabled" />;
       default:
         return <PendingIcon />;
@@ -100,7 +97,7 @@ export const DelegationStatusCard: React.FC<DelegationStatusCardProps> = ({
         return 'warning';
       case DelegationStatus.EXECUTING:
         return 'primary';
-      case DelegationStatus.CANCELLED:
+      case DelegationStatus.REJECTED:
         return 'default';
       default:
         return 'default';
@@ -118,7 +115,7 @@ export const DelegationStatusCard: React.FC<DelegationStatusCardProps> = ({
       case DelegationStatus.COMPLETED:
         return 100;
       case DelegationStatus.FAILED:
-      case DelegationStatus.CANCELLED:
+      case DelegationStatus.REJECTED:
         return 0;
       default:
         return 0;

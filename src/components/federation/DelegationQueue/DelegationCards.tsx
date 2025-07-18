@@ -209,7 +209,7 @@ const DelegationCards: React.FC<DelegationCardsProps> = ({
         const isActionLoading = actionLoading.has(delegation.id);
         
         return (
-          <Grid xs={12} sm={6} lg={4} key={delegation.id}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={delegation.id}>
             <Card 
               variant="outlined" 
               sx={{ 

@@ -37,10 +37,10 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-import { analyticsNavigationItems } from '../navigation/analyticsRoutes';
-import { useCostAlerts } from '../hooks/useAnalyticsWebSocket';
-import { ConnectionIndicator } from '../components/analytics/WebSocketConnectionManager';
-import { CostAlertNotification } from '../components/analytics/CostAlertsPanel';
+import { analyticsNavigationItems } from '../../navigation/analyticsRoutes';
+import { useCostAlerts } from '../../hooks/useAnalyticsWebSocket';
+import { ConnectionIndicator } from './WebSocketConnectionManager';
+import { CostAlertNotification } from './CostAlertsPanel';
 
 const drawerWidth = 280;
 

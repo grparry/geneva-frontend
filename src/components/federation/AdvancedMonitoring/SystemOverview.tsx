@@ -127,7 +127,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
     <Box>
       {/* Key Metrics Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -153,7 +153,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -179,7 +179,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -205,7 +205,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -231,14 +231,14 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
 
       {/* System Health Dashboard */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               System Health Overview
             </Typography>
             
             <Grid container spacing={3}>
-              <Grid xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <Box sx={{ textAlign: 'center' }}>
                   <Typography variant="h3" color="primary" fontWeight="bold">
                     {systemMetrics.networkHealth.toFixed(0)}%
@@ -255,7 +255,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
                 </Box>
               </Grid>
 
-              <Grid xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <Box sx={{ textAlign: 'center' }}>
                   <Typography variant="h3" color="success.main" fontWeight="bold">
                     {systemMetrics.successRate.toFixed(0)}%
@@ -272,7 +272,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
                 </Box>
               </Grid>
 
-              <Grid xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <Box sx={{ textAlign: 'center' }}>
                   <Typography variant="h3" color="info.main" fontWeight="bold">
                     {systemMetrics.healthRate.toFixed(0)}%
@@ -294,7 +294,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
 
             {/* Status Breakdown */}
             <Grid container spacing={2}>
-              <Grid xs={6} md={3}>
+              <Grid size={{ xs: 6, md: 3 }}>
                 <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'success.light', borderRadius: 1 }}>
                   <Typography variant="h5" color="success.contrastText" fontWeight="bold">
                     {systemMetrics.successfulDelegations}
@@ -305,7 +305,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
                 </Box>
               </Grid>
 
-              <Grid xs={6} md={3}>
+              <Grid size={{ xs: 6, md: 3 }}>
                 <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'warning.light', borderRadius: 1 }}>
                   <Typography variant="h5" color="warning.contrastText" fontWeight="bold">
                     {systemMetrics.pendingDelegations}
@@ -316,7 +316,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
                 </Box>
               </Grid>
 
-              <Grid xs={6} md={3}>
+              <Grid size={{ xs: 6, md: 3 }}>
                 <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'error.light', borderRadius: 1 }}>
                   <Typography variant="h5" color="error.contrastText" fontWeight="bold">
                     {systemMetrics.failedDelegations}
@@ -327,7 +327,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
                 </Box>
               </Grid>
 
-              <Grid xs={6} md={3}>
+              <Grid size={{ xs: 6, md: 3 }}>
                 <Box sx={{ textAlign: 'center', p: 2, bgcolor: 'primary.light', borderRadius: 1 }}>
                   <Typography variant="h5" color="primary.contrastText" fontWeight="bold">
                     {systemMetrics.trustedPeers}
@@ -341,7 +341,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper sx={{ p: 3, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               System Alerts
@@ -397,7 +397,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
         </Typography>
         
         <Grid container spacing={2}>
-          <Grid xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Chip
               icon={<DeviceHubOutlined />}
               label={`${systemMetrics.totalPeers} Peers (${systemMetrics.healthyPeers} healthy)`}
@@ -407,7 +407,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
             />
           </Grid>
           
-          <Grid xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Chip
               icon={<AssignmentOutlined />}
               label={`${systemMetrics.totalDelegations} Delegations (${systemMetrics.successRate.toFixed(0)}% success)`}
@@ -417,7 +417,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
             />
           </Grid>
           
-          <Grid xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Chip
               icon={<SecurityOutlined />}
               label={`${systemMetrics.trustedPeers} Trusted (${systemMetrics.trustRate.toFixed(0)}% of peers)`}
@@ -427,7 +427,7 @@ const SystemOverview: React.FC<SystemOverviewProps> = ({
             />
           </Grid>
           
-          <Grid xs={12} sm={6} md={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Chip
               icon={systemStatus.overallStatus === 'healthy' ? <CheckCircleOutlined /> : <WarningOutlined />}
               label={`System ${systemStatus.overallStatus}`}

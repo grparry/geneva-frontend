@@ -124,7 +124,7 @@ export const FederationMetricsCard: React.FC<FederationMetricsCardProps> = ({ me
             <MetricItem
               icon={<SpeedIcon />}
               label="Avg Response Time"
-              value={`${metrics.average_delegation_time_ms}ms`}
+              value={`${metrics.avg_delegation_time_ms}ms`}
               color="info"
             />
           </Box>
@@ -141,17 +141,6 @@ export const FederationMetricsCard: React.FC<FederationMetricsCardProps> = ({ me
                 <Chip label={metrics.total_delegations} size="small" />
               </Box>
             </Box>
-            
-            {metrics.trust_violations > 0 && (
-              <Box flex={{ xs: "1 1 100%", md: "1 1 45%" }}>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <WarningIcon color="warning" fontSize="small" />
-                  <Typography variant="body2" color="warning.main">
-                    {metrics.trust_violations} trust violation{metrics.trust_violations !== 1 ? 's' : ''} detected
-                  </Typography>
-                </Box>
-              </Box>
-            )}
           </Box>
         </Box>
 

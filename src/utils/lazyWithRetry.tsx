@@ -84,7 +84,7 @@ export function lazyWithRetry<T extends ComponentType<any>>(
           // Clear module cache
           if ('webpackChunkName' in importFn) {
             // Force webpack to reload the chunk
-            delete window.__webpack_require__.cache[importFn.toString()];
+            delete (window as any).__webpack_require__?.cache?.[importFn.toString()];
           }
           
           // Wait before retrying
@@ -157,7 +157,7 @@ export class LazyComponentWrapper extends React.Component<
     if (this.state.hasError) {
       return this.props.errorFallback || (
         <LazyErrorFallback
-          error={this.state.error}
+          error={this.state.error!}
           retry={this.handleRetry}
         />
       );
@@ -232,11 +232,11 @@ export const usePreloadOnHover = (
   preloadFn: () => Promise<void>,
   delay: number = 200
 ) => {
-  const timeoutRef = React.useRef<NodeJS.Timeout>();
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   
   const handleMouseEnter = React.useCallback(() => {
     timeoutRef.current = setTimeout(() => {
-      preloadFn();
+      preloadFn().catch(console.error);
     }, delay);
   }, [preloadFn, delay]);
   

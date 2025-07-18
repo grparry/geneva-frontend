@@ -57,6 +57,15 @@ export enum FederationErrorType {
 }
 
 // Core Federation Interfaces (aligned with Geneva backend)
+export interface Substrate {
+  id: string;
+  name: string;
+  url: string;
+  status: string;
+  capabilities: string[];
+  metadata?: Record<string, any>;
+}
+
 export interface SubstratePeer {
   id: string; // UUID
   substrate_id: string; // UUID

@@ -228,7 +228,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
     <Box>
       {/* Certificate Statistics */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid xs={6} md={2.4}>
+        <Grid size={{ xs: 6, md: 2.4 }}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="primary" fontWeight="bold">
               {certStats.total}
@@ -238,7 +238,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
             </Typography>
           </Paper>
         </Grid>
-        <Grid xs={6} md={2.4}>
+        <Grid size={{ xs: 6, md: 2.4 }}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="success.main" fontWeight="bold">
               {certStats.valid}
@@ -248,7 +248,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
             </Typography>
           </Paper>
         </Grid>
-        <Grid xs={6} md={2.4}>
+        <Grid size={{ xs: 6, md: 2.4 }}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="warning.main" fontWeight="bold">
               {certStats.expired}
@@ -258,7 +258,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
             </Typography>
           </Paper>
         </Grid>
-        <Grid xs={6} md={2.4}>
+        <Grid size={{ xs: 6, md: 2.4 }}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="text.secondary" fontWeight="bold">
               {certStats.missing}
@@ -268,7 +268,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
             </Typography>
           </Paper>
         </Grid>
-        <Grid xs={6} md={2.4}>
+        <Grid size={{ xs: 6, md: 2.4 }}>
           <Paper sx={{ p: 2, textAlign: 'center' }}>
             <Typography variant="h4" color="error.main" fontWeight="bold">
               {certStats.revoked}
@@ -287,7 +287,7 @@ const CertificateManager: React.FC<CertificateManagerProps> = ({
 
       <Grid container spacing={2}>
         {certificateStatuses.map((certStatus) => (
-          <Grid xs={12} md={6} lg={4} key={certStatus.peer.id}>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }} key={certStatus.peer.id}>
             <Card variant="outlined">
               <CardContent>
                 {/* Peer Header */}

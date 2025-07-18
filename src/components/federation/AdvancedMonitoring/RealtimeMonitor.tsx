@@ -31,7 +31,7 @@ import {
   PauseOutlined,
   PlayArrowOutlined,
   ClearOutlined,
-  SignalWifiOutlined,
+  SignalWifiBadOutlined,
   SignalWifiOffOutlined,
   SpeedOutlined,
   NetworkCheckOutlined,
@@ -315,7 +315,7 @@ const RealtimeMonitor: React.FC<RealtimeMonitorProps> = ({
       <Alert 
         severity={isConnected ? 'success' : 'warning'} 
         sx={{ mb: 3 }}
-        icon={isConnected ? <SignalWifiOutlined /> : <SignalWifiOffOutlined />}
+        icon={isConnected ? <SignalWifiBadOutlined /> : <SignalWifiOffOutlined />}
       >
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="body2">
@@ -348,7 +348,7 @@ const RealtimeMonitor: React.FC<RealtimeMonitorProps> = ({
 
       {/* Real-time Metrics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -373,7 +373,7 @@ const RealtimeMonitor: React.FC<RealtimeMonitorProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -398,7 +398,7 @@ const RealtimeMonitor: React.FC<RealtimeMonitorProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -420,7 +420,7 @@ const RealtimeMonitor: React.FC<RealtimeMonitorProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>

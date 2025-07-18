@@ -230,8 +230,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
             result = {
               ...test,
               status: 'failed',
-              result: 'Trust validation failed',
-              error: 'Unable to fetch trust relationships',
+              result: 'Trust validation failed: Unable to fetch trust relationships',
               duration: Date.now() - startTime,
             };
           }
@@ -292,8 +291,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
               result = {
                 ...test,
                 status: 'failed',
-                result: 'Test delegation failed',
-                error: 'Unable to create test delegation',
+                result: 'Test delegation failed: Unable to create test delegation',
                 duration: Date.now() - startTime,
               };
             }
@@ -301,8 +299,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
             result = {
               ...test,
               status: 'failed',
-              result: 'Delegation pipeline test failed',
-              error: error instanceof Error ? error.message : 'Unknown error',
+              result: `Delegation pipeline test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
               duration: Date.now() - startTime,
             };
           }
@@ -332,8 +329,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
             result = {
               ...test,
               status: 'failed',
-              result: 'Data integrity check failed',
-              error: 'Unable to fetch federation health',
+              result: 'Data integrity check failed: Unable to fetch federation health',
               duration: Date.now() - startTime,
             };
           }
@@ -422,8 +418,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
       result = {
         ...test,
         status: 'failed',
-        result: 'Test execution failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
+        result: `Test execution failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
         duration: Date.now() - startTime,
       };
     }
@@ -488,7 +483,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
     <Box>
       {/* Diagnostic Overview */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -505,7 +500,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -522,7 +517,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -539,7 +534,7 @@ const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>

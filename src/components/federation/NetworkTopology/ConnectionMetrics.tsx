@@ -88,7 +88,7 @@ const ConnectionMetrics: React.FC<ConnectionMetricsProps> = ({ stats }) => {
 
       {/* Network Statistics Grid */}
       <Grid container spacing={1}>
-        <Grid xs={6}>
+        <Grid size={{ xs: 6 }}>
           <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'primary.light', borderRadius: 1 }}>
             <DeviceHubOutlined fontSize="small" sx={{ color: 'primary.contrastText', mb: 0.5 }} />
             <Typography variant="h6" color="primary.contrastText" fontWeight="bold">
@@ -100,7 +100,7 @@ const ConnectionMetrics: React.FC<ConnectionMetricsProps> = ({ stats }) => {
           </Box>
         </Grid>
         
-        <Grid xs={6}>
+        <Grid size={{ xs: 6 }}>
           <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'info.light', borderRadius: 1 }}>
             <LinkOutlined fontSize="small" sx={{ color: 'info.contrastText', mb: 0.5 }} />
             <Typography variant="h6" color="info.contrastText" fontWeight="bold">
@@ -112,7 +112,7 @@ const ConnectionMetrics: React.FC<ConnectionMetricsProps> = ({ stats }) => {
           </Box>
         </Grid>
         
-        <Grid xs={6}>
+        <Grid size={{ xs: 6 }}>
           <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'success.light', borderRadius: 1 }}>
             <AccountTreeOutlined fontSize="small" sx={{ color: 'success.contrastText', mb: 0.5 }} />
             <Typography variant="h6" color="success.contrastText" fontWeight="bold">
@@ -124,7 +124,7 @@ const ConnectionMetrics: React.FC<ConnectionMetricsProps> = ({ stats }) => {
           </Box>
         </Grid>
         
-        <Grid xs={6}>
+        <Grid size={{ xs: 6 }}>
           <Box sx={{ textAlign: 'center', p: 1, bgcolor: 'warning.light', borderRadius: 1 }}>
             <SignalWifiOffOutlined fontSize="small" sx={{ color: 'warning.contrastText', mb: 0.5 }} />
             <Typography variant="h6" color="warning.contrastText" fontWeight="bold">

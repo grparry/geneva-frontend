@@ -41,7 +41,6 @@ export const useFederationWebSocket = (options?: FederationWebSocketOptions) => 
   
   // Use Geneva's WebSocket infrastructure for federation events
   const { 
-    connectionStatus, 
     isConnected,
     error,
     sendMessage 
@@ -137,7 +136,7 @@ export const useFederationWebSocket = (options?: FederationWebSocketOptions) => 
   
   // Subscribe to events when connected
   useEffect(() => {
-    if (isConnected && websocketSubscriptions.length > 0) {
+    if (isConnected && websocketSubscriptions.length > 0 && sendMessage) {
       // Send subscription message
       sendMessage(JSON.stringify({
         action: 'subscribe',
@@ -203,7 +202,6 @@ export const useFederationWebSocket = (options?: FederationWebSocketOptions) => 
   
   return {
     // Connection status
-    connectionStatus,
     isConnected,
     error,
     

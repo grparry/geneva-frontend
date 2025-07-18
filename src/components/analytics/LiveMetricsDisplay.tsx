@@ -200,7 +200,7 @@ export const LiveMetricsDashboard: React.FC<{
     return (
       <Grid container spacing={3}>
         {[1, 2, 3, 4].map(i => (
-          <Grid xs={12} sm={6} md={3} key={i}>
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
             <Skeleton variant="rectangular" height={140} sx={{ borderRadius: 2 }} />
           </Grid>
         ))}
@@ -234,7 +234,7 @@ export const LiveMetricsDashboard: React.FC<{
 
       {/* Metric cards */}
       <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <LiveMetricCard
             title="Active Workflows"
             value={liveMetrics.metrics.active_workflows}
@@ -245,7 +245,7 @@ export const LiveMetricsDashboard: React.FC<{
           />
         </Grid>
         
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <LiveMetricCard
             title="Cost Rate"
             value={liveMetrics.metrics.current_cost_rate}
@@ -257,7 +257,7 @@ export const LiveMetricsDashboard: React.FC<{
           />
         </Grid>
         
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <LiveMetricCard
             title="Avg Response Time"
             value={liveMetrics.metrics.average_response_time}
@@ -268,7 +268,7 @@ export const LiveMetricsDashboard: React.FC<{
           />
         </Grid>
         
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <LiveMetricCard
             title="Error Rate"
             value={liveMetrics.metrics.error_rate}

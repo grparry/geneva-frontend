@@ -329,7 +329,7 @@ const TrustWorkflow: React.FC<TrustWorkflowProps> = ({
         {upgradablePeers.length > 0 ? (
           <Grid container spacing={2}>
             {upgradablePeers.map((peer) => (
-              <Grid xs={12} sm={6} md={4} key={peer.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={peer.id}>
                 {renderPeerCard(peer, 'upgrade')}
               </Grid>
             ))}
@@ -351,7 +351,7 @@ const TrustWorkflow: React.FC<TrustWorkflowProps> = ({
         {downgradablePeers.length > 0 ? (
           <Grid container spacing={2}>
             {downgradablePeers.map((peer) => (
-              <Grid xs={12} sm={6} md={4} key={peer.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={peer.id}>
                 {renderPeerCard(peer, 'downgrade')}
               </Grid>
             ))}

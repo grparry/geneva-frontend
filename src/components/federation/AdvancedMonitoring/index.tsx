@@ -45,12 +45,12 @@ import {
   useGetFederationHealthQuery,
   useGetPeersQuery,
   useGetDelegationsQuery,
-  useGetTrustAuditQuery,
+  useGetAuditLogQuery,
 } from '../../../api/federation';
 import { useFederationWebSocket } from '../../../hooks/useFederationWebSocket';
 
 // Federation types
-import { FederationMetrics, FederationHealth } from '../../../types/federation';
+import { FederationMetrics, FederationHealth, SubstratePeer } from '../../../types/federation';
 
 // Sub-components
 import SystemOverview from './SystemOverview';
@@ -128,7 +128,7 @@ export const AdvancedMonitoring: React.FC = () => {
     refetch: refetchPeers 
   } = useGetPeersQuery({});
   
-  const peers = peersResponse?.items || [];
+  const peers = peersResponse || [];
 
   const { 
     data: delegationsResponse, 
@@ -145,7 +145,7 @@ export const AdvancedMonitoring: React.FC = () => {
     data: auditResponse, 
     isLoading: auditLoading,
     refetch: refetchAudit 
-  } = useGetTrustAuditQuery({
+  } = useGetAuditLogQuery({
     limit: 50,
     offset: 0,
     timeRange: timeRangeParams,
@@ -154,7 +154,7 @@ export const AdvancedMonitoring: React.FC = () => {
   const auditEntries = auditResponse?.items || [];
 
   // Real-time updates
-  const { isConnected, connectionStatus } = useFederationWebSocket({
+  const { isConnected, error } = useFederationWebSocket({
     subscriptions: ['peers', 'delegations', 'trust', 'events', 'metrics'],
   });
 
@@ -176,8 +176,8 @@ export const AdvancedMonitoring: React.FC = () => {
     const criticalIssues = health.issues?.filter(i => i.severity === 'critical').length || 0;
     const warningIssues = health.issues?.filter(i => i.severity === 'high' || i.severity === 'medium').length || 0;
     
-    const offlinePeers = peers.filter(p => p.status === 'offline').length;
-    const degradedPeers = peers.filter(p => p.status === 'degraded').length;
+    const offlinePeers = peers.filter((p: SubstratePeer) => p.status === 'offline').length;
+    const degradedPeers = peers.filter((p: SubstratePeer) => p.status === 'degraded').length;
     
     const failedDelegations = delegations.filter(d => d.status === 'failed').length;
     const pendingDelegations = delegations.filter(d => d.status === 'pending').length;
@@ -294,7 +294,7 @@ export const AdvancedMonitoring: React.FC = () => {
     <Box>
       {/* Header with System Status */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Card variant="outlined">
             <CardContent sx={{ py: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -344,7 +344,7 @@ export const AdvancedMonitoring: React.FC = () => {
           </Card>
         </Grid>
         
-        <Grid xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Card variant="outlined">
             <CardContent sx={{ py: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

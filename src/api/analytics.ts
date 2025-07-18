@@ -114,19 +114,19 @@ export const {
   useLazyGetAlertsQuery,
 } = analyticsApi;
 
-// Prefetch utilities
+// Prefetch utilities  
 export const prefetchAnalytics = {
   kpiMetrics: (dispatch: any, project_id: string, time_range: string = '30d') => 
-    dispatch(analyticsApi.util.prefetch('getKPIMetrics', { project_id, time_range })),
+    dispatch(analyticsApi.util.prefetch('getKPIMetrics', { project_id, time_range }, {})),
   
   costBreakdown: (dispatch: any, project_id: string, time_range: string = '30d') =>
-    dispatch(analyticsApi.util.prefetch('getCostBreakdown', { project_id, time_range })),
+    dispatch(analyticsApi.util.prefetch('getCostBreakdown', { project_id, time_range }, {})),
   
   workflowPerformance: (dispatch: any, project_id: string, time_range: string = '30d') =>
-    dispatch(analyticsApi.util.prefetch('getWorkflowPerformance', { project_id, time_range })),
+    dispatch(analyticsApi.util.prefetch('getWorkflowPerformance', { project_id, time_range }, {})),
   
   agentPerformance: (dispatch: any, project_id: string, time_range: string = '30d') =>
-    dispatch(analyticsApi.util.prefetch('getAgentPerformance', { project_id, time_range })),
+    dispatch(analyticsApi.util.prefetch('getAgentPerformance', { project_id, time_range }, {})),
 };
 
 // Subscription endpoints for real-time updates

@@ -206,9 +206,9 @@ export const FederationMonitoringDashboard: React.FC<FederationMonitoringDashboa
         <Box flex={{ xs: "1 1 100%", sm: "1 1 45%", md: "1 1 22%" }}>
           <MetricCard
             title="Avg Latency"
-            value={`${metrics.average_delegation_time_ms}ms`}
+            value={`${metrics.avg_delegation_time_ms}ms`}
             subValue="Response time"
-            trend={metrics.average_delegation_time_ms < 100 ? 'up' : 'down'}
+            trend={metrics.avg_delegation_time_ms < 100 ? 'up' : 'down'}
             icon={<LatencyIcon />}
             color={theme.palette.info.main}
           />
@@ -227,12 +227,12 @@ export const FederationMonitoringDashboard: React.FC<FederationMonitoringDashboa
         
         <Box flex={{ xs: "1 1 100%", sm: "1 1 45%", md: "1 1 22%" }}>
           <MetricCard
-            title="Trust Violations"
-            value={metrics.trust_violations}
-            subValue="Security events"
-            trend={metrics.trust_violations === 0 ? 'up' : 'down'}
-            icon={<ErrorIcon />}
-            color={metrics.trust_violations === 0 ? theme.palette.success.main : theme.palette.error.main}
+            title="Network Health"
+            value={`${(metrics.network_health * 100).toFixed(1)}%`}
+            subValue="Overall health"
+            trend={metrics.network_health > 0.8 ? 'up' : 'down'}
+            icon={<TrustIcon />}
+            color={metrics.network_health > 0.8 ? theme.palette.success.main : theme.palette.warning.main}
           />
         </Box>
       </Box>

@@ -81,7 +81,7 @@ export const ExecutiveDashboardSkeleton: React.FC = () => (
     {/* KPI Cards */}
     <Grid container spacing={3} sx={{ mb: 3 }}>
       {[1, 2, 3, 4].map((item) => (
-        <Grid xs={12} sm={6} md={3} key={item}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item}>
           <KPICardSkeleton />
         </Grid>
       ))}
@@ -89,10 +89,10 @@ export const ExecutiveDashboardSkeleton: React.FC = () => (
 
     {/* Charts Row */}
     <Grid container spacing={3} sx={{ mb: 3 }}>
-      <Grid xs={12} md={8}>
+      <Grid size={{ xs: 12, md: 8 }}>
         <ChartSkeleton height={400} />
       </Grid>
-      <Grid xs={12} md={4}>
+      <Grid size={{ xs: 12, md: 4 }}>
         <ChartSkeleton height={400} />
       </Grid>
     </Grid>
@@ -108,7 +108,7 @@ export const CostAnalysisSkeleton: React.FC = () => (
     {/* Summary Cards */}
     <Grid container spacing={3} sx={{ mb: 3 }}>
       {[1, 2, 3].map((item) => (
-        <Grid xs={12} md={4} key={item}>
+        <Grid size={{ xs: 12, md: 4 }} key={item}>
           <KPICardSkeleton />
         </Grid>
       ))}
@@ -116,10 +116,10 @@ export const CostAnalysisSkeleton: React.FC = () => (
 
     {/* Charts */}
     <Grid container spacing={3} sx={{ mb: 3 }}>
-      <Grid xs={12} md={6}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <ChartSkeleton height={350} />
       </Grid>
-      <Grid xs={12} md={6}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <ChartSkeleton height={350} />
       </Grid>
     </Grid>
@@ -135,7 +135,7 @@ export const WorkflowAnalyticsSkeleton: React.FC = () => (
     {/* Summary Stats */}
     <Grid container spacing={3} sx={{ mb: 3 }}>
       {[1, 2, 3, 4].map((item) => (
-        <Grid xs={12} sm={6} md={3} key={item}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item}>
           <KPICardSkeleton />
         </Grid>
       ))}
@@ -157,7 +157,7 @@ export const AgentPerformanceSkeleton: React.FC = () => (
     {/* Agent Cards */}
     <Grid container spacing={3} sx={{ mb: 3 }}>
       {[1, 2, 3, 4, 5, 6].map((item) => (
-        <Grid xs={12} sm={6} md={4} key={item}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -226,7 +226,7 @@ export const AnalyticsSectionSkeleton: React.FC<{
     {cards > 0 && (
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {Array.from({ length: cards }).map((_, index) => (
-          <Grid xs={12} sm={6} md={12 / cards} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 12 / cards }} key={index}>
             <KPICardSkeleton />
           </Grid>
         ))}

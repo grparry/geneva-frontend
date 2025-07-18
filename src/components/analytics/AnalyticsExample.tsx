@@ -8,7 +8,7 @@ import {
   Box,
   Container,
   Typography,
-  Grid2 as Grid,
+  Grid,
   Card,
   CardContent,
   Tab,
@@ -183,14 +183,14 @@ const AnalyticsExample: React.FC = () => {
         {kpiMetrics.isLoading ? (
           <Grid container spacing={3} sx={{ mb: 3 }}>
             {[1, 2, 3, 4].map((item) => (
-              <Grid xs={12} sm={6} md={3} key={item}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={item}>
                 <KPICardSkeleton />
               </Grid>
             ))}
           </Grid>
         ) : kpiMetrics.data ? (
           <Grid container spacing={3} sx={{ mb: 3 }}>
-            <Grid xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <KPICard
                 title="Total Workflows"
                 value={kpiMetrics.data.workflows.total}
@@ -199,7 +199,7 @@ const AnalyticsExample: React.FC = () => {
                 color="primary.main"
               />
             </Grid>
-            <Grid xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <KPICard
                 title="Success Rate"
                 value={kpiMetrics.data.workflows.successRateFormatted}
@@ -208,7 +208,7 @@ const AnalyticsExample: React.FC = () => {
                 color="success.main"
               />
             </Grid>
-            <Grid xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <KPICard
                 title="Total Cost"
                 value={kpiMetrics.data.costs.totalFormatted}
@@ -217,7 +217,7 @@ const AnalyticsExample: React.FC = () => {
                 color="warning.main"
               />
             </Grid>
-            <Grid xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <KPICard
                 title="Active Agents"
                 value={kpiMetrics.data.agents.active_count}
@@ -283,7 +283,7 @@ const AnalyticsExample: React.FC = () => {
             {/* Cost Breakdown Pie Chart */}
             {costAnalysis.data?.distribution && (
               <Grid container spacing={3}>
-                <Grid xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
@@ -311,7 +311,7 @@ const AnalyticsExample: React.FC = () => {
                     </CardContent>
                   </Card>
                 </Grid>
-                <Grid xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom>
@@ -379,7 +379,7 @@ const AnalyticsExample: React.FC = () => {
                   </Typography>
                   <Grid container spacing={2}>
                     {agentPerformance.data.agents.slice(0, 6).map((agent) => (
-                      <Grid xs={12} sm={6} md={4} key={agent.agent_id}>
+                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={agent.agent_id}>
                         <Card variant="outlined">
                           <CardContent>
                             <Typography variant="subtitle1" fontWeight="bold">

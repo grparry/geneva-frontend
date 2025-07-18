@@ -174,7 +174,7 @@ const AgentCard: React.FC<{
         </Box>
         
         <Grid container spacing={2}>
-          <Grid xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Typography variant="caption" color="text.secondary">
               Total Calls
             </Typography>
@@ -182,7 +182,7 @@ const AgentCard: React.FC<{
               {agent.total_calls.toLocaleString()}
             </Typography>
           </Grid>
-          <Grid xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Typography variant="caption" color="text.secondary">
               Success Rate
             </Typography>
@@ -190,7 +190,7 @@ const AgentCard: React.FC<{
               {agent.successRateFormatted}
             </Typography>
           </Grid>
-          <Grid xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Typography variant="caption" color="text.secondary">
               Avg Response
             </Typography>
@@ -198,7 +198,7 @@ const AgentCard: React.FC<{
               {agent.avgResponseTimeFormatted}
             </Typography>
           </Grid>
-          <Grid xs={6}>
+          <Grid size={{ xs: 6 }}>
             <Typography variant="caption" color="text.secondary">
               Total Cost
             </Typography>
@@ -498,7 +498,7 @@ export const AgentPerformance: React.FC = () => {
           {viewMode === 'grid' ? (
             <Grid container spacing={3} sx={{ mb: 4 }}>
               {filteredAgents.map(agent => (
-                <Grid xs={12} sm={6} md={4} key={agent.agent_id}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={agent.agent_id}>
                   <AgentCard
                     agent={agent}
                     viewMode={viewMode}
@@ -540,19 +540,19 @@ export const AgentPerformance: React.FC = () => {
 
         {/* Analytics Charts */}
         <Grid container spacing={3}>
-          <Grid xs={12}>
+          <Grid size={{ xs: 12 }}>
             <AnalyticsErrorBoundary componentName="Utilization Chart">
               <UtilizationChart data={agentData?.utilizationChartData || []} />
             </AnalyticsErrorBoundary>
           </Grid>
           
-          <Grid xs={12} lg={6}>
+          <Grid size={{ xs: 12, lg: 6 }}>
             <AnalyticsErrorBoundary componentName="Performance Radar">
               <PerformanceRadar agents={filteredAgents} />
             </AnalyticsErrorBoundary>
           </Grid>
           
-          <Grid xs={12} lg={6}>
+          <Grid size={{ xs: 12, lg: 6 }}>
             <AnalyticsErrorBoundary componentName="Handoff Patterns">
               <HandoffPatterns patterns={agentData?.handoffAnalysis.patterns || []} />
             </AnalyticsErrorBoundary>

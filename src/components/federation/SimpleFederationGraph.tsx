@@ -40,7 +40,7 @@ export const SimpleFederationGraph: React.FC<SimpleFederationGraphProps> = ({
         return theme.palette.success.main;
       case PeerStatus.ERROR:
         return theme.palette.error.main;
-      case PeerStatus.DISCONNECTED:
+      case PeerStatus.OFFLINE:
         return theme.palette.grey[500];
       default:
         return theme.palette.warning.main;

@@ -209,7 +209,7 @@ const SecurityDashboard: React.FC<SecurityDashboardProps> = ({
       case 'verified': return 'info';
       case 'basic': return 'warning';
       case 'none': return 'error';
-      default: return 'default';
+      default: return 'primary';
     }
   };
 
@@ -225,7 +225,7 @@ const SecurityDashboard: React.FC<SecurityDashboardProps> = ({
     <Box>
       {/* Security Status Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -248,7 +248,7 @@ const SecurityDashboard: React.FC<SecurityDashboardProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -265,7 +265,7 @@ const SecurityDashboard: React.FC<SecurityDashboardProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -282,7 +282,7 @@ const SecurityDashboard: React.FC<SecurityDashboardProps> = ({
           </Card>
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -314,7 +314,7 @@ const SecurityDashboard: React.FC<SecurityDashboardProps> = ({
 
       {/* Detailed Security Analysis */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Trust Level Distribution
@@ -360,7 +360,7 @@ const SecurityDashboard: React.FC<SecurityDashboardProps> = ({
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Security Threats & Recommendations

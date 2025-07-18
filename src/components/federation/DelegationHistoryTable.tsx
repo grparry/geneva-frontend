@@ -36,8 +36,8 @@ import {
   Cancel as CancelIcon,
   HourglassEmpty as PendingIcon
 } from '@mui/icons-material';
-import { DelegationResponse, DelegationStatus, SubstratePeer } from '../../types/federation';
-import { useDelegationHistory } from '../../hooks/useFederation';
+import { PaginatedResponse, Delegation, DelegationStatus, SubstratePeer } from '../../types/federation';
+import { useFederation } from '../../hooks/useFederation';
 import { DelegationStatusCard } from './DelegationStatusCard';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -50,13 +50,13 @@ export const DelegationHistoryTable: React.FC<DelegationHistoryTableProps> = ({
   peers,
   onRefresh
 }) => {
-  const { history, isLoading } = useDelegationHistory(100);
+  const { delegations: history, delegationsLoading: isLoading } = useFederation();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<DelegationStatus[]>([]);
   const [peerFilter, setPeerFilter] = useState<string[]>([]);
-  const [selectedDelegation, setSelectedDelegation] = useState<DelegationResponse | null>(null);
+  const [selectedDelegation, setSelectedDelegation] = useState<Delegation | null>(null);
   const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
 
   const getPeerName = (peerId: string) => {
@@ -70,7 +70,7 @@ export const DelegationHistoryTable: React.FC<DelegationHistoryTableProps> = ({
         return <SuccessIcon fontSize="small" color="success" />;
       case DelegationStatus.FAILED:
         return <ErrorIcon fontSize="small" color="error" />;
-      case DelegationStatus.CANCELLED:
+      case DelegationStatus.REJECTED:
         return <CancelIcon fontSize="small" color="disabled" />;
       default:
         return <PendingIcon fontSize="small" color="warning" />;
@@ -87,7 +87,7 @@ export const DelegationHistoryTable: React.FC<DelegationHistoryTableProps> = ({
       case DelegationStatus.ACCEPTED:
       case DelegationStatus.EXECUTING:
         return 'warning';
-      case DelegationStatus.CANCELLED:
+      case DelegationStatus.REJECTED:
         return 'default';
       default:
         return 'default';
@@ -95,7 +95,7 @@ export const DelegationHistoryTable: React.FC<DelegationHistoryTableProps> = ({
   };
 
   const filteredHistory = useMemo(() => {
-    return history.filter(delegation => {
+    return history.filter((delegation: Delegation) => {
       // Search filter
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
@@ -130,7 +130,7 @@ export const DelegationHistoryTable: React.FC<DelegationHistoryTableProps> = ({
 
   const handleExportCSV = () => {
     const headers = ['ID', 'Status', 'Target Peer', 'Created', 'Completed', 'Duration (ms)', 'Error'];
-    const rows = filteredHistory.map(d => [
+    const rows = filteredHistory.map((d: Delegation) => [
       d.id,
       d.status,
       getPeerName(d.id),
@@ -280,7 +280,7 @@ export const DelegationHistoryTable: React.FC<DelegationHistoryTableProps> = ({
           <TableBody>
             {filteredHistory
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((delegation) => {
+              .map((delegation: Delegation) => {
                 const duration = delegation.completed_at && delegation.accepted_at
                   ? new Date(delegation.completed_at).getTime() - new Date(delegation.accepted_at).getTime()
                   : null;

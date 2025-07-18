@@ -46,7 +46,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
 import { useCostAlerts } from '../../hooks/useAnalyticsWebSocket';
-import { useAcknowledgeAlertMutation } from '../../services/analyticsApi';
+import { useAcknowledgeAlertMutation } from '../../api/analytics';
 import { formatCurrency } from '../../utils/analyticsTransformers';
 import type { CostAlertMessage } from '../../types/analytics';
 
@@ -101,9 +101,10 @@ const AlertItem: React.FC<{
         }}
       >
         <ListItem
-          button
+          component="div"
           onClick={onToggleExpand}
           sx={{
+            cursor: 'pointer',
             '&:hover': {
               bgcolor: alpha(config.bgcolor, 0.5),
             },

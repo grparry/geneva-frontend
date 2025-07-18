@@ -29,6 +29,7 @@ import {
   RefreshRounded,
   FullscreenRounded,
   FullscreenExitRounded,
+  AttachMoneyRounded,
 } from '@mui/icons-material';
 import { useAnalyticsDashboard } from '../../hooks/useAnalytics';
 import { useRealtimeAnalytics } from '../../hooks/useAnalyticsWebSocket';
@@ -251,7 +252,7 @@ export const RealtimeAnalyticsDashboard: React.FC = () => {
         {/* KPI Overview */}
         <AnalyticsErrorBoundary componentName="KPI Overview">
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <RealtimeKPICard
                 title="Active Workflows"
                 value={kpiMetrics?.workflows.total || 0}
@@ -260,7 +261,7 @@ export const RealtimeAnalyticsDashboard: React.FC = () => {
                 liveValue={liveMetrics?.metrics.active_workflows}
               />
             </Grid>
-            <Grid xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <RealtimeKPICard
                 title="Success Rate"
                 value={kpiMetrics?.workflows.successRateFormatted || '0%'}
@@ -268,7 +269,7 @@ export const RealtimeAnalyticsDashboard: React.FC = () => {
                 icon={<TrendingUpRounded sx={{ fontSize: 40 }} />}
               />
             </Grid>
-            <Grid xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <RealtimeKPICard
                 title="Current Cost Rate"
                 value={kpiMetrics?.costs.totalFormatted || '$0'}
@@ -278,7 +279,7 @@ export const RealtimeAnalyticsDashboard: React.FC = () => {
                 format={(v) => `$${v.toFixed(2)}/hr`}
               />
             </Grid>
-            <Grid xs={12} sm={6} md={3}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <RealtimeKPICard
                 title="Active Agents"
                 value={kpiMetrics?.agents.active_count || 0}
@@ -318,10 +319,10 @@ export const RealtimeAnalyticsDashboard: React.FC = () => {
         <TabPanel value={activeTab} index={2}>
           <AnalyticsErrorBoundary componentName="Cost Alerts">
             <Grid container spacing={3}>
-              <Grid xs={12} md={8}>
+              <Grid size={{ xs: 12, md: 8 }}>
                 <CostAlertsPanel maxHeight={600} autoExpand />
               </Grid>
-              <Grid xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Paper sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
                     Alert Settings

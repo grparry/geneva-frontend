@@ -299,7 +299,7 @@ export const VirtualizedTable = <T extends Record<string, any>>({
       {/* Virtualized rows */}
       <Box sx={{ flex: 1 }}>
         <AutoSizer>
-          {({ height, width }) => (
+          {({ height, width }: { height: number; width: number }) => (
             <List
               height={height}
               itemCount={sortedData.length}

@@ -28,34 +28,34 @@ import {
 } from '@mui/icons-material';
 
 // Federation hooks and services
-import { useFederationWebSocket } from '../../hooks/useFederationWebSocket';
+import { useFederationWebSocket } from '../hooks/useFederationWebSocket';
 import { 
   useGetFederationHealthQuery,
   useGetFederationMetricsQuery,
-} from '../../api/federation';
+} from '../api/federation';
 
 // Federation types
-import { FederationTab } from '../../types/federation';
+import { FederationTab } from '../types/federation';
 
 // Federation components
 const PeerManagement = React.lazy(() => 
-  import('../../components/federation/PeerManagement')
+  import('../components/federation/PeerManagement')
 );
 
 const DelegationQueue = React.lazy(() => 
-  import('../../components/federation/DelegationQueue')
+  import('../components/federation/DelegationQueue')
 );
 
 const TrustManagement = React.lazy(() => 
-  import('../../components/federation/TrustManagement')
+  import('../components/federation/TrustManagement')
 );
 
 const NetworkTopology = React.lazy(() => 
-  import('../../components/federation/NetworkTopology')
+  import('../components/federation/NetworkTopology')
 );
 
 const FederationMetrics = React.lazy(() => 
-  import('../../components/federation/FederationMetrics')
+  import('../components/federation/FederationMetrics')
 );
 
 interface TabConfig {
@@ -73,12 +73,11 @@ export const FederationDashboard: React.FC = () => {
   // Real-time federation updates
   const { 
     isConnected, 
-    connectionStatus, 
     error: websocketError,
     optimizeSubscriptions,
   } = useFederationWebSocket({
     subscriptions: ['peers', 'delegations', 'trust', 'events', 'metrics'],
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Federation WebSocket error:', error);
     },
   });
@@ -136,7 +135,7 @@ export const FederationDashboard: React.FC = () => {
       id: 'monitoring',
       label: 'Advanced Monitoring',
       icon: <Analytics />,
-      component: React.lazy(() => import('../../components/federation/AdvancedMonitoring')),
+      component: React.lazy(() => import('../components/federation/AdvancedMonitoring')),
       description: 'Comprehensive system monitoring',
     },
   ];
@@ -164,23 +163,13 @@ export const FederationDashboard: React.FC = () => {
 
   // Connection status indicator
   const getConnectionStatusColor = () => {
-    switch (connectionStatus) {
-      case 'connected': return 'success';
-      case 'connecting': return 'warning';
-      case 'disconnected': return 'error';
-      case 'error': return 'error';
-      default: return 'default';
-    }
+    if (websocketError) return 'error';
+    return isConnected ? 'success' : 'warning';
   };
 
   const getConnectionStatusLabel = () => {
-    switch (connectionStatus) {
-      case 'connected': return 'Connected';
-      case 'connecting': return 'Connecting...';
-      case 'disconnected': return 'Disconnected';
-      case 'error': return 'Error';
-      default: return 'Unknown';
-    }
+    if (websocketError) return 'Error';
+    return isConnected ? 'Connected' : 'Disconnected';
   };
 
   // Health status alert
@@ -244,7 +233,7 @@ export const FederationDashboard: React.FC = () => {
             color={getConnectionStatusColor()}
             size="small"
             variant="outlined"
-            icon={connectionStatus === 'connecting' ? <CircularProgress size={16} /> : undefined}
+            icon={!isConnected && !websocketError ? <CircularProgress size={16} /> : undefined}
           />
           
           {metricsData && (
@@ -347,7 +336,7 @@ export const FederationDashboard: React.FC = () => {
       {process.env.NODE_ENV === 'development' && (
         <Paper sx={{ mt: 3, p: 2, backgroundColor: 'grey.50' }} elevation={0}>
           <Typography variant="caption" color="text.secondary">
-            Debug: WebSocket Status: {connectionStatus} | 
+            Debug: WebSocket Status: {isConnected ? 'connected' : 'disconnected'} | 
             Health: {healthData?.overall_status || 'unknown'} | 
             Active Tab: {activeTab}
           </Typography>

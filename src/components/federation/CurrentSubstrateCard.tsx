@@ -110,7 +110,7 @@ export const CurrentSubstrateCard: React.FC<CurrentSubstrateCardProps> = ({ subs
                 Capabilities ({substrate.capabilities.length})
               </Typography>
               <List dense>
-                {substrate.capabilities.map((capability, index) => (
+                {substrate.capabilities.map((capability: string, index: number) => (
                   <ListItem key={index}>
                     <ListItemIcon sx={{ minWidth: 36 }}>
                       {getCapabilityIcon(capability)}

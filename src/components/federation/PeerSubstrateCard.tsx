@@ -42,7 +42,7 @@ export const PeerSubstrateCard: React.FC<PeerSubstrateCardProps> = ({
         return <ConnectedIcon color="success" />;
       case PeerStatus.ERROR:
         return <ErrorIcon color="error" />;
-      case PeerStatus.DISCONNECTED:
+      case PeerStatus.OFFLINE:
         return <DisconnectedIcon color="disabled" />;
       default:
         return <WarningIcon color="warning" />;
@@ -55,7 +55,7 @@ export const PeerSubstrateCard: React.FC<PeerSubstrateCardProps> = ({
         return 'success';
       case PeerStatus.ERROR:
         return 'error';
-      case PeerStatus.DISCONNECTED:
+      case PeerStatus.OFFLINE:
         return 'default';
       default:
         return 'warning';

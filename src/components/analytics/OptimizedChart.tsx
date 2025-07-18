@@ -33,7 +33,7 @@ import { debounce } from 'lodash';
 // Lazy load heavy chart components
 const LazyTreemap = React.lazy(() => import('recharts').then(module => ({ default: module.Treemap })));
 const LazyRadarChart = React.lazy(() => import('recharts').then(module => ({ default: module.RadarChart })));
-const LazySankey = React.lazy(() => import('recharts').then(module => ({ default: module.Sankey })));
+const LazySankey = React.lazy(() => import('recharts').then(module => ({ default: module.Sankey as unknown as React.ComponentType<any> })));
 
 // Chart loading component
 const ChartLoader: React.FC<{ height?: number }> = ({ height = 300 }) => (
@@ -64,13 +64,20 @@ interface BaseChartProps {
 }
 
 // Memoized tooltip component
-const MemoizedTooltip = React.memo<any>(({ active, payload, label, formatter }) => {
+interface TooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string | number;
+  formatter?: (value: any) => string;
+}
+
+const MemoizedTooltip = React.memo<TooltipProps>(({ active, payload, label, formatter }) => {
   if (!active || !payload || !payload.length) return null;
 
   return (
     <Paper sx={{ p: 1.5 }}>
       <Typography variant="caption" fontWeight="medium">
-        {label}
+        {typeof label === 'number' ? label.toString() : label}
       </Typography>
       {payload.map((entry: any, index: number) => (
         <Typography key={index} variant="caption" display="block" sx={{ color: entry.color }}>
@@ -155,9 +162,9 @@ export const OptimizedLineChart: React.FC<BaseChartProps & {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={processedData}
-          onClick={onDataPointClick ? (data) => {
+          onClick={onDataPointClick ? (data: any) => {
             if (data && data.activePayload) {
-              onDataPointClick(data.activePayload[0].payload, data.activeTooltipIndex || 0);
+              onDataPointClick(data.activePayload[0].payload, Number(data.activeTooltipIndex) || 0);
             }
           } : undefined}
         >
@@ -173,7 +180,14 @@ export const OptimizedLineChart: React.FC<BaseChartProps & {
             stroke={theme.palette.text.secondary}
           />
           <Tooltip
-            content={<MemoizedTooltip formatter={tooltipFormatter} />}
+            content={(props) => (
+              <MemoizedTooltip
+                active={props.active}
+                payload={props.payload}
+                label={props.label}
+                formatter={tooltipFormatter}
+              />
+            )}
           />
           <Legend />
           {lines.map((line, index) => (
@@ -238,7 +252,16 @@ export const OptimizedAreaChart: React.FC<BaseChartProps & {
         <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
         <XAxis dataKey={xDataKey} stroke={theme.palette.text.secondary} />
         <YAxis stroke={theme.palette.text.secondary} />
-        <Tooltip content={<MemoizedTooltip formatter={tooltipFormatter} />} />
+        <Tooltip
+          content={(props) => (
+            <MemoizedTooltip
+              active={props.active}
+              payload={props.payload}
+              label={props.label}
+              formatter={tooltipFormatter}
+            />
+          )}
+        />
         <Legend />
         {areas.map((area, index) => (
           <Area
@@ -285,7 +308,7 @@ export const OptimizedPieChart: React.FC<BaseChartProps & {
 }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const handlePieEnter = useCallback((_, index: number) => {
+  const handlePieEnter = useCallback((_: any, index: number) => {
     setActiveIndex(index);
   }, []);
 
@@ -332,7 +355,16 @@ export const OptimizedPieChart: React.FC<BaseChartProps & {
             />
           ))}
         </Pie>
-        <Tooltip content={<MemoizedTooltip formatter={tooltipFormatter} />} />
+        <Tooltip
+          content={(props) => (
+            <MemoizedTooltip
+              active={props.active}
+              payload={props.payload}
+              label={props.label}
+              formatter={tooltipFormatter}
+            />
+          )}
+        />
       </PieChart>
     </ResponsiveContainer>
   );

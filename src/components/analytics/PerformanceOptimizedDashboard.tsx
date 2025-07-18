@@ -30,7 +30,7 @@ import {
   InfoRounded,
 } from '@mui/icons-material';
 
-import { useKPIMetricsQuery } from '../../services/analyticsApi';
+import { useGetKPIMetricsQuery } from '../../services/analyticsApi';
 import { OptimizedLineChart, OptimizedAreaChart, OptimizedPieChart } from './OptimizedChart';
 import { VirtualizedTable, createColumn } from './VirtualizedTable';
 import { useChartOptimization, useLazyChartRender } from '../../hooks/useChartOptimization';
@@ -50,7 +50,10 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
   const [cacheCleared, setCacheCleared] = useState(false);
 
   // Hooks
-  const { data: kpiData, isLoading: kpiLoading } = useKPIMetricsQuery('default-project');
+  const { data: kpiData, isLoading: kpiLoading } = useGetKPIMetricsQuery({ 
+    project_id: 'default-project',
+    time_range: '30d'
+  });
   const serviceWorker = useServiceWorker({
     onUpdate: () => setShowServiceWorkerUpdate(true),
   });
@@ -76,7 +79,7 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
 
   // Lazy chart rendering
   const chartRef = React.useRef<HTMLDivElement>(null);
-  const { shouldRender: shouldRenderChart } = useLazyChartRender(chartRef);
+  const { shouldRender: shouldRenderChart } = useLazyChartRender(chartRef as React.RefObject<HTMLElement>);
 
   // Export handlers
   const handleExportClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -217,7 +220,7 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
       {/* Main content grid */}
       <Grid container spacing={3}>
         {/* KPI Cards */}
-        <Grid xs={12} md={6} lg={3}>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Workflow Success
@@ -226,12 +229,12 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
               {kpiLoading ? <CircularProgress size={40} /> : `${kpiData?.workflows.success_rate.toFixed(1)}%`}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {kpiData?.workflows.trend > 0 ? '+' : ''}{kpiData?.workflows.trend.toFixed(1)}% from last period
+              {kpiData?.workflows.trend && kpiData.workflows.trend > 0 ? '+' : ''}{kpiData?.workflows.trend?.toFixed(1) || '0.0'}% from last period
             </Typography>
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={6} lg={3}>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Total Cost
@@ -245,27 +248,27 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={6} lg={3}>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Active Agents
             </Typography>
             <Typography variant="h3" color="success.main">
-              {kpiLoading ? <CircularProgress size={40} /> : kpiData?.agents.active || 0}
+              {kpiLoading ? <CircularProgress size={40} /> : kpiData?.agents.active_count || 0}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {kpiData?.agents.total || 0} total agents
+              {kpiData?.agents.active_count || 0} active agents
             </Typography>
           </Paper>
         </Grid>
 
-        <Grid xs={12} md={6} lg={3}>
+        <Grid size={{ xs: 12, md: 6, lg: 3 }}>
           <Paper sx={{ p: 2, height: '100%' }}>
             <Typography variant="h6" gutterBottom>
               Avg Response Time
             </Typography>
             <Typography variant="h3" color="info.main">
-              {kpiLoading ? <CircularProgress size={40} /> : `${kpiData?.agents.avg_response_time || 0}ms`}
+              {kpiLoading ? <CircularProgress size={40} /> : `${kpiData?.performance.avg_response_time || 0}ms`}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Within target range
@@ -274,7 +277,7 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
         </Grid>
 
         {/* Optimized workflow trend chart */}
-        <Grid xs={12} lg={8}>
+        <Grid size={{ xs: 12, lg: 8 }}>
           <Paper sx={{ p: 2, height: 400 }} ref={chartRef}>
             <Typography variant="h6" gutterBottom>
               Workflow Trends (Optimized)
@@ -307,19 +310,19 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
         </Grid>
 
         {/* Real-time metrics (lazy loaded) */}
-        <Grid xs={12} lg={4}>
+        <Grid size={{ xs: 12, lg: 4 }}>
           <Paper sx={{ p: 2, height: 400 }}>
             <Typography variant="h6" gutterBottom>
               Real-time Metrics
             </Typography>
             <Suspense fallback={<CircularProgress />}>
-              <LazyRealtimeMetrics height={350} />
+              <LazyRealtimeMetrics />
             </Suspense>
           </Paper>
         </Grid>
 
         {/* Virtualized table example */}
-        <Grid xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Recent Workflows (Virtualized)
@@ -346,13 +349,13 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
         </Grid>
 
         {/* Alerts (lazy loaded) */}
-        <Grid xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               Active Alerts
             </Typography>
             <Suspense fallback={<CircularProgress />}>
-              <LazyAlertsList projectId="default-project" />
+              <LazyAlertsList />
             </Suspense>
           </Paper>
         </Grid>

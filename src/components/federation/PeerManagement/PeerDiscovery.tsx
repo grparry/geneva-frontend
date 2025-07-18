@@ -366,7 +366,7 @@ const PeerDiscovery: React.FC<PeerDiscoveryProps> = ({
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                   <Typography variant="body2">Initial Trust Level:</Typography>
-                  <TrustLevelBadge level="basic" size="small" />
+                  <TrustLevelBadge level={TrustLevel.BASIC} size="small" />
                 </Box>
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>

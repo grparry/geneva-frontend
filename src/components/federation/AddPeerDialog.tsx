@@ -33,7 +33,9 @@ interface PeerFormData {
   url: string;
   name: string;
   trust_level: TrustLevel;
-  api_key?: string;
+  substrate_id: string;
+  capabilities?: Record<string, any>;
+  mcp_version: string;
 }
 
 const TRUST_LEVEL_DESCRIPTIONS = {
@@ -59,7 +61,9 @@ export const AddPeerDialog: React.FC<AddPeerDialogProps> = ({
     url: '',
     name: '',
     trust_level: TrustLevel.BASIC,
-    api_key: ''
+    substrate_id: '',
+    capabilities: {},
+    mcp_version: '1.0.0'
   });
 
   const steps = ['Enter URL', 'Discover & Verify', 'Configure Trust'];
@@ -125,7 +129,12 @@ export const AddPeerDialog: React.FC<AddPeerDialogProps> = ({
         url: formData.url,
         name: formData.name,
         trust_level: formData.trust_level,
-        api_key: formData.api_key || undefined
+        substrate_id: formData.substrate_id,
+        capabilities: formData.capabilities || {},
+        mcp_version: formData.mcp_version,
+        status: 'discovered' as any,
+        error_count: 0,
+        discovered_at: new Date().toISOString()
       });
       
       onSuccess?.();
@@ -143,7 +152,9 @@ export const AddPeerDialog: React.FC<AddPeerDialogProps> = ({
       url: '',
       name: '',
       trust_level: TrustLevel.BASIC,
-      api_key: ''
+      substrate_id: '',
+      capabilities: {},
+      mcp_version: '1.0.0'
     });
     setError(null);
     setDiscoveryResult(null);
@@ -173,12 +184,11 @@ export const AddPeerDialog: React.FC<AddPeerDialogProps> = ({
             />
             <TextField
               fullWidth
-              label="API Key (Optional)"
-              value={formData.api_key}
-              onChange={handleFieldChange('api_key')}
-              type="password"
+              label="Substrate ID"
+              value={formData.substrate_id}
+              onChange={handleFieldChange('substrate_id')}
               margin="normal"
-              helperText="Required if the peer substrate requires authentication"
+              helperText="Unique identifier for the substrate"
             />
           </Box>
         );

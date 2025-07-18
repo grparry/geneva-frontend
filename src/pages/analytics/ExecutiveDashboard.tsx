@@ -162,7 +162,7 @@ const ExecutiveSummary: React.FC<{ timeRange: string }> = ({ timeRange }) => {
     return (
       <Grid container spacing={3}>
         {[1, 2, 3, 4].map(i => (
-          <Grid xs={12} sm={6} lg={3} key={i}>
+          <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={i}>
             <Card>
               <CardContent>
                 <LinearProgress />
@@ -176,7 +176,7 @@ const ExecutiveSummary: React.FC<{ timeRange: string }> = ({ timeRange }) => {
   
   return (
     <Grid container spacing={3}>
-      <Grid xs={12} sm={6} lg={3}>
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
         <KPIMetricCard
           title="Total Workflows"
           value={kpiData?.workflows.total || 0}
@@ -187,7 +187,7 @@ const ExecutiveSummary: React.FC<{ timeRange: string }> = ({ timeRange }) => {
         />
       </Grid>
       
-      <Grid xs={12} sm={6} lg={3}>
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
         <KPIMetricCard
           title="Success Rate"
           value={kpiData?.workflows.successRateFormatted || '0%'}
@@ -198,7 +198,7 @@ const ExecutiveSummary: React.FC<{ timeRange: string }> = ({ timeRange }) => {
         />
       </Grid>
       
-      <Grid xs={12} sm={6} lg={3}>
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
         <KPIMetricCard
           title="Total Cost"
           value={kpiData?.costs.totalFormatted || '$0'}
@@ -210,7 +210,7 @@ const ExecutiveSummary: React.FC<{ timeRange: string }> = ({ timeRange }) => {
         />
       </Grid>
       
-      <Grid xs={12} sm={6} lg={3}>
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
         <KPIMetricCard
           title="Active Agents"
           value={liveMetrics?.metrics.active_agents || kpiData?.agents.active_count || 0}
@@ -394,13 +394,13 @@ export const ExecutiveDashboard: React.FC = () => {
 
         {/* Charts Row */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid xs={12} lg={8}>
+          <Grid size={{ xs: 12, lg: 8 }}>
             <AnalyticsErrorBoundary componentName="Cost Trends">
               <CostTrendChart timeRange={timeRange} />
             </AnalyticsErrorBoundary>
           </Grid>
           
-          <Grid xs={12} lg={4}>
+          <Grid size={{ xs: 12, lg: 4 }}>
             <AnalyticsErrorBoundary componentName="Alerts Summary">
               <AlertSummaryWidget />
             </AnalyticsErrorBoundary>
@@ -409,7 +409,7 @@ export const ExecutiveDashboard: React.FC = () => {
 
         {/* Performance Metrics */}
         <Grid container spacing={3}>
-          <Grid xs={12}>
+          <Grid size={{ xs: 12 }}>
             <AnalyticsErrorBoundary componentName="Workflow Performance">
               <WorkflowPerformanceChart timeRange={timeRange} />
             </AnalyticsErrorBoundary>
@@ -422,7 +422,7 @@ export const ExecutiveDashboard: React.FC = () => {
             Quick Insights
           </Typography>
           <Grid container spacing={2}>
-            <Grid xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -446,7 +446,7 @@ export const ExecutiveDashboard: React.FC = () => {
               </Card>
             </Grid>
             
-            <Grid xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Card>
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>

@@ -128,7 +128,7 @@ export const AnalyticsOverviewWidget: React.FC = () => {
           </Box>
           <Grid container spacing={2}>
             {[1, 2, 3, 4].map(i => (
-              <Grid xs={6} key={i}>
+              <Grid size={{ xs: 6 }} key={i}>
                 <Skeleton variant="rectangular" height={80} />
               </Grid>
             ))}
@@ -154,7 +154,7 @@ export const AnalyticsOverviewWidget: React.FC = () => {
         </Box>
         
         <Grid container spacing={2}>
-          <Grid xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <MiniKPICard
               title="Workflows"
               value={liveMetrics?.metrics.active_workflows || kpiData?.workflows.total || 0}
@@ -164,7 +164,7 @@ export const AnalyticsOverviewWidget: React.FC = () => {
               isLive={!!liveMetrics}
             />
           </Grid>
-          <Grid xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <MiniKPICard
               title="Success Rate"
               value={kpiData?.workflows.successRateFormatted || '0%'}
@@ -173,7 +173,7 @@ export const AnalyticsOverviewWidget: React.FC = () => {
               onClick={() => navigate('/analytics/workflows')}
             />
           </Grid>
-          <Grid xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <MiniKPICard
               title="Total Cost"
               value={kpiData?.costs.totalFormatted || '$0'}
@@ -183,7 +183,7 @@ export const AnalyticsOverviewWidget: React.FC = () => {
               onClick={() => navigate('/analytics/costs')}
             />
           </Grid>
-          <Grid xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <MiniKPICard
               title="Active Agents"
               value={liveMetrics?.metrics.active_agents || kpiData?.agents.active_count || 0}
@@ -297,7 +297,7 @@ export const LiveMetricsWidget: React.FC = () => {
         </Box>
         
         <Grid container spacing={2}>
-          <Grid xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LiveMetricSparkline
               metric="cost_rate"
               title="Cost Rate"
@@ -306,7 +306,7 @@ export const LiveMetricsWidget: React.FC = () => {
               thresholdType="above"
             />
           </Grid>
-          <Grid xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LiveMetricSparkline
               metric="error_rate"
               title="Error Rate"
@@ -315,7 +315,7 @@ export const LiveMetricsWidget: React.FC = () => {
               thresholdType="above"
             />
           </Grid>
-          <Grid xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LiveMetricSparkline
               metric="response_time"
               title="Response Time"
@@ -324,7 +324,7 @@ export const LiveMetricsWidget: React.FC = () => {
               thresholdType="above"
             />
           </Grid>
-          <Grid xs={6}>
+          <Grid size={{ xs: 6 }}>
             <LiveMetricSparkline
               metric="api_calls"
               title="API Calls/min"
@@ -363,7 +363,7 @@ export const QuickCostSummary: React.FC = () => {
     );
   }
   
-  const costIncrease = costData?.costTrendsFormatted?.[0]?.change || 0;
+  const costIncrease = costData?.costTrendsFormatted?.[0]?.total_cost || 0;
   const isOverBudget = costIncrease > 10;
   
   return (

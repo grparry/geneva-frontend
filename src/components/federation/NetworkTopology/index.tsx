@@ -115,7 +115,7 @@ export const NetworkTopology: React.FC = () => {
     refetch: refetchPeers 
   } = useGetPeersQuery({});
   
-  const peers = peersResponse?.items || [];
+  const peers = peersResponse || [];
 
   const { 
     data: trustRelationships = [], 
@@ -142,10 +142,10 @@ export const NetworkTopology: React.FC = () => {
   // Create network nodes from peers
   const networkNodes = useMemo((): NetworkNode[] => {
     return peers
-      .filter(peer => filters.showOfflinePeers || peer.status !== PeerStatus.OFFLINE)
-      .filter(peer => filters.minTrustLevel === 'all' || 
+      .filter((peer: SubstratePeer) => filters.showOfflinePeers || peer.status !== PeerStatus.OFFLINE)
+      .filter((peer: SubstratePeer) => filters.minTrustLevel === 'all' || 
         getTrustLevelPriority(peer.trust_level) >= getTrustLevelPriority(filters.minTrustLevel as TrustLevel))
-      .map((peer, index) => {
+      .map((peer: SubstratePeer, index: number) => {
         const peerDelegations = delegations.filter(d => 
           d.target_substrate === peer.substrate_id || d.source_substrate === peer.substrate_id
         );
@@ -173,18 +173,28 @@ export const NetworkTopology: React.FC = () => {
     // Trust relationship edges
     if (filters.showTrustConnections) {
       trustRelationships.forEach(trust => {
-        const sourceNode = networkNodes.find(n => n.peer.id === trust.from_peer_id);
-        const targetNode = networkNodes.find(n => n.peer.id === trust.to_peer_id);
+        const trustNode = networkNodes.find(n => n.peer.id === trust.peer_id);
         
-        if (sourceNode && targetNode) {
-          edges.push({
-            source: trust.from_peer_id,
-            target: trust.to_peer_id,
-            weight: getTrustWeight(trust.trust_level),
-            type: 'trust',
-            color: getTrustColor(trust.trust_level),
-            animated: false,
-            trustLevel: trust.trust_level,
+        if (trustNode && trust.mutual) {
+          // For mutual trust, we can create connections to other peers
+          // This is a simplified approach - in reality you'd need more complex logic
+          const otherPeers = networkNodes.filter(n => n.peer.id !== trust.peer_id);
+          otherPeers.forEach(otherPeer => {
+            const mutualTrust = trustRelationships.find(t => 
+              t.peer_id === otherPeer.peer.id && t.mutual && 
+              t.trust_level === trust.trust_level
+            );
+            if (mutualTrust) {
+              edges.push({
+                source: trust.peer_id,
+                target: otherPeer.peer.id,
+                weight: getTrustWeight(trust.trust_level),
+                type: 'trust',
+                color: getTrustColor(trust.trust_level),
+                animated: false,
+                trustLevel: trust.trust_level,
+              });
+            }
           });
         }
       });
@@ -309,8 +319,11 @@ export const NetworkTopology: React.FC = () => {
     const connections = new Set<string>();
     
     trusts.forEach(trust => {
-      if (trust.from_peer_id === nodeId) connections.add(trust.to_peer_id);
-      if (trust.to_peer_id === nodeId) connections.add(trust.from_peer_id);
+      if (trust.peer_id === nodeId && trust.mutual) {
+        // For mutual trust, this peer is connected to others with mutual trust
+        const mutualTrusts = trusts.filter(t => t.mutual && t.trust_level === trust.trust_level && t.peer_id !== nodeId);
+        mutualTrusts.forEach(mt => connections.add(mt.peer_id));
+      }
     });
 
     return Array.from(connections);
@@ -396,14 +409,14 @@ export const NetworkTopology: React.FC = () => {
       {/* Controls Header */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <Typography variant="h6">Network Topology</Typography>
             <Typography variant="caption" color="text.secondary">
               {networkStats.totalNodes} nodes, {networkStats.totalEdges} connections
             </Typography>
           </Grid>
 
-          <Grid xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <FormControl size="small" fullWidth>
               <InputLabel>Layout</InputLabel>
               <Select
@@ -419,7 +432,7 @@ export const NetworkTopology: React.FC = () => {
             </FormControl>
           </Grid>
 
-          <Grid xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <ToggleButtonGroup
               value={viewMode}
               exclusive
@@ -444,7 +457,7 @@ export const NetworkTopology: React.FC = () => {
             </ToggleButtonGroup>
           </Grid>
 
-          <Grid xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="caption">Zoom:</Typography>
               <IconButton size="small" onClick={handleZoomOut}>
@@ -465,7 +478,7 @@ export const NetworkTopology: React.FC = () => {
             </Box>
           </Grid>
 
-          <Grid xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Tooltip title="Center view">
                 <IconButton size="small" onClick={handleCenterView}>

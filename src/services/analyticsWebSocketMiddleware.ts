@@ -52,7 +52,7 @@ export const createAnalyticsWebSocketMiddleware = (): Middleware => {
   let wsClient = getAnalyticsWebSocketClient();
   let isSetup = false;
 
-  return (store: MiddlewareAPI) => (next: Dispatch<UnknownAction>) => (action: AnyAction) => {
+  return (store: MiddlewareAPI) => (next: Dispatch<UnknownAction>) => (action: UnknownAction) => {
     // Setup event listeners once
     if (!isSetup) {
       setupEventListeners(wsClient, store);
@@ -75,11 +75,11 @@ export const createAnalyticsWebSocketMiddleware = (): Middleware => {
         break;
 
       case WS_SUBSCRIBE_ALERTS:
-        wsClient.subscribeCostAlerts(action.payload?.severity);
+        wsClient.subscribeCostAlerts((action.payload as any)?.severity);
         break;
 
       case WS_UNSUBSCRIBE:
-        wsClient.unsubscribe(action.payload.channel);
+        wsClient.unsubscribe((action.payload as any)?.channel);
         break;
 
       // Auto-connect on auth success
@@ -169,7 +169,7 @@ const updateKPIMetricsCache = (
 
   // Update all cached KPI queries
   ['24h', '7d', '30d', '90d'].forEach(timeRange => {
-    store.dispatch(
+    (store.dispatch as any)(
       analyticsApi.util.updateQueryData(
         'getKPIMetrics',
         { project_id: projectId, time_range: timeRange },
@@ -216,7 +216,7 @@ const updateTrendDataCache = (
   // Update each metric's trend data
   Object.entries(metricUpdates).forEach(([metric, value]) => {
     ['24h', '7d', '30d'].forEach(timeRange => {
-      store.dispatch(
+      (store.dispatch as any)(
         analyticsApi.util.updateQueryData(
           'getTrendData',
           { project_id: projectId, metric, time_range: timeRange },
@@ -262,7 +262,7 @@ const updateCostMetricsCache = (
   if (!projectId) return;
 
   // Update cost breakdown cache to reflect alert
-  store.dispatch(
+  (store.dispatch as any)(
     analyticsApi.util.updateQueryData(
       'getCostBreakdown',
       { project_id: projectId, time_range: '24h' },
