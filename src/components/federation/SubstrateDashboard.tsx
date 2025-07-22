@@ -67,26 +67,16 @@ export const SubstrateDashboard: React.FC<SubstrateDashboardProps> = ({
   const useSimpleGraph = true;
 
   // Set up WebSocket for real-time updates
-  const { lastMessage, connectionStatus } = useFederationWebSocket('/api/federation/events/stream');
+  const { isConnected, error: wsError } = useFederationWebSocket({ subscriptions: ['peers', 'delegations', 'trust'] });
 
+  // TODO: Implement real-time event handling when WebSocket events are properly structured
   useEffect(() => {
-    if (lastMessage) {
-      try {
-        const event = JSON.parse(lastMessage) as FederationEvent;
-        setRecentEvents(prev => [event, ...prev].slice(0, 10)); // Keep last 10 events
-        
-        // Refresh data based on event type
-        if (event.type.startsWith('peer.')) {
-          refreshPeers();
-        }
-        if (event.type.startsWith('delegation.')) {
-          refreshMetrics();
-        }
-      } catch (e) {
-        console.error('Failed to parse federation event:', e);
-      }
+    // Connection status changes can trigger data refresh
+    if (isConnected) {
+      refreshPeers();
+      refreshMetrics();
     }
-  }, [lastMessage, refreshPeers, refreshMetrics]);
+  }, [isConnected, refreshPeers, refreshMetrics]);
 
   const handlePeerClick = (peer: SubstratePeer) => {
     setSelectedPeer(peer);
@@ -142,8 +132,8 @@ export const SubstrateDashboard: React.FC<SubstrateDashboardProps> = ({
             </Typography>
             <Box display="flex" gap={1} alignItems="center">
               <Chip 
-                label={connectionStatus} 
-                color={connectionStatus === 'connected' ? 'success' : 'default'}
+                label={isConnected ? 'Connected' : 'Disconnected'} 
+                color={isConnected ? 'success' : 'secondary'}
                 size="small"
               />
               <Button

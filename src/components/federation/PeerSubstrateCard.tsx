@@ -178,8 +178,8 @@ export const PeerSubstrateCard: React.FC<PeerSubstrateCardProps> = ({
             Capabilities
           </Typography>
           <Box display="flex" flexWrap="wrap" gap={0.5}>
-            {peer.capabilities.length > 0 ? (
-              peer.capabilities.map(cap => (
+            {(Array.isArray(peer.capabilities) ? peer.capabilities : Object.keys(peer.capabilities || {})).length > 0 ? (
+              (Array.isArray(peer.capabilities) ? peer.capabilities : Object.keys(peer.capabilities || {})).map((cap: string) => (
                 <Chip
                   key={cap}
                   label={cap}

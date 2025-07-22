@@ -141,9 +141,9 @@ export const InfrastructureMap: React.FC<InfrastructureMapProps> = ({
   const loadInfrastructureData = async () => {
     try {
       const [nodesRes, healthRes, metricsRes] = await Promise.all([
-        apiClient.get('/api/infrastructure/nodes'),
-        apiClient.get('/api/infrastructure/health'),
-        apiClient.get('/api/infrastructure/metrics'),
+        apiClient.get('/infrastructure/nodes'),
+        apiClient.get('/infrastructure/health'),
+        apiClient.get('/infrastructure/metrics'),
       ]);
       
       setNodes(nodesRes.data);

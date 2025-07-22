@@ -121,7 +121,7 @@ export const ProposalSubmissionForm: React.FC<ProposalSubmissionFormProps> = ({
 
   const validateProposal = async () => {
     try {
-      const response = await apiClient.post('/api/ontology/proposals/validate', proposal);
+      const response = await apiClient.post('/ontology/proposals/validate', proposal);
       setValidation(response.data);
     } catch (error) {
       console.error('Validation failed:', error);
@@ -180,7 +180,7 @@ export const ProposalSubmissionForm: React.FC<ProposalSubmissionFormProps> = ({
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const response = await apiClient.post('/api/ontology/proposals', proposal);
+      const response = await apiClient.post('/ontology/proposals', proposal);
       const proposalId = response.data.proposal_id;
       
       if (onSubmit) {

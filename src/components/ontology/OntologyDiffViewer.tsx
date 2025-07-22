@@ -103,7 +103,7 @@ export const OntologyDiffViewer: React.FC<OntologyDiffViewerProps> = ({
 
   const loadVersions = async () => {
     try {
-      const response = await apiClient.get('/api/ontology/versions');
+      const response = await apiClient.get('/ontology/versions');
       const versionList = response.data as OntologyVersion[];
       setVersions(versionList);
       
@@ -158,7 +158,7 @@ export const OntologyDiffViewer: React.FC<OntologyDiffViewerProps> = ({
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get('/api/ontology/diff', {
+      const response = await apiClient.get('/ontology/diff', {
         params: { from: fromVersion, to: toVersion },
       });
       setDiff(response.data);

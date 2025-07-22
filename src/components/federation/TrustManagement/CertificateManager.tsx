@@ -34,7 +34,7 @@ import {
 import {
   SecurityOutlined,
   VerifiedUserOutlined,
-  CertificateOutlined,
+  SecurityOutlined as CertificateOutlined,
   DownloadOutlined,
   UploadOutlined,
   RefreshOutlined,

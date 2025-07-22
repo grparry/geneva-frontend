@@ -52,7 +52,7 @@ export const createAnalyticsWebSocketMiddleware = (): Middleware => {
   let wsClient = getAnalyticsWebSocketClient();
   let isSetup = false;
 
-  return (store: MiddlewareAPI) => (next: Dispatch<UnknownAction>) => (action: UnknownAction) => {
+  return (store: MiddlewareAPI) => (next: any) => (action: any) => {
     // Setup event listeners once
     if (!isSetup) {
       setupEventListeners(wsClient, store);
@@ -62,7 +62,7 @@ export const createAnalyticsWebSocketMiddleware = (): Middleware => {
     // Handle WebSocket actions
     switch (action.type) {
       case WS_CONNECT:
-        const { projectId, token } = action.payload;
+        const { projectId, token } = (action.payload as any);
         wsClient.connect(projectId, token);
         break;
 
@@ -71,7 +71,7 @@ export const createAnalyticsWebSocketMiddleware = (): Middleware => {
         break;
 
       case WS_SUBSCRIBE_METRICS:
-        wsClient.subscribeLiveMetrics(action.payload);
+        wsClient.subscribeLiveMetrics(action.payload as any);
         break;
 
       case WS_SUBSCRIBE_ALERTS:

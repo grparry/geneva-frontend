@@ -94,7 +94,7 @@ export const SubstrateDetailDialog: React.FC<SubstrateDetailDialogProps> = ({
             Endpoints
           </Typography>
           <List dense>
-            {('endpoints' in substrate && substrate.endpoints ? substrate.endpoints : [`https://${substrate.id}.substrate.network`]).map((endpoint: string, index: number) => (
+            {((substrate as any).endpoints ? (substrate as any).endpoints : [substrate.url || `https://${substrate.id}.substrate.network`]).map((endpoint: string, index: number) => (
               <ListItem key={index}>
                 <ListItemText
                   primary={endpoint}
@@ -114,7 +114,7 @@ export const SubstrateDetailDialog: React.FC<SubstrateDetailDialogProps> = ({
         Available Capabilities
       </Typography>
       <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
-        {substrate.capabilities.map((cap) => (
+        {(Array.isArray(substrate.capabilities) ? substrate.capabilities : Object.keys(substrate.capabilities || {})).map((cap: string) => (
           <Chip key={cap} label={cap} size="small" variant="outlined" />
         ))}
       </Box>

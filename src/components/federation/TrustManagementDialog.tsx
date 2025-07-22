@@ -122,10 +122,7 @@ export const TrustManagementDialog: React.FC<TrustManagementDialogProps> = ({
     setError(null);
 
     try {
-      await updateTrustLevel({
-        peerId: peer.id,
-        trustLevel: newTrustLevel
-      });
+      await updateTrustLevel('current_substrate_id', peer.id, newTrustLevel);
       
       // Log the change (would be sent to backend)
       console.log('Trust level updated', {

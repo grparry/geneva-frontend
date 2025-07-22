@@ -59,19 +59,8 @@ import ConnectionMetrics from './ConnectionMetrics';
 type LayoutType = 'force' | 'circle' | 'grid' | 'hierarchy';
 type ViewMode = 'trust' | 'activity' | 'status' | 'delegation';
 
-interface NetworkNode {
-  id: string;
-  peer: SubstratePeer;
-  x: number;
-  y: number;
-  size: number;
-  color: string;
-  connections: string[];
-  trustLevel: TrustLevel;
-  status: PeerStatus;
-  delegationCount: number;
-  lastActivity?: string;
-}
+// Import NetworkNode from NetworkCanvas to ensure type consistency
+import { NetworkNode } from './NetworkCanvas';
 
 interface NetworkEdge {
   source: string;

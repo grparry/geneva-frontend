@@ -354,7 +354,7 @@ let wsClient: AnalyticsWebSocketClient | null = null;
 export const getAnalyticsWebSocketClient = (config?: Partial<WebSocketConfig>): AnalyticsWebSocketClient => {
   if (!wsClient) {
     wsClient = new AnalyticsWebSocketClient({
-      url: process.env.REACT_APP_WS_URL || 'ws://localhost:8000/api/analytics/ws',
+      url: process.env.REACT_APP_WS_URL || 'ws://localhost:8400/api/analytics/ws',
       ...config,
     });
   }

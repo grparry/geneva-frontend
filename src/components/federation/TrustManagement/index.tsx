@@ -39,7 +39,7 @@ import {
 import { 
   useGetPeersQuery,
   useGetTrustRelationshipsQuery,
-  useGetTrustAuditQuery,
+  useGetAuditLogQuery,
   useUpdateTrustLevelMutation,
 } from '../../../api/federation';
 import { useTrustWebSocket } from '../../../hooks/useFederationWebSocket';
@@ -78,7 +78,7 @@ export const TrustManagement: React.FC = () => {
     refetch: refetchPeers 
   } = useGetPeersQuery({});
   
-  const peers = peersResponse?.items || [];
+  const peers = peersResponse || [];
 
   const { 
     data: trustRelationships, 
@@ -92,7 +92,7 @@ export const TrustManagement: React.FC = () => {
     isLoading: auditLoading, 
     error: auditError,
     refetch: refetchAudit 
-  } = useGetTrustAuditQuery({
+  } = useGetAuditLogQuery({
     limit: 100,
     offset: 0,
   });
@@ -197,7 +197,7 @@ export const TrustManagement: React.FC = () => {
       case 'audit':
         return (
           <TrustAuditLog
-            auditLog={auditLog?.items || []}
+            auditLog={(auditLog as any)?.items || auditLog || []}
             isLoading={auditLoading}
             filters={filters}
           />

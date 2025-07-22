@@ -24,7 +24,7 @@ import {
   Group as GroupIcon,
   Timeline as TimelineIcon
 } from '@mui/icons-material';
-import { useWebSocket } from '../../hooks/useWebSocket';
+import { useWebSocketSimple } from '../../hooks/useWebSocketSimple';
 import ChatWebSocketTester from './ChatWebSocketTester';
 import AgentCollaborationHub from '../agents/AgentCollaborationHub';
 
@@ -90,7 +90,7 @@ const Phase6Dashboard: React.FC = () => {
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
 
   // Initialize WebSocket connection to Phase 6 backend (worker progress)
-  const { send: sendMessage, isConnected } = useWebSocket({
+  const { sendMessage, isConnected } = useWebSocketSimple({
     url: 'ws://localhost:8080/api/workers/progress',
     onConnect: () => {
       setConnectionStatus('connected');
@@ -98,9 +98,6 @@ const Phase6Dashboard: React.FC = () => {
     },
     onDisconnect: () => {
       setConnectionStatus('disconnected');
-    },
-    onError: () => {
-      setConnectionStatus('error');
     }
   });
 

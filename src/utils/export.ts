@@ -1,12 +1,12 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 declare module 'jspdf' {
   interface jsPDF {
     autoTable: (options: any) => void;
   }
 }
-import * as XLSX from 'xlsx';
 
 export interface ExportOptions {
   format: 'json' | 'csv' | 'xlsx' | 'pdf';

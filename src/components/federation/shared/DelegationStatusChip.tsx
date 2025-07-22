@@ -47,7 +47,7 @@ export const DelegationStatusChip: React.FC<DelegationStatusChipProps> = ({
     switch (delegationStatus) {
       case DelegationStatus.PENDING:
         return {
-          color: 'default' as const,
+          color: 'secondary' as const,
           backgroundColor: '#f5f5f5',
           textColor: '#666',
           icon: <ScheduleOutlined />,
@@ -113,7 +113,7 @@ export const DelegationStatusChip: React.FC<DelegationStatusChipProps> = ({
       
       default:
         return {
-          color: 'default' as const,
+          color: 'secondary' as const,
           backgroundColor: '#f5f5f5',
           textColor: '#666',
           icon: <ScheduleOutlined />,

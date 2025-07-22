@@ -71,7 +71,7 @@ export const MemoryFieldsViewer: React.FC<MemoryFieldsViewerProps> = ({
 
   const loadCodexMappings = async () => {
     try {
-      const response = await apiClient.get('/api/agents/codex-mappings', {
+      const response = await apiClient.get('/agents/codex-mappings', {
         params: { agent_type: agent.agent_type },
       });
       const mappings = response.data as AgentCodexMapping[];

@@ -168,11 +168,11 @@ export const TaskDelegationDialog: React.FC<TaskDelegationDialogProps> = ({
 
     try {
       const request: DelegationRequest = {
-        target_peer_id: selectedPeerId,
+        task_id: `task_${Date.now()}`,
+        target_substrate: selectedPeerId,
         task_type: formData.task_type,
         task_data: formData.task_data,
-        priority: formData.priority,
-        timeout_ms: formData.timeout_ms
+        priority: formData.priority
       };
 
       const result = await delegateTask(request);
@@ -287,11 +287,11 @@ export const TaskDelegationDialog: React.FC<TaskDelegationDialogProps> = ({
                               Trust: {peer.trust_level} | Status: {peer.status}
                             </Typography>
                             <Box display="flex" gap={0.5} mt={0.5}>
-                              {peer.capabilities.slice(0, 3).map(cap => (
+                              {(Array.isArray(peer.capabilities) ? peer.capabilities : Object.keys(peer.capabilities || {})).slice(0, 3).map((cap: string) => (
                                 <Chip key={cap} label={cap} size="small" />
                               ))}
-                              {peer.capabilities.length > 3 && (
-                                <Chip label={`+${peer.capabilities.length - 3}`} size="small" />
+                              {(Array.isArray(peer.capabilities) ? peer.capabilities : Object.keys(peer.capabilities || {})).length > 3 && (
+                                <Chip label={`+${(Array.isArray(peer.capabilities) ? peer.capabilities : Object.keys(peer.capabilities || {})).length - 3}`} size="small" />
                               )}
                             </Box>
                           </Box>

@@ -7,17 +7,18 @@
 import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { Box } from '@mui/material';
 import * as d3 from 'd3';
+import { TrustLevel, PeerStatus, SubstratePeer } from '../../../types/federation';
 
-interface NetworkNode {
+export interface NetworkNode {
   id: string;
-  peer: any;
+  peer: SubstratePeer;
   x: number;
   y: number;
   size: number;
   color: string;
   connections: string[];
-  trustLevel: string;
-  status: string;
+  trustLevel: TrustLevel;
+  status: PeerStatus;
   delegationCount: number;
   lastActivity?: string;
 }

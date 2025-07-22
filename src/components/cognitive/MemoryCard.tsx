@@ -69,10 +69,10 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
   const [bookmarked, setBookmarked] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
-  const riskLevel = getRiskLevel(memory.risk_score);
-  const riskColor = getRiskColor(memory.risk_score);
-  const tierColor = getTierColor(memory.tier);
-  const tierDefinition = TIER_DEFINITIONS[memory.tier];
+  const riskLevel = getRiskLevel(memory.risk_score || 0);
+  const riskColor = getRiskColor(memory.risk_score || 0);
+  const tierColor = getTierColor(memory.tier || 1);
+  const tierDefinition = TIER_DEFINITIONS[memory.tier || 1];
   const riskDefinition = SECURITY_RISK_DEFINITIONS[riskLevel];
 
   const handleCardClick = () => {
@@ -100,12 +100,13 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
     setBookmarked(!bookmarked);
   };
 
-  const truncatedContent = memory.content.length > 200 
-    ? `${memory.content.substring(0, 200)}...`
-    : memory.content;
+  const content = memory.content || '';
+  const truncatedContent = content.length > 200 
+    ? `${content.substring(0, 200)}...`
+    : content;
 
-  const displayContent = expanded ? memory.content : truncatedContent;
-  const shouldShowExpandButton = memory.content.length > 200 && !showFullContent;
+  const displayContent = expanded ? content : truncatedContent;
+  const shouldShowExpandButton = content.length > 200 && !showFullContent;
 
   return (
     <Card
@@ -162,11 +163,11 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
                 }}
                 noWrap
               >
-                {memory.memory_type.toUpperCase()} Memory
+                {(memory.memory_type || 'Unknown').toUpperCase()} Memory
               </Typography>
               
               <Chip
-                label={`Tier ${memory.tier}`}
+                label={`Tier ${memory.tier || 1}`}
                 size="small"
                 sx={{
                   bgcolor: tierColor,
@@ -179,10 +180,10 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
 
             {/* Risk and Importance */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Tooltip title={`Risk Score: ${formatRiskScore(memory.risk_score)} (${riskDefinition.name})`}>
+              <Tooltip title={`Risk Score: ${formatRiskScore(memory.risk_score || 0)} (${riskDefinition?.name || 'Unknown'})`}>
                 <Chip
                   icon={<Security />}
-                  label={formatRiskScore(memory.risk_score)}
+                  label={formatRiskScore(memory.risk_score || 0)}
                   size="small"
                   sx={{
                     bgcolor: alpha(riskColor, 0.1),
@@ -193,10 +194,10 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
                 />
               </Tooltip>
               
-              <Tooltip title={`Importance: ${formatImportance(memory.importance)}`}>
+              <Tooltip title={`Importance: ${formatImportance(memory.importance || 0)}`}>
                 <Chip
                   icon={<Psychology />}
-                  label={formatImportance(memory.importance)}
+                  label={formatImportance(memory.importance || 0)}
                   size="small"
                   variant="outlined"
                   sx={{
@@ -241,7 +242,7 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
         </Typography>
 
         {/* Concepts */}
-        {memory.concepts.length > 0 && (
+        {memory.concepts && memory.concepts.length > 0 && (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
             {memory.concepts.slice(0, expanded ? memory.concepts.length : 5).map((concept) => (
               <Chip
@@ -258,7 +259,7 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
                 }}
               />
             ))}
-            {!expanded && memory.concepts.length > 5 && (
+            {!expanded && memory.concepts && memory.concepts.length > 5 && (
               <Chip
                 label={`+${memory.concepts.length - 5} more`}
                 size="small"
@@ -279,11 +280,11 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
         {showMetadata && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
             <Typography variant="caption" color="text.secondary">
-              Created {formatDistanceToNow(new Date(memory.created_at))} ago
+              Created {memory.created_at ? formatDistanceToNow(new Date(memory.created_at)) : 'Unknown'} ago
             </Typography>
             
             <Chip
-              label={memory.status}
+              label={memory.status || 'Unknown'}
               size="small"
               color={memory.status === 'processed' ? 'success' : 'default'}
               sx={{
@@ -296,7 +297,7 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
             />
             
             <Typography variant="caption" color="text.secondary">
-              ID: {memory.id.slice(-8)}
+              ID: {memory.id ? memory.id.slice(-8) : 'Unknown'}
             </Typography>
           </Box>
         )}

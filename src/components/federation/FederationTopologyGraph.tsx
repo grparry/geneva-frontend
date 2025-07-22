@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { Box, useTheme, alpha, CircularProgress, Typography } from '@mui/material';
 import { Substrate, SubstratePeer, PeerStatus, TrustLevel } from '../../types/federation';
+import { safeForceGraphImport } from '../../utils/aframe-stub';
 
 interface FederationTopologyGraphProps {
   currentSubstrate: Substrate;
@@ -44,12 +45,7 @@ export const FederationTopologyGraph: React.FC<FederationTopologyGraphProps> = (
   useEffect(() => {
     const loadForceGraph = async () => {
       try {
-        // First, create a dummy AFRAME global to prevent errors
-        if (typeof window !== 'undefined' && !(window as any).AFRAME) {
-          (window as any).AFRAME = { registerComponent: () => {} };
-        }
-        
-        const module = await import('react-force-graph');
+        const module = await safeForceGraphImport();
         setForceGraph2D(() => module.ForceGraph2D);
         setLoading(false);
       } catch (err) {

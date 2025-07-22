@@ -20,10 +20,12 @@ import {
 import RefreshIcon from '@mui/icons-material/Refresh';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import { ForceGraph2D } from 'react-force-graph';
+// Dynamic import to avoid AFRAME issues
+// import { ForceGraph2D } from 'react-force-graph';
 import { apiClient } from '../../api/client';
 import { NodeDetailsPanel } from './NodeDetailsPanel';
 import { ExportMenu } from '../common/ExportMenu';
+import { safeForceGraphImport } from '../../utils/aframe-stub';
 
 interface OntologyNode {
   id: string;
@@ -194,6 +196,10 @@ export const OntologyGraphViewer: React.FC<OntologyGraphViewerProps> = ({
     showCapabilities: true,
     minImportance: 0,
   });
+  
+  // Dynamic ForceGraph2D loading to avoid AFRAME issues
+  const [ForceGraph2D, setForceGraph2D] = useState<any>(null);
+  const [graphLoading, setGraphLoading] = useState(true);
 
   const loadOntologyGraph = useCallback(async () => {
     setLoading(true);
@@ -208,7 +214,7 @@ export const OntologyGraphViewer: React.FC<OntologyGraphViewerProps> = ({
       if (filterOptions.showProperties) types.push('property');
       if (filterOptions.showCapabilities) types.push('capability');
 
-      const response = await apiClient.get('/api/ontology/graph', {
+      const response = await apiClient.get('/ontology/graph', {
         params: {
           namespace,
           types: types.length > 0 ? types : undefined,
@@ -246,6 +252,22 @@ export const OntologyGraphViewer: React.FC<OntologyGraphViewerProps> = ({
       setLoading(false);
     }
   }, [namespace, filterOptions]);
+
+  // Dynamic import ForceGraph2D to avoid AFRAME issues
+  useEffect(() => {
+    const loadForceGraph = async () => {
+      try {
+        const module = await safeForceGraphImport();
+        setForceGraph2D(() => module.ForceGraph2D);
+        setGraphLoading(false);
+      } catch (err) {
+        console.error('Failed to load ForceGraph2D:', err);
+        setGraphLoading(false);
+      }
+    };
+
+    loadForceGraph();
+  }, []);
 
   useEffect(() => {
     loadOntologyGraph();
@@ -295,21 +317,28 @@ export const OntologyGraphViewer: React.FC<OntologyGraphViewerProps> = ({
     <Box sx={{ height: '100%', display: 'flex' }}>
       {/* Main Graph Area */}
       <Box sx={{ flex: 1, position: 'relative', bgcolor: 'background.default' }}>
-        {graphData && (
-          <ForceGraph2D
-            graphData={graphData}
-            nodeLabel="label"
-            nodeColor="color"
-            nodeVal="size"
-            linkLabel="label"
-            linkWidth={(link) => (link.value || 1) * 2}
-            linkDirectionalArrowLength={6}
-            linkDirectionalArrowRelPos={1}
-            onNodeClick={handleNodeClick}
-            enableNodeDrag={true}
-            enableZoomInteraction={true}
-            enablePanInteraction={true}
-          />
+        {graphLoading || !ForceGraph2D ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            <CircularProgress />
+            <Typography sx={{ ml: 2 }}>Loading graph visualization...</Typography>
+          </Box>
+        ) : (
+          graphData && (
+            <ForceGraph2D
+              graphData={graphData}
+              nodeLabel="label"
+              nodeColor="color"
+              nodeVal="size"
+              linkLabel="label"
+              linkWidth={(link: any) => (link.value || 1) * 2}
+              linkDirectionalArrowLength={6}
+              linkDirectionalArrowRelPos={1}
+              onNodeClick={handleNodeClick}
+              enableNodeDrag={true}
+              enableZoomInteraction={true}
+              enablePanInteraction={true}
+            />
+          )
         )}
 
         {/* Graph Controls */}

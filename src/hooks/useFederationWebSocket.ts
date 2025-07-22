@@ -44,21 +44,16 @@ export const useFederationWebSocket = (options?: FederationWebSocketOptions) => 
     isConnected,
     error,
     sendMessage 
-  } = useWebSocketSimple('/api/federation/events/stream', {
+  } = useWebSocketSimple({
+    url: '/api/federation/events/stream',
     onMessage: (event) => {
       try {
-        const federationEvent = JSON.parse(event.data);
+        const federationEvent = typeof event === 'string' ? JSON.parse(event) : event;
         handleFederationEvent(federationEvent);
       } catch (e) {
         console.error('Failed to parse federation event:', e);
       }
-    },
-    onError: (error) => {
-      console.error('Federation WebSocket error:', error);
-      options?.onError?.(error.toString());
-    },
-    reconnectInterval: 5000,
-    reconnectAttempts: 5,
+    }
   });
   
   // Handle federation events with proper typing

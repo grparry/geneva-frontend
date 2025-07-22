@@ -7,9 +7,9 @@
 import { useState, useCallback } from 'react';
 import { 
   useGetPeersQuery,
-  useAddPeerMutation,
-  useRemovePeerMutation,
-  useUpdatePeerMutation,
+  useDiscoverPeerMutation,
+  useUpdatePeerStatusMutation,
+  useRefreshPeerMutation,
   useGetDelegationsQuery,
   useDelegateTaskMutation,
   useGetTrustRelationshipsQuery,
@@ -42,12 +42,21 @@ export interface UseFederationReturn {
   // Task delegation
   delegations: any[];
   delegationsLoading: boolean;
+  isDelegating: boolean;
   delegateTask: (request: DelegateTaskRequest) => Promise<void>;
   
   // Trust management
   trustRelationships: any[];
   trustLoading: boolean;
   updateTrustLevel: (fromPeerId: string, toPeerId: string, level: TrustLevel) => Promise<void>;
+  
+  // Dashboard-specific properties
+  currentSubstrate?: any;
+  metrics?: any;
+  loading: boolean;
+  error: any;
+  refreshPeers: () => Promise<void>;
+  refreshMetrics: () => Promise<void>;
   
   // Utility functions
   refresh: () => Promise<void>;
@@ -62,6 +71,7 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
   } = options;
 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDelegating, setIsDelegating] = useState(false);
 
   // API queries
   const { 
@@ -73,7 +83,7 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
     pollingInterval: autoRefresh ? refreshInterval : 0,
   });
   
-  const peers = peersResponse?.items || [];
+  const peers = (peersResponse as any)?.items || peersResponse || [];
 
   const { 
     data: delegationsResponse, 
@@ -84,7 +94,7 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
     offset: 0,
   });
   
-  const delegations = delegationsResponse?.items || [];
+  const delegations = (delegationsResponse as any)?.items || delegationsResponse || [];
 
   const { 
     data: trustRelationships = [], 
@@ -93,16 +103,16 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
   } = useGetTrustRelationshipsQuery({});
 
   // Mutations
-  const [addPeerMutation] = useAddPeerMutation();
-  const [removePeerMutation] = useRemovePeerMutation();
-  const [updatePeerMutation] = useUpdatePeerMutation();
+  const [addPeerMutation] = useDiscoverPeerMutation();
+  const [removePeerMutation] = useUpdatePeerStatusMutation();
+  const [updatePeerMutation] = useRefreshPeerMutation();
   const [delegateTaskMutation] = useDelegateTaskMutation();
   const [updateTrustLevelMutation] = useUpdateTrustLevelMutation();
 
   // Actions
   const addPeer = useCallback(async (peer: Omit<SubstratePeer, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      await addPeerMutation(peer).unwrap();
+      await addPeerMutation({ peer_url: peer.url }).unwrap();
     } catch (error) {
       console.error('Failed to add peer:', error);
       throw error;
@@ -111,7 +121,7 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
 
   const removePeer = useCallback(async (peerId: string) => {
     try {
-      await removePeerMutation(peerId).unwrap();
+      await removePeerMutation({ peer_id: peerId, status: PeerStatus.OFFLINE }).unwrap();
     } catch (error) {
       console.error('Failed to remove peer:', error);
       throw error;
@@ -120,7 +130,7 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
 
   const updatePeer = useCallback(async (peerId: string, updates: Partial<SubstratePeer>) => {
     try {
-      await updatePeerMutation({ id: peerId, ...updates }).unwrap();
+      await updatePeerMutation(peerId).unwrap();
     } catch (error) {
       console.error('Failed to update peer:', error);
       throw error;
@@ -139,8 +149,7 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
   const updateTrustLevel = useCallback(async (fromPeerId: string, toPeerId: string, level: TrustLevel) => {
     try {
       await updateTrustLevelMutation({
-        from_peer_id: fromPeerId,
-        to_peer_id: toPeerId,
+        peer_id: toPeerId,
         trust_level: level,
       }).unwrap();
     } catch (error) {
@@ -178,11 +187,11 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
   }, []);
 
   const getHealthyPeers = useCallback(() => {
-    return peers.filter(peer => peer.status === PeerStatus.HEALTHY);
+    return peers.filter((peer: SubstratePeer) => peer.status === PeerStatus.HEALTHY);
   }, [peers]);
 
   const getTrustedPeers = useCallback(() => {
-    return peers.filter(peer => 
+    return peers.filter((peer: SubstratePeer) => 
       peer.trust_level === TrustLevel.TRUSTED || 
       peer.trust_level === TrustLevel.FULL
     );
@@ -201,12 +210,21 @@ export const useFederation = (options: UseFederationOptions = {}): UseFederation
     // Task delegation
     delegations,
     delegationsLoading,
+    isDelegating,
     delegateTask,
     
     // Trust management
     trustRelationships,
     trustLoading,
     updateTrustLevel,
+    
+    // Dashboard-specific properties
+    currentSubstrate: undefined,
+    metrics: undefined,
+    loading: peersLoading || delegationsLoading || trustLoading || isRefreshing,
+    error: peersError,
+    refreshPeers: async () => { await refetchPeers(); },
+    refreshMetrics: async () => {}, // TODO: implement when metrics API is ready
     
     // Utility functions
     refresh,

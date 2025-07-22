@@ -311,7 +311,7 @@ export const useObservabilityStore = create<ObservabilityStore>()(
             deleted_files: [],
             environment_variables: {
               'NODE_ENV': 'development',
-              'REACT_APP_API_URL': 'http://localhost:8000'
+              'REACT_APP_API_URL': 'http://localhost:8400'
             },
             tool_availability: ['Read', 'Write', 'Edit', 'Bash'],
             memory_context: {

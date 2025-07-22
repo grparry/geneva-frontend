@@ -122,7 +122,7 @@ export const DelegationFlowMap: React.FC<DelegationFlowMapProps> = ({
     setLoading(true);
     try {
       const [tasksRes, flowsRes, metricsRes] = await Promise.all([
-        apiClient.get('/api/federation/delegations', {
+        apiClient.get('/federation/delegations', {
           params: {
             substrate_id: substrateId,
             time_range: timeRange,
@@ -130,10 +130,10 @@ export const DelegationFlowMap: React.FC<DelegationFlowMapProps> = ({
             task_type: filter.taskType !== 'all' ? filter.taskType : undefined,
           },
         }),
-        apiClient.get('/api/federation/delegation-flows', {
+        apiClient.get('/federation/delegation-flows', {
           params: { substrate_id: substrateId, time_range: timeRange },
         }),
-        apiClient.get('/api/federation/delegation-metrics', {
+        apiClient.get('/federation/delegation-metrics', {
           params: { substrate_id: substrateId, time_range: timeRange },
         }),
       ]);

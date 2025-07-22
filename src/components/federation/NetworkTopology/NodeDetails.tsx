@@ -69,8 +69,8 @@ const NodeDetails: React.FC<NodeDetailsProps> = ({
   // Calculate node-specific metrics
   const nodeMetrics = useMemo(() => {
     // Trust relationships
-    const outgoingTrust = trustRelationships.filter(t => t.from_peer_id === peer.id);
-    const incomingTrust = trustRelationships.filter(t => t.to_peer_id === peer.id);
+    const outgoingTrust = trustRelationships.filter(t => t.peer_id === peer.id);
+    const incomingTrust = trustRelationships.filter(t => t.peer_id === peer.id);
     
     // Delegations
     const sentDelegations = delegations.filter(d => d.source_substrate === peer.substrate_id);

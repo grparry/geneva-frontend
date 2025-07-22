@@ -189,11 +189,11 @@ const TrustMatrix: React.FC<TrustMatrixProps> = ({
           Level: {relationship.trust_level}
         </Typography>
         <Typography variant="caption" display="block">
-          Since: {new Date(relationship.created_at).toLocaleDateString()}
+          Since: {new Date(relationship.established_at).toLocaleDateString()}
         </Typography>
-        {relationship.last_verified_at && (
+        {relationship.last_verified && (
           <Typography variant="caption" display="block">
-            Verified: {new Date(relationship.last_verified_at).toLocaleDateString()}
+            Verified: {new Date(relationship.last_verified).toLocaleDateString()}
           </Typography>
         )}
       </Box>

@@ -124,7 +124,7 @@ export const MemoryLifecycleVisualizer: React.FC<MemoryLifecycleVisualizerProps>
 
   const loadStageMetrics = async (stage: string) => {
     try {
-      const response = await apiClient.get('/api/codex/lifecycle/metrics', {
+      const response = await apiClient.get('/codex/lifecycle/metrics', {
         params: { stage, time_range: '24h' },
       });
       setStageMetrics(response.data);

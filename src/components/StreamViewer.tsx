@@ -21,7 +21,7 @@ import {
 import { StreamMessage } from './StreamMessage';
 import { useObservabilityStore } from '../store/observabilityStore';
 import { useUIStore } from '../store/uiStore';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { useWebSocketSimple } from '../hooks/useWebSocketSimple';
 
 interface Message {
   message_id: string;
@@ -84,21 +84,13 @@ export const StreamViewer: React.FC<{ conversationId?: string }> = ({
   }, [messages.length, scrollToBottom]);
 
   // Initialize WebSocket connection
-  useWebSocket({
-    url: 'ws://localhost:8000/ws/communication-stream',
+  useWebSocketSimple({
+    url: 'ws://localhost:8400/ws/communication-stream',
     onConnect: () => {
       console.log('StreamViewer: WebSocket connected');
     },
     onDisconnect: () => {
       console.log('StreamViewer: WebSocket disconnected');
-    },
-    onError: (error) => {
-      console.error('StreamViewer: WebSocket error:', error);
-      addNotification({
-        type: 'error',
-        title: 'Connection Error',
-        message: 'Failed to connect to real-time updates'
-      });
     }
   });
 

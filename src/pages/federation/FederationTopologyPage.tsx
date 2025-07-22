@@ -31,5 +31,13 @@ export const FederationTopologyPage: React.FC = () => {
     discovered_at: peer.lastSeen.toISOString(),
   }));
   
-  return <FederationTopologyGraph currentSubstrate={currentSubstrate} peers={substratePeers} />;
+  // Add url property to match Substrate interface
+  const currentSubstrateWithUrl = {
+    ...currentSubstrate,
+    url: (currentSubstrate as any).endpoint || (currentSubstrate as any).url || '',
+    status: currentSubstrate.status || 'active',
+    capabilities: currentSubstrate.capabilities || []
+  };
+  
+  return <FederationTopologyGraph currentSubstrate={currentSubstrateWithUrl} peers={substratePeers} />;
 };

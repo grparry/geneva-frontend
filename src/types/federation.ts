@@ -14,6 +14,7 @@ export enum PeerStatus {
   OFFLINE = 'offline',
   UNTRUSTED = 'untrusted',
   ERROR = 'error',
+  DISCONNECTED = 'disconnected',
 }
 
 export enum TrustLevel {
@@ -109,6 +110,8 @@ export interface Delegation {
 export interface TrustRelationship {
   id: string; // UUID
   peer_id: string; // UUID (foreign key)
+  from_peer_id: string; // UUID (source peer)
+  to_peer_id: string; // UUID (target peer)
   trust_level: TrustLevel;
   established_at: string; // ISO DateTime
   last_verified?: string; // ISO DateTime
@@ -156,6 +159,14 @@ export interface DelegationResult {
   data?: Record<string, any>;
   error?: string;
   metrics: Record<string, any>;
+}
+
+export interface DelegationRequest {
+  task_id: string;
+  task_type: string;
+  task_data: Record<string, any>;
+  target_substrate: string;
+  priority?: number;
 }
 
 export interface Heartbeat {
@@ -357,6 +368,17 @@ export interface GraphLink {
 export interface NetworkTopologyData {
   nodes: GraphNode[];
   links: GraphLink[];
+}
+
+export interface NetworkNode {
+  id: string;
+  name: string;
+  status: PeerStatus;
+  trustLevel: TrustLevel;
+  color: string;
+  size?: number;
+  x?: number;
+  y?: number;
 }
 
 // Filter and Search

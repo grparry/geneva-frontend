@@ -91,7 +91,7 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({ executionId 
           ],
           environment_variables: {
             'NODE_ENV': 'development',
-            'REACT_APP_API_URL': 'http://localhost:8000',
+            'REACT_APP_API_URL': 'http://localhost:8400',
             'OBSERVABILITY_ENABLED': 'true',
             'DATABASE_URL': 'postgresql://user:pass@localhost/geneva'
           },

@@ -151,10 +151,10 @@ export const useLiveMetrics = (
       setLastUpdate(new Date());
 
       // Update Redux cache with live data
-      dispatch(
+      (dispatch as any)(
         analyticsApi.util.updateQueryData('getKPIMetrics', 
           { project_id: '', time_range: '24h' }, 
-          (draft) => {
+          (draft: any) => {
             // Update relevant fields with live data
             if (draft && metrics) {
               draft.performance.avg_response_time = metrics.metrics.average_response_time;

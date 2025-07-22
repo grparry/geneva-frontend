@@ -437,14 +437,14 @@ export const CostAnalysis: React.FC = () => {
               title="Total Cost"
               value={costData?.totalFormatted || '$0'}
               subtitle={`${timeRange} period`}
-              change={costData?.cost_trends?.[0]?.change}
+              change={(costData?.cost_trends?.[0] as any)?.change || 0}
               icon={<AttachMoneyRounded />}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CostSummaryCard
               title="LLM Costs"
-              value={costData?.llm_costs?.totalFormatted || '$0'}
+              value={`$${costData?.llm_costs?.total?.toFixed(2) || '0.00'}`}
               subtitle={`${costData?.distribution?.[0]?.percentage.toFixed(0)}% of total`}
               icon={<CloudRounded />}
               color="info.main"
@@ -453,7 +453,7 @@ export const CostAnalysis: React.FC = () => {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CostSummaryCard
               title="Resource Costs"
-              value={costData?.resource_costs?.totalFormatted || '$0'}
+              value={`$${costData?.resource_costs?.total?.toFixed(2) || '0.00'}`}
               subtitle={`${costData?.distribution?.[1]?.percentage.toFixed(0)}% of total`}
               icon={<StorageRounded />}
               color="success.main"
@@ -462,7 +462,7 @@ export const CostAnalysis: React.FC = () => {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <CostSummaryCard
               title="Avg per Workflow"
-              value={costData?.topWorkflowsFormatted || '$0'}
+              value={Array.isArray(costData?.top_workflows) && costData?.top_workflows && costData.top_workflows.length > 0 ? `$${(costData.top_workflows.reduce((sum, w) => sum + w.total_cost, 0) / costData.top_workflows.length).toFixed(2)}` : '$0'}
               change={undefined}
               icon={<ApiRounded />}
               color="warning.main"

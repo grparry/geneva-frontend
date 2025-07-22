@@ -40,7 +40,7 @@ import {
 } from '../../../api/federation';
 
 // Federation types and components
-import { SubstratePeer } from '../../../types/federation';
+import { SubstratePeer, TrustLevel } from '../../../types/federation';
 import { TrustLevelBadge, PeerStatusIcon } from '../shared';
 
 interface PeerDiscoveryProps {

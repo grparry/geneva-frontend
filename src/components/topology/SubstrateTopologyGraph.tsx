@@ -18,8 +18,10 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
+  CircularProgress,
 } from '@mui/material';
-import { ForceGraph2D } from 'react-force-graph';
+// Dynamic import to avoid AFRAME issues
+// import { ForceGraph2D } from 'react-force-graph';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
@@ -38,6 +40,7 @@ import { topologyWebSocket } from '../../services/websocket';
 import { SubstrateDetailDialog } from '../federation/SubstrateDetailDialog';
 import { AgentDetailDialog } from '../ontology/AgentDetailDialog';
 import { TrustLevel, PeerStatus } from '../../types/federation';
+import { safeForceGraphImport } from '../../utils/aframe-stub';
 
 interface SubstrateNode {
   id: string;
@@ -110,6 +113,26 @@ export const SubstrateTopologyGraph: React.FC<SubstrateTopologyGraphProps> = ({
   const [selectedNode, setSelectedNode] = useState<SubstrateNode | null>(null);
   const [substrateDialogOpen, setSubstrateDialogOpen] = useState(false);
   const [agentDialogOpen, setAgentDialogOpen] = useState(false);
+  
+  // Dynamic ForceGraph2D loading to avoid AFRAME issues
+  const [ForceGraph2D, setForceGraph2D] = useState<any>(null);
+  const [graphLoading, setGraphLoading] = useState(true);
+
+  // Dynamic import ForceGraph2D to avoid AFRAME issues
+  useEffect(() => {
+    const loadForceGraph = async () => {
+      try {
+        const module = await safeForceGraphImport();
+        setForceGraph2D(() => module.ForceGraph2D);
+        setGraphLoading(false);
+      } catch (err) {
+        console.error('Failed to load ForceGraph2D:', err);
+        setGraphLoading(false);
+      }
+    };
+
+    loadForceGraph();
+  }, []);
 
   useEffect(() => {
     loadTopologyData();
@@ -150,7 +173,7 @@ export const SubstrateTopologyGraph: React.FC<SubstrateTopologyGraphProps> = ({
   const loadTopologyData = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/api/topology/graph', {
+      const response = await apiClient.get('/topology/graph', {
         params: {
           substrate_id: substrateId,
           view_mode: viewMode,
@@ -621,24 +644,31 @@ export const SubstrateTopologyGraph: React.FC<SubstrateTopologyGraphProps> = ({
 
       {/* Graph */}
       <Box sx={{ width: '100%', height: '100%' }}>
-        <ForceGraph2D
-          ref={graphRef}
-          graphData={filteredData}
-          nodeLabel={showLabels ? nodeLabel : undefined}
-          nodeColor={getNodeColor}
-          nodeRelSize={1}
-          nodeVal={getNodeSize}
-          linkColor={getLinkColor}
-          linkWidth={(link: SubstrateLink) => link.strength * 3}
-          linkDirectionalParticles={(link: SubstrateLink) => 
-            link.type === 'data_flow' ? 2 : 0
-          }
-          linkDirectionalParticleSpeed={0.005}
-          onNodeClick={handleNodeClick}
-          onLinkClick={handleLinkClick}
-          cooldownTicks={100}
-          onEngineStop={() => graphRef.current?.zoomToFit(400)}
-        />
+        {graphLoading || !ForceGraph2D ? (
+          <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+            <CircularProgress />
+            <Typography sx={{ ml: 2 }}>Loading graph visualization...</Typography>
+          </Box>
+        ) : (
+          <ForceGraph2D
+            ref={graphRef}
+            graphData={filteredData}
+            nodeLabel={showLabels ? nodeLabel : undefined}
+            nodeColor={getNodeColor}
+            nodeRelSize={1}
+            nodeVal={getNodeSize}
+            linkColor={getLinkColor}
+            linkWidth={(link: SubstrateLink) => link.strength * 3}
+            linkDirectionalParticles={(link: SubstrateLink) => 
+              link.type === 'data_flow' ? 2 : 0
+            }
+            linkDirectionalParticleSpeed={0.005}
+            onNodeClick={handleNodeClick}
+            onLinkClick={handleLinkClick}
+            cooldownTicks={100}
+            onEngineStop={() => graphRef.current?.zoomToFit(400)}
+          />
+        )}
       </Box>
 
       {/* Filter Menu */}
@@ -772,13 +802,10 @@ export const SubstrateTopologyGraph: React.FC<SubstrateTopologyGraphProps> = ({
           substrate={{
             id: selectedNode.id,
             name: selectedNode.name,
-            status: selectedNode.status === 'active' ? PeerStatus.CONNECTED : PeerStatus.DISCONNECTED,
-            trust_level: TrustLevel.BASIC,
-            endpoints: [`https://${selectedNode.id}.substrate.network`],
+            url: `https://${selectedNode.id}.substrate.network`,
+            status: selectedNode.status === 'active' ? 'connected' : 'disconnected',
             capabilities: selectedNode.capabilities || [],
-            public_key: '',
-            last_seen: new Date().toISOString(),
-          }}
+          } as any}
         />
       )}
 
