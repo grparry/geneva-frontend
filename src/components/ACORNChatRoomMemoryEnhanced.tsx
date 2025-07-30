@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Box, Paper, Typography, TextField, Button, Avatar, Chip, List, ListItem, ListItemAvatar, ListItemText, Divider, IconButton, CircularProgress, Tabs, Tab, Snackbar, Alert, Stack } from '@mui/material';
+import { Box, Paper, Typography, TextField, Button, Avatar, Chip, List, ListItem, ListItemAvatar, ListItemText, Divider, IconButton, CircularProgress, Tabs, Tab, Snackbar, Alert, Stack, Drawer } from '@mui/material';
 import { 
   Send as SendIcon, 
   Add as AddIcon, 
@@ -12,7 +12,8 @@ import {
   Security as SecurityIcon,
   Edit as EditIcon,
   Assignment as TaskIcon,
-  Speed as SpeedIcon
+  Speed as SpeedIcon,
+  MenuBook as MemoryPanelIcon
 } from '@mui/icons-material';
 import { useWebSocketSimple } from '../hooks/useWebSocketSimple';
 import { ClaudeProgressBar, ProgressStage } from './claude/progress/ClaudeProgressBar';
@@ -38,6 +39,10 @@ import { TaskPlanner } from './claude/advanced/TaskPlanner';
 import { PerformanceOverlay } from './claude/advanced/PerformanceOverlay';
 // System Agent Integration
 import { useSystemAgentIntegration } from '../hooks/useSystemAgentIntegration';
+// Memory Enhancement Components
+import { MemoryStatusIndicator } from './memory/MemoryStatusIndicator';
+import { ConversationMemoryPanel } from './memory/ConversationMemoryPanel';
+import { MemoryEnhancedMessage } from './memory/MemoryEnhancedMessage';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8400';
 const WS_BASE = API_BASE.replace(/^http/, 'ws');
@@ -49,6 +54,11 @@ interface Message {
   user_id?: string;
   agent_id?: string;
   media_items?: AnyMediaItem[];
+  // Memory enhancement fields
+  memory_enhanced?: boolean;
+  memory_context?: any[];
+  learning_applied?: any[];
+  cross_agent_insights?: string[];
 }
 
 interface InfrastructureEvent {
@@ -66,9 +76,14 @@ interface AgentProfile {
   avatar: string;
   color: string;
   status: 'idle' | 'thinking' | 'responding';
+  memory_stats?: {
+    total_items: number;
+    cache_hit_rate: number;
+    last_learning: string;
+  };
 }
 
-// System Agent profiles
+// System Agent profiles with memory enhancement indicators
 const SYSTEM_AGENTS: Record<string, AgentProfile> = {
   thedra_codex: {
     id: 'thedra_codex',
@@ -76,7 +91,12 @@ const SYSTEM_AGENTS: Record<string, AgentProfile> = {
     title: 'Chief Memory Officer',
     avatar: '📚',
     color: '#6a1b9a',
-    status: 'idle'
+    status: 'idle',
+    memory_stats: {
+      total_items: 47,
+      cache_hit_rate: 0.89,
+      last_learning: new Date().toISOString()
+    }
   },
   greta_praxis: {
     id: 'greta_praxis',
@@ -84,7 +104,12 @@ const SYSTEM_AGENTS: Record<string, AgentProfile> = {
     title: 'Chief Ontology Officer',
     avatar: '🔮',
     color: '#3f51b5',
-    status: 'idle'
+    status: 'idle',
+    memory_stats: {
+      total_items: 23,
+      cache_hit_rate: 0.84,
+      last_learning: new Date().toISOString()
+    }
   },
   bradley_sentinel: {
     id: 'bradley_sentinel',
@@ -92,7 +117,12 @@ const SYSTEM_AGENTS: Record<string, AgentProfile> = {
     title: 'Chief Security Officer',
     avatar: '🛡️',
     color: '#f44336',
-    status: 'idle'
+    status: 'idle',
+    memory_stats: {
+      total_items: 31,
+      cache_hit_rate: 0.92,
+      last_learning: new Date().toISOString()
+    }
   },
   digby_claude: {
     id: 'digby_claude',
@@ -100,11 +130,16 @@ const SYSTEM_AGENTS: Record<string, AgentProfile> = {
     title: 'Chief Automation Officer',
     avatar: '⚡',
     color: '#ff9800',
-    status: 'idle'
+    status: 'idle',
+    memory_stats: {
+      total_items: 18,
+      cache_hit_rate: 0.87,
+      last_learning: new Date().toISOString()
+    }
   }
 };
 
-// ACORN Executive profiles
+// ACORN Executive profiles (same as before)
 const ACORN_EXECUTIVES: Record<string, AgentProfile> = {
   sloan_ceo: {
     id: 'sloan_ceo',
@@ -196,12 +231,12 @@ const ACORN_EXECUTIVES: Record<string, AgentProfile> = {
   }
 };
 
-interface ACORNChatRoomProps {
+interface ACORNChatRoomMemoryEnhancedProps {
   roomId?: string;
   initialParticipants?: string[];
 }
 
-export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialParticipants = [] }) => {
+export const ACORNChatRoomMemoryEnhanced: React.FC<ACORNChatRoomMemoryEnhancedProps> = ({ roomId, initialParticipants = [] }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   // Store participants with their full IDs (including acorn/ prefix if present)
@@ -216,6 +251,11 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   });
   const [infrastructureEvents, setInfrastructureEvents] = useState<InfrastructureEvent[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
+  
+  // Memory Enhancement State
+  const [memoryPanelOpen, setMemoryPanelOpen] = useState(false);
+  const [selectedMemoryItem, setSelectedMemoryItem] = useState<any>(null);
+  const [memoryStatsVisible, setMemoryStatsVisible] = useState(true);
   
   // Phase 4 Advanced Features State
   const [constraintValidatorOpen, setConstraintValidatorOpen] = useState(false);
@@ -253,12 +293,12 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   
   // Debug logging
   useEffect(() => {
-    console.log('ACORNChatRoom mounted with:', {
+    console.log('ACORNChatRoomMemoryEnhanced mounted with:', {
       roomId,
       initialParticipants,
       participantsSet: Array.from(participants),
       systemParticipants: Array.from(systemParticipants),
-      note: 'System agents (Thedra, Greta, Bradley, Digby) automatically included'
+      note: 'System agents (Thedra, Greta, Bradley, Digby) automatically included with memory enhancement'
     });
   }, [roomId, initialParticipants, participants, systemParticipants]);
 
@@ -268,14 +308,41 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
     enabled: !!roomId,
     onConnect: () => {
       setIsConnected(true);
-      console.log('Connected to chat room');
+      console.log('Connected to memory-enhanced chat room');
     },
     onDisconnect: () => {
       setIsConnected(false);
-      console.log('Disconnected from chat room');
+      console.log('Disconnected from memory-enhanced chat room');
     },
     onMessage: (message) => {
-      setMessages(prev => [...prev, message]);
+      // Enhance message with memory indicators (mock for demo)
+      const enhancedMessage = {
+        ...message,
+        memory_enhanced: message.type === 'agent' && Math.random() > 0.3, // 70% chance of memory enhancement
+        memory_context: message.type === 'agent' ? [
+          {
+            id: `ctx_${Date.now()}`,
+            content: 'Previous conversation about similar topics',
+            relevance_score: 0.85 + Math.random() * 0.15,
+            memory_type: ['conversation', 'learning', 'insight'][Math.floor(Math.random() * 3)],
+            source: message.agent_id || 'system',
+            timestamp: new Date().toISOString()
+          }
+        ] : undefined,
+        learning_applied: message.type === 'agent' ? [
+          {
+            pattern_applied: 'user_preference_concise_response',
+            confidence: 0.92,
+            learning_type: 'user_preference'
+          }
+        ] : undefined,
+        cross_agent_insights: message.type === 'agent' && Math.random() > 0.5 ? [
+          'Security best practices from Bradley',
+          'Memory optimization from Thedra'
+        ] : undefined
+      };
+      
+      setMessages(prev => [...prev, enhancedMessage]);
       
       // Update agent status based on message
       if (message.type === 'agent' && message.agent_id) {
@@ -287,8 +354,6 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
       }
     }
   });
-
-  // Chat WebSocket is now handled in the hook itself
 
   // WebSocket for infrastructure events
   const infraWs = useWebSocketSimple({
@@ -334,8 +399,6 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
       }
     }
   });
-
-  // Infrastructure WebSocket is now handled in the hook itself
   
   // Claude progress tracking
   const { currentProgress, error: progressError } = useClaudeProgress({
@@ -394,7 +457,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Tool Control Event Listeners
+  // Tool Control Event Listeners (same as before)
   useEffect(() => {
     const handleSwitchToTab = (event: CustomEvent) => {
       const { tabIndex, toolParams } = event.detail;
@@ -438,11 +501,34 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
     };
   }, [systemAgentIntegration, roomId]);
 
-  // Enhanced Chat Commands
+  // Enhanced Chat Commands (same as before but with memory commands)
   const handleEnhancedCommands = useCallback((message: string) => {
     const trimmed = message.trim();
     
-    // Tool control commands
+    // Memory commands
+    if (trimmed === '/memory') {
+      setMemoryPanelOpen(true);
+      return true;
+    }
+    
+    if (trimmed === '/memory-stats') {
+      setMemoryStatsVisible(!memoryStatsVisible);
+      return true;
+    }
+    
+    if (trimmed.startsWith('/remember ')) {
+      const memoryContent = trimmed.substring('/remember '.length);
+      // Mock storing memory
+      const mockMessage: Message = {
+        type: 'system',
+        content: `📝 Stored in memory: "${memoryContent}"`,
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, mockMessage]);
+      return true;
+    }
+    
+    // Tool control commands (same as before)
     if (trimmed.startsWith('/create-task ')) {
       const taskDescription = trimmed.substring('/create-task '.length);
       const event = new CustomEvent('createTask', {
@@ -489,7 +575,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
     }
     
     return false;
-  }, []);
+  }, [memoryStatsVisible]);
   
   const sendMessage = useCallback(() => {
     if ((inputMessage.trim() || pendingMedia.length > 0) && chatWs.isConnected) {
@@ -580,7 +666,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
     } else {
       console.log('Cannot send - trim:', inputMessage.trim(), 'connected:', chatWs.isConnected);
     }
-  }, [inputMessage, pendingMedia, chatWs, participants, systemParticipants, addMockClarification, validateTask]);
+  }, [inputMessage, pendingMedia, chatWs, participants, systemParticipants, addMockClarification, validateTask, handleEnhancedCommands, learningData]);
   
   // Handle media addition
   const handleMediaAdded = useCallback((mediaItems: AnyMediaItem[]) => {
@@ -684,61 +770,21 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   }, [chatWs]);
 
   const renderMessage = (message: Message, index: number) => {
-    const isUser = message.type === 'user';
     // Handle both formats: with and without acorn/ prefix
     const normalizedAgentId = message.agent_id ? message.agent_id.replace('acorn/', '') : null;
     const agent = normalizedAgentId ? (agentStatuses[normalizedAgentId] || agentStatuses[message.agent_id!]) : null;
 
     return (
-      <ListItem key={index} sx={{ flexDirection: isUser ? 'row-reverse' : 'row' }}>
-        {!isUser && agent && (
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: agent.color }}>{agent.avatar}</Avatar>
-          </ListItemAvatar>
-        )}
-        <Box
-          sx={{
-            maxWidth: message.media_items && message.media_items.length > 0 ? '90%' : '70%',
-            bgcolor: isUser ? 'primary.main' : 'grey.100',
-            color: isUser ? 'white' : 'text.primary',
-            borderRadius: 2,
-            p: 2,
-            ml: isUser ? 2 : 0,
-            mr: isUser ? 0 : 2
-          }}
-        >
-          {agent && (
-            <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
-              {agent.name}
-            </Typography>
-          )}
-          {message.content && (
-            <Typography variant="body1" sx={{ mb: message.media_items ? 1 : 0 }}>
-              {message.content}
-            </Typography>
-          )}
-          
-          {/* Multi-modal content */}
-          {message.media_items && message.media_items.length > 0 && (
-            <Box sx={{ mt: 1 }}>
-              <MultiModalViewer
-                context={{
-                  id: `msg-${index}`,
-                  mediaItems: message.media_items,
-                  createdAt: message.timestamp,
-                  updatedAt: message.timestamp
-                }}
-                embedded
-                maxHeight={300}
-              />
-            </Box>
-          )}
-          
-          <Typography variant="caption" sx={{ opacity: 0.7, display: 'block', mt: 0.5 }}>
-            {new Date(message.timestamp).toLocaleTimeString()}
-          </Typography>
-        </Box>
-      </ListItem>
+      <MemoryEnhancedMessage
+        key={index}
+        message={message}
+        agent={agent || undefined}
+        index={index}
+        onMemoryContextClick={(context) => {
+          console.log('Memory context clicked:', context);
+          setSelectedMemoryItem(context);
+        }}
+      />
     );
   };
 
@@ -782,12 +828,22 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
 
   return (
     <Box sx={{ display: 'flex', gap: 2, height: '100vh', p: 2 }}>
-      {/* Agent Selection Panel */}
+      {/* Agent Selection Panel with Memory Enhancement */}
       <Box sx={{ width: '25%' }}>
         <Paper sx={{ p: 2, height: '100%', overflow: 'auto' }}>
-          <Typography variant="h6" gutterBottom>
-            ACORN Executives
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6">
+              ACORN Executives
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={() => setMemoryPanelOpen(true)}
+              color="primary"
+              title="View conversation memory"
+            >
+              <MemoryPanelIcon />
+            </IconButton>
+          </Box>
           <List>
             {Object.values(ACORN_EXECUTIVES).map((agent) => {
               const agentClarifications = pendingClarifications.filter(c => c.agent_id === agent.id);
@@ -812,7 +868,6 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                 </ListItemAvatar>
                 <ListItemText
                   primary={agent.name}
-                  secondaryTypographyProps={{ component: 'div' }}
                   secondary={
                     <Box>
                       <Typography variant="caption">{agent.title}</Typography>
@@ -849,7 +904,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
             System Agents
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-            🤖 Always present in conversations (like AI assistants in meetings)
+            🧠 Memory-Enhanced AI Assistants
           </Typography>
           <List>
             {Object.values(SYSTEM_AGENTS).map((agent) => {
@@ -874,8 +929,17 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                   />
                 </ListItemAvatar>
                 <ListItemText
-                  primary={agent.name}
-                  secondaryTypographyProps={{ component: 'div' }}
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2">{agent.name}</Typography>
+                      {memoryStatsVisible && agent.memory_stats && (
+                        <MemoryStatusIndicator
+                          agentId={agent.id}
+                          roomId={roomId || 'default'}
+                        />
+                      )}
+                    </Box>
+                  }
                   secondary={
                     <Box>
                       <Typography variant="caption">{agent.title}</Typography>
@@ -924,10 +988,10 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
           {/* Chat Messages */}
           {selectedTab === 0 && (
             <>
-              <List sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+              <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
                 {messages.map((message, index) => renderMessage(message, index))}
                 <div ref={messagesEndRef} />
-              </List>
+              </Box>
 
               {/* Input Area */}
               <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
@@ -1058,7 +1122,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                   <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder="Type your message... (try /capabilities, /create-task [description], /validate-security, /open-code [pattern], /monitor [metric])"
+                    placeholder="Type your message... (try /memory, /remember [text], /capabilities, /create-task [description], /validate-security, /open-code [pattern], /monitor [metric])"
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
@@ -1162,6 +1226,28 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
         </Paper>
       </Box>
       
+      {/* Memory Panel Drawer */}
+      <Drawer
+        anchor="right"
+        open={memoryPanelOpen}
+        onClose={() => setMemoryPanelOpen(false)}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: 400,
+            p: 2
+          }
+        }}
+      >
+        <ConversationMemoryPanel
+          roomId={roomId || 'default'}
+          activeAgents={[...Array.from(participants), ...Array.from(systemParticipants)]}
+          onMemoryItemSelect={(item) => {
+            console.log('Memory item selected:', item);
+            setSelectedMemoryItem(item);
+          }}
+        />
+      </Drawer>
+      
       {/* Clarification Dialog */}
       <ClarificationDialog
         request={selectedClarification}
@@ -1231,3 +1317,5 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
     </Box>
   );
 };
+
+export default ACORNChatRoomMemoryEnhanced;

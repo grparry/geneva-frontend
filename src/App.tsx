@@ -28,6 +28,7 @@ import { ACORNTeamPage } from './pages/ACORNTeamPage';
 import { ACORNWorkflowPage } from './pages/ACORNWorkflowPage';
 import { ACORNTaskPage } from './pages/ACORNTaskPage';
 import { ACORNChatPage } from './pages/ACORNChatPage';
+import { ACORNChatMemoryPage } from './pages/ACORNChatMemoryPage';
 import Phase6Dashboard from './components/phase6/Phase6Dashboard';
 import { Phase6CheckpointsPage } from './pages/Phase6CheckpointsPage';
 import { Phase6RecoveryPage } from './pages/Phase6RecoveryPage';
@@ -110,6 +111,7 @@ const AppContent: React.FC = () => {
     if (path.startsWith('/observability/agents')) return 'Agents';
     
     // ACORN
+    if (path.startsWith('/acorn/memory-chat')) return 'ACORN Memory Chat';
     if (path.startsWith('/acorn')) return 'ACORN Platform';
     
     return 'Geneva Platform';
@@ -191,7 +193,7 @@ const AppContent: React.FC = () => {
         <Toolbar />
         <Box sx={{ flex: 1, overflow: 'auto' }}>
           <Routes>
-            <Route path="/" element={<Navigate to="/federation" replace />} />
+            <Route path="/" element={<Navigate to="/acorn/memory-chat" replace />} />
             
             {/* Federation routes */}
             <Route path="/federation" element={<FederationOverviewPage />} />
@@ -244,6 +246,7 @@ const AppContent: React.FC = () => {
             <Route path="/acorn/workflows" element={<ACORNWorkflowPage />} />
             <Route path="/acorn/tasks" element={<ACORNTaskPage />} />
             <Route path="/acorn/chat" element={<ACORNChatPage />} />
+            <Route path="/acorn/memory-chat" element={<ACORNChatMemoryPage />} />
             <Route path="/acorn/*" element={<Navigate to="/acorn/team" replace />} />
           </Routes>
         </Box>

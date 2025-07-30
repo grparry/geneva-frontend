@@ -42,9 +42,12 @@ export const ACORNChatPage: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE}/api/chat/rooms`);
       const data = await response.json();
-      setRooms(data);
+      // Ensure data is an array
+      setRooms(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch rooms:', error);
+      // Set empty array on error to prevent map errors
+      setRooms([]);
     }
   };
 

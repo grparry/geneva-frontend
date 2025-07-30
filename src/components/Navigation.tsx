@@ -126,6 +126,7 @@ const navigationItems = [
       { path: '/acorn/workflows', label: 'Workflows', icon: <WorkflowIcon /> },
       { path: '/acorn/tasks', label: 'Tasks', icon: <TaskIcon /> },
       { path: '/acorn/chat', label: 'Executive Chat', icon: <ForumIcon /> },
+      { path: '/acorn/memory-chat', label: 'Memory Chat', icon: <MemoryIcon /> },
     ]
   }
 ];
