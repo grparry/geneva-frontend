@@ -38,6 +38,9 @@ import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
 import { OCLPage } from './pages/OCLPage';
 import { CognitiveMemoryPage } from './pages/CognitiveMemoryPage';
 
+// Chronos pages
+import ChronosMainPage from './pages/chronos/ChronosMainPage';
+
 // Federation pages
 import { FederationOverviewPage } from './pages/federation/FederationOverviewPage';
 import { FederationTopologyPage } from './pages/federation/FederationTopologyPage';
@@ -66,6 +69,9 @@ const AppContent: React.FC = () => {
 
   const getPageTitle = () => {
     const path = location.pathname;
+    // Chronos
+    if (path.startsWith('/chronos')) return 'Chronos Production Suite';
+    
     // Federation
     if (path === '/federation') return 'Federation Overview';
     if (path.startsWith('/federation/topology')) return 'Federation Topology';
@@ -119,6 +125,7 @@ const AppContent: React.FC = () => {
 
   const getPageSection = () => {
     const path = location.pathname;
+    if (path.startsWith('/chronos')) return 'Chronos';
     if (path.startsWith('/federation')) return 'Federation';
     if (path.startsWith('/ontology')) return 'Ontology';
     if (path.startsWith('/codex')) return 'Codex';
@@ -194,6 +201,9 @@ const AppContent: React.FC = () => {
         <Box sx={{ flex: 1, overflow: 'auto' }}>
           <Routes>
             <Route path="/" element={<Navigate to="/acorn/memory-chat" replace />} />
+            
+            {/* Chronos routes */}
+            <Route path="/chronos" element={<ChronosMainPage />} />
             
             {/* Federation routes */}
             <Route path="/federation" element={<FederationOverviewPage />} />

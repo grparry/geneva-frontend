@@ -42,10 +42,19 @@ import {
   Layers as LayersIcon,
   Route as RouteIcon,
   Storage as StorageIcon,
+  CloudUpload as DeployIcon,
+  Speed as MetricsIcon,
+  Schedule as ScheduleIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const navigationItems = [
+  {
+    section: 'Chronos Deployment',
+    items: [
+      { path: '/chronos', label: 'Production Suite', icon: <RocketIcon /> },
+    ]
+  },
   {
     section: 'Federation',
     items: [
