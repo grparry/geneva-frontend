@@ -42,8 +42,10 @@ import {
   AutoAwesome as AutoAwesomeIcon
 } from '@mui/icons-material';
 import { ACORNChatRoomMemoryEnhanced } from '../components/ACORNChatRoomMemoryEnhanced';
+import { formatTimestamp } from '../utils/dateUtils';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8400';
+
 
 interface ChatRoom {
   room_id: string;
@@ -442,7 +444,7 @@ export const ACORNChatMemoryPage: React.FC = () => {
                   )}
                   
                   <Typography variant="caption" color="text.secondary">
-                    Created: {new Date(room.created_at).toLocaleString()}
+                    Created: {formatTimestamp(room.created_at)}
                   </Typography>
                 </CardContent>
                 <CardActions>

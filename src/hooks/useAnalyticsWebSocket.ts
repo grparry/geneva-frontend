@@ -153,7 +153,7 @@ export const useLiveMetrics = (
       // Update Redux cache with live data
       (dispatch as any)(
         analyticsApi.util.updateQueryData('getKPIMetrics', 
-          { project_id: '', time_range: '24h' }, 
+          { time_range: '24h' }, 
           (draft: any) => {
             // Update relevant fields with live data
             if (draft && metrics) {

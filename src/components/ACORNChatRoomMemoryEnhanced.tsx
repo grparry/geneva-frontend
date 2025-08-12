@@ -16,6 +16,7 @@ import {
   MenuBook as MemoryPanelIcon
 } from '@mui/icons-material';
 import { useWebSocketSimple } from '../hooks/useWebSocketSimple';
+import { SUPERADMIN_CUSTOMER_ID } from '../constants/tenant';
 import { ClaudeProgressBar, ProgressStage } from './claude/progress/ClaudeProgressBar';
 import { useClaudeProgress } from '../hooks/useClaudeProgress';
 import { ClarificationDialog } from './claude/clarification/ClarificationDialog';
@@ -302,9 +303,52 @@ export const ACORNChatRoomMemoryEnhanced: React.FC<ACORNChatRoomMemoryEnhancedPr
     });
   }, [roomId, initialParticipants, participants, systemParticipants]);
 
+  // Helper function to get tenant context for WebSocket URLs (DATA APIs - use selected tenant)
+  const getTenantQueryParams = useCallback(() => {
+    try {
+      // First try: Get tenant context from project store (for superadmin user selections)
+      const projectStoreData = localStorage.getItem('project-store');
+      if (projectStoreData) {
+        const store = JSON.parse(projectStoreData);
+        const state = store.state || store;
+        
+        if (state.currentCustomer?.id && state.currentProject?.id) {
+          console.log('🏢 WebSocket: Using selected tenant context for chat WebSocket:', {
+            customerId: state.currentCustomer.id,
+            projectId: state.currentProject.id
+          });
+          return `?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
+        }
+      }
+      
+      // Fallback: Use tenant-store for detected tenant (from subdomain)
+      const tenantStoreData = localStorage.getItem('tenant-store');
+      if (tenantStoreData) {
+        const store = JSON.parse(tenantStoreData);
+        const state = store.state || store;
+        
+        if (state.currentCustomer?.id && state.currentProject?.id) {
+          console.log('🏢 WebSocket: Using detected tenant context for chat WebSocket:', {
+            customerId: state.currentCustomer.id,
+            projectId: state.currentProject.id
+          });
+          return `?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
+        }
+      }
+      
+      // No fallback to superadmin for data APIs - require explicit tenant selection
+      console.warn('🏢 WebSocket: No tenant context available for chat WebSocket - connections may fail');
+      
+    } catch (error) {
+      console.warn('🏢 WebSocket: Failed to get tenant context for WebSocket URL:', error);
+    }
+    
+    return '';
+  }, []);
+
   // WebSocket for chat - only connect if we have a roomId
   const chatWs = useWebSocketSimple({
-    url: roomId ? `${WS_BASE}/api/chat/ws/${roomId}` : '',
+    url: roomId ? `${WS_BASE}/api/chat/ws/${roomId}${getTenantQueryParams()}` : '',
     enabled: !!roomId,
     onConnect: () => {
       setIsConnected(true);
@@ -357,7 +401,7 @@ export const ACORNChatRoomMemoryEnhanced: React.FC<ACORNChatRoomMemoryEnhancedPr
 
   // WebSocket for infrastructure events
   const infraWs = useWebSocketSimple({
-    url: `${WS_BASE}/api/chat/infrastructure`,
+    url: `${WS_BASE}/api/chat/infrastructure${getTenantQueryParams()}`,
     enabled: !!roomId,
     onMessage: (infraEvent) => {
       setInfrastructureEvents(prev => [...prev.slice(-50), infraEvent]); // Keep last 50 events

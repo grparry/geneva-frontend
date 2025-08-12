@@ -1,13 +1,18 @@
-import axios from 'axios';
+import { defaultApiClient } from './createApiClient';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8400';
+// Export the tenant-aware API client as the default
+export const apiClient = defaultApiClient;
 
-export const apiClient = axios.create({
-  baseURL: API_BASE + '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Re-export chat API
+export { chatApi, ChatApiService } from './chatApi';
+export type { 
+  CreateChatRoomRequest, 
+  CreateChatRoomResponse, 
+  ChatRoom, 
+  ChatMessage, 
+  SendMessageRequest, 
+  SendMessageResponse 
+} from './chatApi';
 
 export const api = {
   // Communication Stream endpoints
@@ -15,16 +20,12 @@ export const api = {
     const params = new URLSearchParams();
     if (communicationType) params.append('communication_type', communicationType);
     
-    const response = await axios.get(
-      `${API_BASE}/api/observability/stream/${conversationId}?${params}`
-    );
+    const response = await apiClient.get(`/observability/stream/${conversationId}?${params}`);
     return response.data;
   },
   
   getRecentConversations: async (hours: number = 24) => {
-    const response = await axios.get(
-      `${API_BASE}/api/observability/recent?hours=${hours}`
-    );
+    const response = await apiClient.get(`/observability/recent?hours=${hours}`);
     return response.data;
   },
 
@@ -34,23 +35,17 @@ export const api = {
     if (agentId) params.append('agent_id', agentId);
     params.append('time_range', timeRange);
     
-    const response = await axios.get(
-      `${API_BASE}/api/observability/executions?${params}`
-    );
+    const response = await apiClient.get(`/observability/executions?${params}`);
     return response.data;
   },
 
   getExecutionDetails: async (executionId: string) => {
-    const response = await axios.get(
-      `${API_BASE}/api/observability/executions/${executionId}`
-    );
+    const response = await apiClient.get(`/observability/executions/${executionId}`);
     return response.data;
   },
 
   getExecutionContext: async (executionId: string) => {
-    const response = await axios.get(
-      `${API_BASE}/api/observability/executions/${executionId}/context`
-    );
+    const response = await apiClient.get(`/observability/executions/${executionId}/context`);
     return response.data;
   },
 
@@ -59,16 +54,12 @@ export const api = {
     const params = new URLSearchParams();
     params.append('time_range', timeRange);
     
-    const response = await axios.get(
-      `${API_BASE}/api/observability/agents/${agentId}/metrics?${params}`
-    );
+    const response = await apiClient.get(`/observability/agents/${agentId}/metrics?${params}`);
     return response.data;
   },
 
   getSystemHealth: async () => {
-    const response = await axios.get(
-      `${API_BASE}/api/observability/health`
-    );
+    const response = await apiClient.get('/observability/health');
     return response.data;
   }
 };

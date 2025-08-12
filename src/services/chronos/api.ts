@@ -1,5 +1,6 @@
 // Chronos API Client - Connects to the 15 deployment endpoints from Phase 1.10
-import axios, { AxiosResponse } from 'axios';
+// Migrated to use TenantApiClient for consistent tenant header injection
+import { createChronosApiClient } from '../../api/createApiClient';
 import {
   DeploymentRequest,
   DeploymentResponse,
@@ -19,68 +20,39 @@ import {
   BenchmarkResult
 } from '../../types/chronos';
 
-// Base API configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8400';
-const CHRONOS_API_BASE = `${API_BASE_URL}/chronos/deployment`;
-
-// Create axios instance with default config
-const apiClient = axios.create({
-  baseURL: CHRONOS_API_BASE,
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add request interceptor for auth if needed
-apiClient.interceptors.request.use((config) => {
-  // Add any authentication headers here
-  // const token = localStorage.getItem('auth_token');
-  // if (token) {
-  //   config.headers.Authorization = `Bearer ${token}`;
-  // }
-  return config;
-});
-
-// Response interceptor for error handling
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('Chronos API Error:', error.response?.data || error.message);
-    throw error;
-  }
-);
+// Create tenant-aware API client for Chronos
+const apiClient = createChronosApiClient();
 
 export class ChronosAPI {
   // 1. Deploy Chronos - Create new deployment
   static async deployChronos(request: DeploymentRequest): Promise<DeploymentResponse> {
-    const response: AxiosResponse<DeploymentResponse> = await apiClient.post('/deploy', request);
+    const response = await apiClient.post<DeploymentResponse>('/deploy', request);
     return response.data;
   }
 
   // 2. Rollback Chronos - Rollback to previous version  
   static async rollbackChronos(request: RollbackRequest): Promise<DeploymentResponse> {
-    const response: AxiosResponse<DeploymentResponse> = await apiClient.post('/rollback', request);
+    const response = await apiClient.post<DeploymentResponse>('/rollback', request);
     return response.data;
   }
 
   // 3. Get Deployment Status - Check deployment status by environment
   static async getDeploymentStatus(environment?: DeploymentEnvironment): Promise<EnvironmentStatus> {
-    const params = environment ? { environment } : {};
-    const response: AxiosResponse<EnvironmentStatus> = await apiClient.get('/status', { params });
+    const params = environment ? { params: { environment } } : {};
+    const response = await apiClient.get<EnvironmentStatus>('/status', params);
     return response.data;
   }
 
   // 4. Validate Deployment Readiness - Pre-deployment validation
   static async validateDeploymentReadiness(): Promise<ValidationResults> {
-    const response: AxiosResponse<ValidationResults> = await apiClient.get('/validate/readiness');
+    const response = await apiClient.get<ValidationResults>('/validate/readiness');
     return response.data;
   }
 
   // 5. Health Check - Get deployment health status
   static async getHealthCheck(environment?: DeploymentEnvironment): Promise<HealthCheckResult> {
     const params = environment ? { environment } : {};
-    const response: AxiosResponse<HealthCheckResult> = await apiClient.get('/health', { params });
+    const response = await apiClient.get<HealthCheckResult>('/health', { params });
     return response.data;
   }
 
@@ -131,7 +103,7 @@ export class ChronosAPI {
 
   // 9. Get Configuration Template - Get deployment configuration template
   static async getConfigurationTemplate(environment: DeploymentEnvironment): Promise<ConfigurationTemplate> {
-    const response: AxiosResponse<ConfigurationTemplate> = await apiClient.post('/config/template', null, {
+    const response = await apiClient.post<ConfigurationTemplate>('/config/template', null, {
       params: { environment }
     });
     return response.data;
@@ -152,7 +124,7 @@ export class ChronosAPI {
 
   // 11. Get Performance Benchmarks - Performance benchmark results
   static async getPerformanceBenchmarks(): Promise<BenchmarkResult[]> {
-    const response: AxiosResponse<BenchmarkResult[]> = await apiClient.get('/benchmarks/performance');
+    const response = await apiClient.get<BenchmarkResult[]>('/benchmarks/performance');
     return response.data;
   }
 
@@ -172,7 +144,7 @@ export class ChronosAPI {
 
   // 13. Deployment Analytics - Get comprehensive analytics
   static async getDeploymentAnalytics(timeRange: string = '24h'): Promise<ChronosMetrics> {
-    const response: AxiosResponse<ChronosMetrics> = await apiClient.get('/analytics/overview', {
+    const response = await apiClient.get<ChronosMetrics>('/analytics/overview', {
       params: { time_range: timeRange }
     });
     return response.data;
@@ -180,7 +152,7 @@ export class ChronosAPI {
 
   // 14. System Health Overview - Overall system health
   static async getSystemHealth(): Promise<SystemHealth> {
-    const response: AxiosResponse<SystemHealth> = await apiClient.get('/system/health');
+    const response = await apiClient.get<SystemHealth>('/system/health');
     return response.data;
   }
 
@@ -197,23 +169,27 @@ export class ChronosAPI {
 
   // Additional utility methods for schedule management
   static async getSchedules(): Promise<ScheduleInfo[]> {
-    const response: AxiosResponse<ScheduleInfo[]> = await apiClient.get('/schedules');
+    const response = await apiClient.get<ScheduleInfo[]>('/schedules');
     return response.data;
   }
 
   static async getTrinityIntegrationStatus(): Promise<TrinityIntegrationStatus> {
-    const response: AxiosResponse<TrinityIntegrationStatus> = await apiClient.get('/trinity/status');
+    const response = await apiClient.get<TrinityIntegrationStatus>('/trinity/status');
     return response.data;
   }
 
   // Real-time monitoring endpoints
   static async subscribeToDeploymentProgress(deploymentId: string): Promise<EventSource> {
-    const url = `${CHRONOS_API_BASE}/events/deployment/${deploymentId}`;
+    // Get the base URL from the API client
+    const baseURL = apiClient.getAxiosInstance().defaults.baseURL || '';
+    const url = `${baseURL}/events/deployment/${deploymentId}`;
     return new EventSource(url);
   }
 
   static async subscribeToSystemAlerts(): Promise<EventSource> {
-    const url = `${CHRONOS_API_BASE}/events/alerts`;
+    // Get the base URL from the API client  
+    const baseURL = apiClient.getAxiosInstance().defaults.baseURL || '';
+    const url = `${baseURL}/events/alerts`;
     return new EventSource(url);
   }
 }

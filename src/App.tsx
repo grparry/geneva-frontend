@@ -15,6 +15,12 @@ import {
 } from '@mui/icons-material';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
+import { TenantContextGuard } from './components/auth/TenantContextGuard';
+import { TenantContextProvider } from './contexts/TenantContext';
+import { GlobalContextSelector } from './components/layout/GlobalContextSelector';
+import { useMultiTabSync } from './hooks/useMultiTabSync';
+import { useTenantConfig } from './hooks/useTenantConfig';
+import { SUPERADMIN_CUSTOMER_ID } from './constants/tenant';
 import { ObservabilityDashboard } from './pages/ObservabilityDashboard';
 import { CommunicationsPage } from './pages/CommunicationsPage';
 import { MultiStreamPage } from './pages/MultiStreamPage';
@@ -62,10 +68,13 @@ import { InfrastructurePage } from './pages/topology/InfrastructurePage';
 
 const DRAWER_WIDTH = 280;
 
-const AppContent: React.FC = () => {
+const AppContent: React.FC<{ tenantConfig: { isSuperadmin: boolean } }> = ({ tenantConfig }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
+  
+  // Initialize multi-tab synchronization
+  useMultiTabSync();
 
   const getPageTitle = () => {
     const path = location.pathname;
@@ -165,9 +174,12 @@ const AppContent: React.FC = () => {
             )}
           </Stack>
           
-          <Typography variant="h6" sx={{ fontWeight: 'normal' }}>
-            {getPageTitle()}
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Typography variant="h6" sx={{ fontWeight: 'normal' }}>
+              {getPageTitle()}
+            </Typography>
+            {tenantConfig.isSuperadmin && <GlobalContextSelector />}
+          </Stack>
         </Toolbar>
       </AppBar>
 
@@ -199,7 +211,8 @@ const AppContent: React.FC = () => {
       >
         <Toolbar />
         <Box sx={{ flex: 1, overflow: 'auto' }}>
-          <Routes>
+          <TenantContextGuard>
+            <Routes>
             <Route path="/" element={<Navigate to="/acorn/memory-chat" replace />} />
             
             {/* Chronos routes */}
@@ -258,7 +271,8 @@ const AppContent: React.FC = () => {
             <Route path="/acorn/chat" element={<ACORNChatPage />} />
             <Route path="/acorn/memory-chat" element={<ACORNChatMemoryPage />} />
             <Route path="/acorn/*" element={<Navigate to="/acorn/team" replace />} />
-          </Routes>
+            </Routes>
+          </TenantContextGuard>
         </Box>
       </Box>
     </Box>
@@ -266,9 +280,29 @@ const AppContent: React.FC = () => {
 };
 
 function App() {
+  const tenantConfig = useTenantConfig();
+  
+  // Show loading spinner while detecting tenant
+  if (!tenantConfig) {
+    return (
+      <Box sx={{ 
+        height: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+      }}>
+        <Typography>Detecting tenant configuration...</Typography>
+      </Box>
+    );
+  }
+  
+  // Pass tenant config through context or global state
+  // The TenantApiClient will use the detected customer ID as fallback
   return (
     <Router>
-      <AppContent />
+      <TenantContextProvider>
+        <AppContent tenantConfig={tenantConfig} />
+      </TenantContextProvider>
     </Router>
   );
 }

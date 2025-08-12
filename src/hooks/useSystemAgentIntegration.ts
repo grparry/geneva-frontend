@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useWebSocketSimple } from './useWebSocketSimple';
+import { SUPERADMIN_CUSTOMER_ID } from '../constants/tenant';
 
 // Tool Integration Types
 export interface ToolCommand {
@@ -68,13 +69,49 @@ export const useSystemAgentIntegration = (roomId: string) => {
   const [toolCommandHandlers, setToolCommandHandlers] = useState<Record<string, (command: ToolCommand) => void>>({});
   const commandQueueRef = useRef<ToolCommand[]>([]);
 
-  // WebSocket connection for tool commands
+  // WebSocket connection for tool commands with tenant context
+  const getWebSocketUrl = () => {
+    // Get current tenant context for WebSocket authentication
+    try {
+      // First try: Get tenant context from project store (for superadmin user selections)
+      const projectStoreData = localStorage.getItem('project-store');
+      if (projectStoreData) {
+        const store = JSON.parse(projectStoreData);
+        const state = store.state || store;
+        
+        if (state.currentCustomer?.id && state.currentProject?.id) {
+          return `/api/chat/ws/${roomId}?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
+        }
+      }
+      
+      // Fallback: Use tenant-store for detected tenant (from subdomain)
+      const tenantStoreData = localStorage.getItem('tenant-store');
+      if (tenantStoreData) {
+        const store = JSON.parse(tenantStoreData);
+        const state = store.state || store;
+        
+        if (state.currentCustomer?.id && state.currentProject?.id) {
+          return `/api/chat/ws/${roomId}?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
+        }
+      }
+      
+      // No fallback to superadmin for data APIs - require explicit tenant selection
+      console.warn('🏢 WebSocket: No tenant context available for chat WebSocket - connection may fail');
+      
+    } catch (error) {
+      console.warn('🏢 WebSocket: Failed to get tenant context for WebSocket URL:', error);
+    }
+    
+    // Default fallback
+    return `/api/chat/ws/${roomId}`;
+  };
+  
   const { 
     isConnected, 
     sendMessage, 
     lastMessage, 
     error: wsError 
-  } = useWebSocketSimple(`/api/chat/ws/${roomId}`);
+  } = useWebSocketSimple(getWebSocketUrl());
 
   // Process incoming WebSocket messages for tool commands
   useEffect(() => {

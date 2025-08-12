@@ -51,7 +51,6 @@ export const PerformanceOptimizedDashboard: React.FC = () => {
 
   // Hooks
   const { data: kpiData, isLoading: kpiLoading } = useGetKPIMetricsQuery({ 
-    project_id: 'default-project',
     time_range: '30d'
   });
   const serviceWorker = useServiceWorker({

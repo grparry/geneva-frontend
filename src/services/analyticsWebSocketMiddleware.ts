@@ -172,7 +172,7 @@ const updateKPIMetricsCache = (
     (store.dispatch as any)(
       analyticsApi.util.updateQueryData(
         'getKPIMetrics',
-        { project_id: projectId, time_range: timeRange },
+        { time_range: timeRange },
         (draft: KPIMetricsResponse) => {
           if (!draft) return;
 
@@ -219,7 +219,7 @@ const updateTrendDataCache = (
       (store.dispatch as any)(
         analyticsApi.util.updateQueryData(
           'getTrendData',
-          { project_id: projectId, metric, time_range: timeRange },
+          { metric, time_range: timeRange },
           (draft) => {
             if (!draft) return;
 
@@ -265,7 +265,7 @@ const updateCostMetricsCache = (
   (store.dispatch as any)(
     analyticsApi.util.updateQueryData(
       'getCostBreakdown',
-      { project_id: projectId, time_range: '24h' },
+      { time_range: '24h' },
       (draft) => {
         if (!draft) return;
         

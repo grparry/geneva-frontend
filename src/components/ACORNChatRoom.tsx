@@ -38,9 +38,10 @@ import { TaskPlanner } from './claude/advanced/TaskPlanner';
 import { PerformanceOverlay } from './claude/advanced/PerformanceOverlay';
 // System Agent Integration
 import { useSystemAgentIntegration } from '../hooks/useSystemAgentIntegration';
-
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8400';
-const WS_BASE = API_BASE.replace(/^http/, 'ws');
+// Chat API Service
+import { chatApi } from '../api/chatApi';
+// Date utilities
+import { formatTimestamp } from '../utils/dateUtils';
 
 interface Message {
   type: 'user' | 'agent' | 'system';
@@ -251,6 +252,9 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   // Learning insights state
   const [showLearningInsights, setShowLearningInsights] = useState(false);
   
+  // History loading state
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  
   // Debug logging
   useEffect(() => {
     console.log('ACORNChatRoom mounted with:', {
@@ -264,7 +268,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
 
   // WebSocket for chat - only connect if we have a roomId
   const chatWs = useWebSocketSimple({
-    url: roomId ? `${WS_BASE}/api/chat/ws/${roomId}` : '',
+    url: roomId ? chatApi.getWebSocketUrl(roomId) : '',
     enabled: !!roomId,
     onConnect: () => {
       setIsConnected(true);
@@ -292,7 +296,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
 
   // WebSocket for infrastructure events
   const infraWs = useWebSocketSimple({
-    url: `${WS_BASE}/api/chat/infrastructure`,
+    url: chatApi.getInfrastructureWebSocketUrl(),
     enabled: !!roomId,
     onMessage: (infraEvent) => {
       setInfrastructureEvents(prev => [...prev.slice(-50), infraEvent]); // Keep last 50 events
@@ -336,6 +340,55 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   });
 
   // Infrastructure WebSocket is now handled in the hook itself
+  
+  // Load conversation history when entering a room
+  useEffect(() => {
+    const loadRoomHistory = async () => {
+      if (!roomId || !isConnected) return;
+      
+      setIsLoadingHistory(true);
+      
+      try {
+        console.log('🔄 Loading conversation history for room:', roomId);
+        
+        // Load recent messages (last 50)
+        const historyResponse = await chatApi.getRoomHistory(roomId, 50);
+        
+        if (historyResponse.messages && historyResponse.messages.length > 0) {
+          console.log('📜 Loaded', historyResponse.messages.length, 'historical messages');
+          
+          // Convert ChatMessage format to our Message format
+          const historicalMessages: Message[] = historyResponse.messages.map(msg => ({
+            type: msg.type,
+            content: msg.content,
+            timestamp: msg.timestamp,
+            user_id: msg.user_id,
+            agent_id: msg.agent_id,
+            // Add any other fields your Message interface expects
+          }));
+          
+          // Replace current messages with historical ones
+          setMessages(historicalMessages);
+          
+          // Scroll to bottom after loading
+          setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+          
+        } else {
+          console.log('📭 No conversation history found for room:', roomId);
+        }
+        
+      } catch (error) {
+        console.error('❌ Failed to load conversation history:', error);
+        // Don't show error to user - just log it
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+    
+    loadRoomHistory();
+  }, [roomId, isConnected]); // Load when room changes or connection is established
   
   // Claude progress tracking
   const { currentProgress, error: progressError } = useClaudeProgress({
@@ -393,6 +446,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
 
   // Tool Control Event Listeners
   useEffect(() => {
@@ -735,7 +789,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
           )}
           
           <Typography variant="caption" sx={{ opacity: 0.7, display: 'block', mt: 0.5 }}>
-            {new Date(message.timestamp).toLocaleTimeString()}
+            {formatTimestamp(message.timestamp)}
           </Typography>
         </Box>
       </ListItem>
@@ -772,7 +826,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
           }
           secondary={
             <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
-              {new Date(event.timestamp).toLocaleTimeString()}
+              {formatTimestamp(event.timestamp)}
             </Typography>
           }
         />
@@ -925,6 +979,20 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
           {selectedTab === 0 && (
             <>
               <List sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+                {isLoadingHistory && (
+                  <ListItem>
+                    <ListItemText 
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <CircularProgress size={16} />
+                          <Typography variant="body2" color="text.secondary">
+                            Loading conversation history...
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </ListItem>
+                )}
                 {messages.map((message, index) => renderMessage(message, index))}
                 <div ref={messagesEndRef} />
               </List>

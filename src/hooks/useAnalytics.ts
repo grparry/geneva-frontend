@@ -43,23 +43,20 @@ const useTypedSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 // KPI Metrics Hook
 export const useKPIMetrics = (timeRange: string = '30d', options?: { pollingInterval?: number }) => {
-  const projectId = useTypedSelector(state => state.project.currentProjectId);
-  
   const { data, error, isLoading, isFetching, refetch } = useGetKPIMetricsQuery(
-    { project_id: projectId, time_range: timeRange },
+    { time_range: timeRange },
     {
       pollingInterval: options?.pollingInterval,
-      skip: !projectId,
     }
   );
 
   // Subscribe to real-time updates
   useEffect(() => {
-    if (projectId && options?.pollingInterval) {
-      const unsubscribe = subscribeToAnalytics.kpiMetrics(projectId);
+    if (options?.pollingInterval) {
+      const unsubscribe = subscribeToAnalytics.kpiMetrics();
       return unsubscribe;
     }
-  }, [projectId, options?.pollingInterval]);
+  }, [options?.pollingInterval]);
 
   const transformedData = useMemo(() => {
     if (!data) return null;
@@ -77,13 +74,9 @@ export const useKPIMetrics = (timeRange: string = '30d', options?: { pollingInte
 
 // Cost Analysis Hook
 export const useCostAnalysis = (timeRange: string = '30d', granularity: 'hour' | 'day' | 'week' | 'month' = 'day') => {
-  const projectId = useTypedSelector(state => state.project.currentProjectId);
-  
   const { data, error, isLoading, isFetching, refetch } = useGetCostBreakdownQuery(
-    { project_id: projectId, time_range: timeRange, granularity },
-    {
-      skip: !projectId,
-    }
+    { time_range: timeRange, granularity },
+    {}
   );
 
   const transformedData = useMemo(() => {
@@ -105,13 +98,9 @@ export const useCostAnalysis = (timeRange: string = '30d', granularity: 'hour' |
 
 // Workflow Analytics Hook
 export const useWorkflowAnalytics = (timeRange: string = '30d', limit: number = 50) => {
-  const projectId = useTypedSelector(state => state.project.currentProjectId);
-  
   const { data, error, isLoading, isFetching, refetch } = useGetWorkflowPerformanceQuery(
-    { project_id: projectId, time_range: timeRange, limit },
-    {
-      skip: !projectId,
-    }
+    { time_range: timeRange, limit },
+    {}
   );
 
   const transformedData = useMemo(() => {
@@ -130,13 +119,9 @@ export const useWorkflowAnalytics = (timeRange: string = '30d', limit: number = 
 
 // Agent Performance Hook
 export const useAgentPerformance = (timeRange: string = '30d') => {
-  const projectId = useTypedSelector(state => state.project.currentProjectId);
-  
   const { data, error, isLoading, isFetching, refetch } = useGetAgentPerformanceQuery(
-    { project_id: projectId, time_range: timeRange },
-    {
-      skip: !projectId,
-    }
+    { time_range: timeRange },
+    {}
   );
 
   const transformedData = useMemo(() => {
@@ -159,13 +144,9 @@ export const useTrendData = (
   timeRange: string = '30d',
   granularity: 'hour' | 'day' | 'week' | 'month' = 'day'
 ) => {
-  const projectId = useTypedSelector(state => state.project.currentProjectId);
-  
   const { data, error, isLoading, isFetching, refetch } = useGetTrendDataQuery(
-    { project_id: projectId, metric, time_range: timeRange, granularity },
-    {
-      skip: !projectId,
-    }
+    { metric, time_range: timeRange, granularity },
+    {}
   );
 
   const transformedData = useMemo(() => {
@@ -184,24 +165,20 @@ export const useTrendData = (
 
 // Alerts Hook
 export const useAlerts = (status?: 'active' | 'acknowledged' | 'resolved', autoRefresh: boolean = true) => {
-  const projectId = useTypedSelector(state => state.project.currentProjectId);
-  
   const { data, error, isLoading, isFetching, refetch } = useGetAlertsQuery(
-    { project_id: projectId, status },
-    {
-      skip: !projectId,
-    }
+    { status },
+    {}
   );
 
   const [acknowledgeAlert, { isLoading: isAcknowledging }] = useAcknowledgeAlertMutation();
 
   // Subscribe to real-time alerts
   useEffect(() => {
-    if (projectId && autoRefresh) {
-      const unsubscribe = subscribeToAnalytics.alerts(projectId);
+    if (autoRefresh) {
+      const unsubscribe = subscribeToAnalytics.alerts();
       return unsubscribe;
     }
-  }, [projectId, autoRefresh]);
+  }, [autoRefresh]);
 
   const handleAcknowledgeAlert = useCallback(async (alertId: string, notes?: string) => {
     try {
@@ -277,7 +254,6 @@ export const useAnalyticsDashboard = (timeRange: string = '30d') => {
 
 // Chart-specific hooks
 export const useCostTrendChart = (timeRange: string = '30d') => {
-  const projectId = useTypedSelector(state => state.project.currentProjectId);
   const costData = useCostAnalysis(timeRange);
   
   const chartData = useMemo(() => {

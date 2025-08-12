@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Paper, Button, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, Chip, Avatar } from '@mui/material';
+import { Box, Container, Typography, Paper, Button, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Chip, Avatar, Alert, Snackbar } from '@mui/material';
 import { Grid } from '@mui/material';
 import { Chat as ChatIcon, Add as AddIcon, Group as GroupIcon } from '@mui/icons-material';
 import { ACORNChatRoom } from '../components/ACORNChatRoom';
-
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8400';
-
-interface ChatRoom {
-  room_id: string;
-  participants: string[];
-  created_at: string;
-  message_count: number;
-}
+import { ProjectContextValidator } from '../components/ProjectContextValidator';
+import { useProjectContext } from '../store/projectStore';
+import { chatApi, type ChatRoom, type CreateChatRoomRequest } from '../api/chatApi';
+import { formatTimestamp } from '../utils/dateUtils';
 
 const ACORN_EXECUTIVES = [
   { id: 'sloan_ceo', name: 'Sloan', title: 'CEO' },
@@ -27,12 +22,16 @@ const ACORN_EXECUTIVES = [
   { id: 'baxter_assistant', name: 'Baxter', title: 'Assistant' }
 ];
 
+
 export const ACORNChatPage: React.FC = () => {
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
-  const [roomName, setRoomName] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  // Project context
+  const projectContext = useProjectContext();
 
   useEffect(() => {
     fetchRooms();
@@ -40,53 +39,80 @@ export const ACORNChatPage: React.FC = () => {
 
   const fetchRooms = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/chat/rooms`);
-      const data = await response.json();
+      console.log('🔍 ACORN Chat: Fetching rooms using chatApi');
+      const roomsData = await chatApi.listRooms();
+      console.log('🔍 ACORN Chat: Response data:', roomsData);
+      console.log('🔍 ACORN Chat: Data type:', typeof roomsData, 'Is array:', Array.isArray(roomsData));
+      
       // Ensure data is an array
-      setRooms(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to fetch rooms:', error);
+      const rooms = Array.isArray(roomsData) ? roomsData : [];
+      console.log('🔍 ACORN Chat: Setting rooms:', rooms);
+      console.log('🔍 ACORN Chat: Rooms length:', rooms.length);
+      setRooms(rooms);
+      console.log('🔍 ACORN Chat: State after setRooms called');
+    } catch (error: any) {
+      console.error('❌ ACORN Chat: Failed to fetch rooms:', error);
       // Set empty array on error to prevent map errors
       setRooms([]);
+      
+      // Enhanced error handling for authentication
+      if (error.response?.status === 403) {
+        setErrorMessage('Authentication required. Please select a valid project context to view chat rooms.');
+      } else if (error.response?.status === 404) {
+        setErrorMessage('No chat rooms found. Please check your project context or create a new room.');
+      } else if (error.response?.status === 500) {
+        setErrorMessage('Server error. Please try again later or contact support.');
+      } else {
+        setErrorMessage(`Failed to fetch rooms: ${error.response?.data?.detail || error.message}`);
+      }
     }
   };
 
   const createRoom = async () => {
-    if (selectedParticipants.length === 0) return;
+    if (selectedParticipants.length === 0) {
+      setErrorMessage('Please select at least one participant');
+      return;
+    }
+
+    const contextIds = projectContext.getContextIds();
+    if (!contextIds) {
+      setErrorMessage('Please select a project context before creating a chat room');
+      return;
+    }
 
     try {
-      const payload = {
-        customer_id: 'test-customer-001', // TODO: Get from context
-        project_id: 'test-project-001',   // TODO: Get from context
-        participants: selectedParticipants
+      const createRoomRequest: CreateChatRoomRequest = {
+        customer_id: contextIds.customerId,
+        project_id: contextIds.projectId,
+        participants: selectedParticipants,
+        include_system_agents: true
       };
       
-      console.log('Creating room with payload:', payload);
+      console.log('Creating room with request:', createRoomRequest);
       
-      const response = await fetch(`${API_BASE}/api/chat/rooms`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Room creation failed:', response.status, errorText);
-        alert(`Failed to create room: ${response.status} ${errorText}`);
-        return;
-      }
-      
-      const newRoom = await response.json();
+      const newRoom = await chatApi.createRoom(createRoomRequest);
       console.log('Room created:', newRoom);
       
       await fetchRooms();
       setSelectedRoom(newRoom.room_id);
       setCreateDialogOpen(false);
       setSelectedParticipants([]);
-      setRoomName('');
-    } catch (error) {
+      setErrorMessage(null);
+    } catch (error: any) {
       console.error('Failed to create room:', error);
-      alert('Failed to create room. Check console for details.');
+      
+      // Enhanced error handling for new security requirements
+      if (error.response?.status === 403) {
+        setErrorMessage('Authentication required. Please ensure you have selected a valid project context.');
+      } else if (error.response?.status === 404 && error.response?.data?.detail?.includes('Customer')) {
+        setErrorMessage('Customer not found. Please check your project context.');
+      } else if (error.response?.status === 400 && error.response?.data?.detail?.includes('project_id')) {
+        setErrorMessage('Invalid project ID format. Please select a valid project.');
+      } else if (error.response?.status === 400 && error.response?.data?.detail?.includes('does not exist')) {
+        setErrorMessage(`Project validation failed: ${error.response.data.detail}`);
+      } else {
+        setErrorMessage(`Failed to create room: ${error.response?.data?.detail || error.message}`);
+      }
     }
   };
 
@@ -127,11 +153,35 @@ export const ACORNChatPage: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={() => setCreateDialogOpen(true)}
+          disabled={!projectContext.hasContext || !projectContext.customer || !projectContext.project}
         >
           New Chat Room
         </Button>
       </Box>
 
+      {/* Enhanced Project Context Validation */}
+      <ProjectContextValidator 
+        showDetails={false}
+      />
+
+      {/* Error Messages */}
+      <Snackbar
+        open={!!errorMessage}
+        autoHideDuration={6000}
+        onClose={() => setErrorMessage(null)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setErrorMessage(null)}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
+
+      {(() => {
+        console.log('🔍 ACORN Chat: Rendering with rooms.length:', rooms.length);
+        console.log('🔍 ACORN Chat: rooms.length === 0?', rooms.length === 0);
+        console.log('🔍 ACORN Chat: rooms array:', rooms);
+        return null;
+      })()}
       {rooms.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <ChatIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
@@ -145,6 +195,7 @@ export const ACORNChatPage: React.FC = () => {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setCreateDialogOpen(true)}
+            disabled={!projectContext.hasContext || !projectContext.customer || !projectContext.project}
           >
             Create First Room
           </Button>
@@ -178,11 +229,16 @@ export const ACORNChatPage: React.FC = () => {
                     })}
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {room.message_count} messages
+                    {room.message_count} messages • {room.room_type}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Created: {new Date(room.created_at).toLocaleString()}
+                    Created: {formatTimestamp(room.created_at)}
                   </Typography>
+                  {room.last_activity_at && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      Last active: {formatTimestamp(room.last_activity_at)}
+                    </Typography>
+                  )}
                 </CardContent>
                 <CardActions>
                   <Button

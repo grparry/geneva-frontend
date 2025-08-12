@@ -1,12 +1,18 @@
 /**
  * Configuration and error handling for analytics API
+ * Migrated to use TenantApiClient for consistent tenant header injection
  */
 
-import { BaseQueryFn, FetchArgs, fetchBaseQuery, FetchBaseQueryError, retry } from '@reduxjs/toolkit/query/react';
+import { BaseQueryFn, FetchArgs, FetchBaseQueryError, retry } from '@reduxjs/toolkit/query/react';
 import { Mutex } from 'async-mutex';
+import { createAnalyticsApiClient } from './createApiClient';
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Create a mutex for token refresh
 const mutex = new Mutex();
+
+// Create tenant-aware analytics API client
+const analyticsApiClient = createAnalyticsApiClient();
 
 // Custom error types
 export interface AnalyticsApiError {
@@ -21,69 +27,91 @@ const RATE_LIMIT_STATUS = 429;
 const DEFAULT_RETRY_AFTER = 5000; // 5 seconds
 const MAX_RETRIES = 3;
 
-// Create base query with auth
-const baseQuery = fetchBaseQuery({
-  baseUrl: '/api/analytics',
-  prepareHeaders: (headers, { getState }) => {
-    const state = getState() as any;
-    const token = state.auth?.token;
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
-    headers.set('Content-Type', 'application/json');
-    return headers;
-  },
-});
-
-// Base query with automatic token refresh
-const baseQueryWithReauth: BaseQueryFn<
-  string | FetchArgs,
+// Custom base query using TenantApiClient
+const baseQuery: BaseQueryFn<
+  string | (FetchArgs & { axiosConfig?: AxiosRequestConfig }),
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  // Wait until the mutex is available
-  await mutex.waitForUnlock();
-  
-  let result = await baseQuery(args, api, extraOptions);
-  
-  if (result.error && result.error.status === 401) {
-    // Check if another request is already refreshing the token
-    if (!mutex.isLocked()) {
-      const release = await mutex.acquire();
-      try {
-        const refreshResult = await baseQuery(
-          { url: '/auth/refresh', method: 'POST' },
-          api,
-          extraOptions
-        );
-        
-        if (refreshResult.data) {
-          // Store the new token
-          api.dispatch({ type: 'auth/tokenRefreshed', payload: refreshResult.data });
-          // Retry the original query
-          result = await baseQuery(args, api, extraOptions);
-        } else {
-          // Refresh failed, logout user
-          api.dispatch({ type: 'auth/logout' });
-        }
-      } finally {
-        release();
-      }
+  try {
+    let url: string;
+    let config: AxiosRequestConfig = {};
+    
+    if (typeof args === 'string') {
+      url = args;
     } else {
-      // Wait for the token refresh to complete
-      await mutex.waitForUnlock();
-      // Retry the original query
-      result = await baseQuery(args, api, extraOptions);
+      url = args.url;
+      if (args.method && args.method !== 'GET') {
+        config.method = args.method as any;
+      }
+      if (args.body) {
+        config.data = args.body;
+      }
+      if (args.params) {
+        config.params = args.params;
+      }
+      if (args.axiosConfig) {
+        config = { ...config, ...args.axiosConfig };
+      }
     }
+
+    let response: AxiosResponse;
+    const method = config.method?.toLowerCase() || 'get';
+    
+    switch (method) {
+      case 'post':
+        response = await analyticsApiClient.post(url, config.data, { params: config.params });
+        break;
+      case 'put':
+        response = await analyticsApiClient.put(url, config.data, { params: config.params });
+        break;
+      case 'patch':
+        response = await analyticsApiClient.patch(url, config.data, { params: config.params });
+        break;
+      case 'delete':
+        response = await analyticsApiClient.delete(url, { params: config.params });
+        break;
+      default:
+        response = await analyticsApiClient.get(url, { params: config.params });
+    }
+    
+    return { data: response.data };
+  } catch (axiosError: any) {
+    let error: FetchBaseQueryError = {
+      status: 'FETCH_ERROR',
+      error: 'Request failed',
+    };
+
+    if (axiosError.response) {
+      error = {
+        status: axiosError.response.status,
+        data: axiosError.response.data,
+      };
+    } else if (axiosError.request) {
+      error = {
+        status: 'FETCH_ERROR',
+        error: 'Network error',
+      };
+    } else {
+      error = {
+        status: 'PARSING_ERROR',
+        originalStatus: 0,
+        data: axiosError.message,
+        error: axiosError.message,
+      };
+    }
+
+    return { error };
   }
-  
-  return result;
 };
+
+// Base query with tenant context - no auth needed since TenantApiClient handles it
+const baseQueryWithTenantContext = baseQuery;
 
 // Add retry logic with exponential backoff
 export const baseQueryWithRetry = retry(
   async (args: string | FetchArgs, api, extraOptions) => {
-    const result = await baseQueryWithReauth(args, api, extraOptions);
+    const result = await baseQueryWithTenantContext(args, api, extraOptions);
     
     // Handle rate limiting
     if (result.error && result.error.status === RATE_LIMIT_STATUS) {

@@ -1,5 +1,6 @@
 /**
  * Analytics API service using RTK Query for Geneva platform
+ * Migrated to use TenantApiClient - no longer needs project_id parameters
  */
 
 import { createApi } from '@reduxjs/toolkit/query/react';
@@ -10,10 +11,16 @@ import type {
   AgentPerformanceResponse,
   TrendDataResponse,
   AlertResponse,
-  AnalyticsRequestParams,
   AcknowledgeAlertParams
 } from '../types/analytics';
 import { baseQueryWithRetry, CACHE_CONFIG } from './analyticsConfig';
+
+// Updated request params without project_id (handled by TenantApiClient headers)
+export interface AnalyticsRequestParams {
+  time_range?: string;
+  granularity?: 'hour' | 'day' | 'week' | 'month';
+  limit?: number;
+}
 
 // Create the analytics API service
 export const analyticsApi = createApi({
@@ -23,9 +30,9 @@ export const analyticsApi = createApi({
   endpoints: (builder) => ({
     // Get KPI metrics
     getKPIMetrics: builder.query<KPIMetricsResponse, AnalyticsRequestParams>({
-      query: ({ project_id, time_range = '30d' }) => ({
+      query: ({ time_range = '30d' }) => ({
         url: '/kpi-metrics',
-        params: { project_id, time_range },
+        params: { time_range },
       }),
       providesTags: ['KPIMetrics'],
       keepUnusedDataFor: CACHE_CONFIG.kpiMetrics,
@@ -33,9 +40,9 @@ export const analyticsApi = createApi({
 
     // Get cost breakdown
     getCostBreakdown: builder.query<CostBreakdownResponse, AnalyticsRequestParams>({
-      query: ({ project_id, time_range = '30d', granularity = 'day' }) => ({
+      query: ({ time_range = '30d', granularity = 'day' }) => ({
         url: '/cost-breakdown',
-        params: { project_id, time_range, granularity },
+        params: { time_range, granularity },
       }),
       providesTags: ['CostBreakdown'],
       keepUnusedDataFor: CACHE_CONFIG.costBreakdown,
@@ -43,9 +50,9 @@ export const analyticsApi = createApi({
 
     // Get workflow performance
     getWorkflowPerformance: builder.query<WorkflowPerformanceResponse, AnalyticsRequestParams>({
-      query: ({ project_id, time_range = '30d', limit = 50 }) => ({
+      query: ({ time_range = '30d', limit = 50 }) => ({
         url: '/workflow-performance',
-        params: { project_id, time_range, limit },
+        params: { time_range, limit },
       }),
       providesTags: ['WorkflowPerformance'],
       keepUnusedDataFor: CACHE_CONFIG.workflowPerformance,
@@ -53,9 +60,9 @@ export const analyticsApi = createApi({
 
     // Get agent performance
     getAgentPerformance: builder.query<AgentPerformanceResponse, AnalyticsRequestParams>({
-      query: ({ project_id, time_range = '30d' }) => ({
+      query: ({ time_range = '30d' }) => ({
         url: '/agent-performance',
-        params: { project_id, time_range },
+        params: { time_range },
       }),
       providesTags: ['AgentPerformance'],
       keepUnusedDataFor: CACHE_CONFIG.agentPerformance,
@@ -63,9 +70,9 @@ export const analyticsApi = createApi({
 
     // Get trend data for specific metric
     getTrendData: builder.query<TrendDataResponse, AnalyticsRequestParams & { metric: string }>({
-      query: ({ project_id, metric, time_range = '30d', granularity = 'day' }) => ({
+      query: ({ metric, time_range = '30d', granularity = 'day' }) => ({
         url: `/trends/${metric}`,
-        params: { project_id, time_range, granularity },
+        params: { time_range, granularity },
       }),
       providesTags: (result, error, arg) => [{ type: 'Trends', id: arg.metric }],
       keepUnusedDataFor: CACHE_CONFIG.trends,
@@ -73,9 +80,9 @@ export const analyticsApi = createApi({
 
     // Get alerts
     getAlerts: builder.query<AlertResponse, AnalyticsRequestParams & { status?: string }>({
-      query: ({ project_id, status }) => ({
+      query: ({ status }) => ({
         url: '/alerts',
-        params: { project_id, ...(status && { status }) },
+        params: { ...(status && { status }) },
       }),
       providesTags: ['Alerts'],
       keepUnusedDataFor: CACHE_CONFIG.alerts,
@@ -114,25 +121,25 @@ export const {
   useLazyGetAlertsQuery,
 } = analyticsApi;
 
-// Prefetch utilities  
+// Prefetch utilities (no longer need project_id - handled by TenantApiClient headers)
 export const prefetchAnalytics = {
-  kpiMetrics: (dispatch: any, project_id: string, time_range: string = '30d') => 
-    dispatch(analyticsApi.util.prefetch('getKPIMetrics', { project_id, time_range }, {})),
+  kpiMetrics: (dispatch: any, time_range: string = '30d') => 
+    dispatch(analyticsApi.util.prefetch('getKPIMetrics', { time_range }, {})),
   
-  costBreakdown: (dispatch: any, project_id: string, time_range: string = '30d') =>
-    dispatch(analyticsApi.util.prefetch('getCostBreakdown', { project_id, time_range }, {})),
+  costBreakdown: (dispatch: any, time_range: string = '30d') =>
+    dispatch(analyticsApi.util.prefetch('getCostBreakdown', { time_range }, {})),
   
-  workflowPerformance: (dispatch: any, project_id: string, time_range: string = '30d') =>
-    dispatch(analyticsApi.util.prefetch('getWorkflowPerformance', { project_id, time_range }, {})),
+  workflowPerformance: (dispatch: any, time_range: string = '30d') =>
+    dispatch(analyticsApi.util.prefetch('getWorkflowPerformance', { time_range }, {})),
   
-  agentPerformance: (dispatch: any, project_id: string, time_range: string = '30d') =>
-    dispatch(analyticsApi.util.prefetch('getAgentPerformance', { project_id, time_range }, {})),
+  agentPerformance: (dispatch: any, time_range: string = '30d') =>
+    dispatch(analyticsApi.util.prefetch('getAgentPerformance', { time_range }, {})),
 };
 
-// Subscription endpoints for real-time updates
+// Subscription endpoints for real-time updates (no project_id needed - TenantApiClient handles tenant context)
 export const subscribeToAnalytics = {
   // Subscribe to KPI updates with automatic cache updates
-  kpiMetrics: (project_id: string) => {
+  kpiMetrics: () => {
     const updateInterval = setInterval(() => {
       analyticsApi.util.invalidateTags(['KPIMetrics']);
     }, 30000); // Update every 30 seconds
@@ -141,7 +148,7 @@ export const subscribeToAnalytics = {
   },
 
   // Subscribe to alerts with automatic refresh
-  alerts: (project_id: string) => {
+  alerts: () => {
     const updateInterval = setInterval(() => {
       analyticsApi.util.invalidateTags(['Alerts']);
     }, 10000); // Check for new alerts every 10 seconds
