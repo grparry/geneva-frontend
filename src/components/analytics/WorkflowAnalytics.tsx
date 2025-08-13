@@ -213,7 +213,7 @@ const WorkflowAnalytics: React.FC = () => {
         cost: workflow.avgCost * (0.8 + Math.random() * 0.4),
         startTime: startTime.toISOString(),
         endTime: new Date(startTime.getTime() + duration * 1000).toISOString(),
-        agents: ['Digby', 'Iris', 'Bradley'].slice(0, 1 + Math.floor(Math.random() * 3)),
+        agents: ['Iris', 'Bradley'].slice(0, 1 + Math.floor(Math.random() * 2)),
         tools: ['web-search', 'analyzer', 'generator'].slice(0, 1 + Math.floor(Math.random() * 3)),
         errorMessage: status === 'failed' ? 'API rate limit exceeded' : undefined
       });

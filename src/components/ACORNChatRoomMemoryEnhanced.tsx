@@ -124,19 +124,6 @@ const SYSTEM_AGENTS: Record<string, AgentProfile> = {
       cache_hit_rate: 0.92,
       last_learning: new Date().toISOString()
     }
-  },
-  digby_claude: {
-    id: 'digby_claude',
-    name: 'Digby',
-    title: 'Chief Automation Officer',
-    avatar: '⚡',
-    color: '#ff9800',
-    status: 'idle',
-    memory_stats: {
-      total_items: 18,
-      cache_hit_rate: 0.87,
-      last_learning: new Date().toISOString()
-    }
   }
 };
 
@@ -299,7 +286,7 @@ export const ACORNChatRoomMemoryEnhanced: React.FC<ACORNChatRoomMemoryEnhancedPr
       initialParticipants,
       participantsSet: Array.from(participants),
       systemParticipants: Array.from(systemParticipants),
-      note: 'System agents (Thedra, Greta, Bradley, Digby) automatically included with memory enhancement'
+      note: 'System agents (Thedra, Greta, Bradley) automatically included with memory enhancement'
     });
   }, [roomId, initialParticipants, participants, systemParticipants]);
 

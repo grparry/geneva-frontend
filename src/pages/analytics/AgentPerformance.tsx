@@ -80,7 +80,6 @@ import { AgentPerformanceSkeleton } from '../../components/analytics/AnalyticsLo
 
 // Agent type icons and colors
 const agentTypeConfig: Record<string, { icon: string; color: string }> = {
-  'Digby': { icon: '🔍', color: '#2196f3' },
   'Iris': { icon: '🎯', color: '#4caf50' },
   'Bradley': { icon: '📊', color: '#ff9800' },
   'Greta': { icon: '📝', color: '#9c27b0' },
@@ -469,7 +468,6 @@ export const AgentPerformance: React.FC = () => {
                   <MenuItem value="high_performing">High Performing</MenuItem>
                   <MenuItem value="low_performing">Needs Improvement</MenuItem>
                   <Divider />
-                  <MenuItem value="Digby">Digby Agents</MenuItem>
                   <MenuItem value="Iris">Iris Agents</MenuItem>
                   <MenuItem value="Bradley">Bradley Agents</MenuItem>
                   <MenuItem value="Greta">Greta Agents</MenuItem>

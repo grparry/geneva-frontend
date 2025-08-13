@@ -171,15 +171,6 @@ const generateMockDashboardData = (): LearningDashboardData => {
     ],
     topPerformingAgents: [
       {
-        agentId: 'digby_claude',
-        agentName: 'Digby',
-        sessionsInvolved: 67,
-        successRate: 0.94,
-        averageResponseTime: 2.3,
-        userRating: 4.8,
-        specializations: ['React', 'Testing', 'Performance']
-      },
-      {
         agentId: 'iris_cto',
         agentName: 'Iris',
         sessionsInvolved: 45,

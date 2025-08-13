@@ -56,13 +56,6 @@ interface ProgressEvent {
 const Phase6Dashboard: React.FC = () => {
   const [agents, setAgents] = useState<Agent[]>([
     {
-      id: 'digby_claude_code',
-      name: 'Digby',
-      type: 'Development Agent',
-      status: 'idle',
-      capabilities: ['code_development', 'task_planning', 'constraint_validation']
-    },
-    {
       id: 'iris_cto',
       name: 'Iris',
       type: 'Architecture Agent',

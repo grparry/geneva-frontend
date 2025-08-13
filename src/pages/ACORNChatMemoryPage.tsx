@@ -78,7 +78,6 @@ const SYSTEM_AGENTS = [
   { id: 'thedra_codex', name: 'Thedra', title: 'Chief Memory Officer', description: 'Manages conversation memory and context' },
   { id: 'greta_praxis', name: 'Greta', title: 'Chief Ontology Officer', description: 'Validates concepts and maintains semantic consistency' },
   { id: 'bradley_sentinel', name: 'Bradley', title: 'Chief Security Officer', description: 'Provides security guidance and best practices' },
-  { id: 'digby_claude', name: 'Digby', title: 'Chief Automation Officer', description: 'Handles automation and process optimization' }
 ];
 
 export const ACORNChatMemoryPage: React.FC = () => {
@@ -128,7 +127,7 @@ export const ACORNChatMemoryPage: React.FC = () => {
         },
         {
           room_id: 'demo-memory-room-2', 
-          participants: ['sloan_ceo', 'greta_praxis', 'digby_claude'],
+          participants: ['sloan_ceo', 'greta_praxis'],
           created_at: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
           message_count: 47,
           memory_enhanced: true,

@@ -44,7 +44,7 @@ export const MemoryDemoGuide: React.FC<MemoryDemoGuideProps> = ({ onStartDemo })
       actions: [
         'Click "New Memory Chat" button',
         'Enable "Memory Enhancement" toggle',
-        'Select system agents (Thedra, Bradley, Greta, Digby)',
+        'Select system agents (Thedra, Bradley, Greta)',
         'Add ACORN executives if desired',
         'Create the room'
       ]
@@ -167,13 +167,6 @@ export const MemoryDemoGuide: React.FC<MemoryDemoGuideProps> = ({ onStartDemo })
               <ListItemText 
                 primary="Bradley (Chief Security Officer)" 
                 secondary="Provides security guidance with contextual awareness"
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon><TrendingUpIcon color="warning" /></ListItemIcon>
-              <ListItemText 
-                primary="Digby (Chief Automation Officer)" 
-                secondary="Handles automation with learned optimization patterns"
               />
             </ListItem>
           </List>

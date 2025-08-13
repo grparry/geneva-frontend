@@ -194,7 +194,6 @@ const ExecutiveAnalyticsDashboard: React.FC<ExecutiveAnalyticsDashboardProps> = 
 
   // Mock agent performance data
   const agentPerformance: AgentPerformance[] = [
-    { agent: 'Digby', tasks: 3847, successRate: 96.5, avgDuration: 2.8, utilization: 87 },
     { agent: 'Iris', tasks: 2956, successRate: 94.2, avgDuration: 3.5, utilization: 72 },
     { agent: 'Bradley', tasks: 2134, successRate: 98.1, avgDuration: 1.9, utilization: 65 },
     { agent: 'Greta', tasks: 1892, successRate: 93.7, avgDuration: 4.2, utilization: 58 },

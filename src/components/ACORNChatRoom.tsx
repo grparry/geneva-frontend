@@ -95,14 +95,6 @@ const SYSTEM_AGENTS: Record<string, AgentProfile> = {
     color: '#f44336',
     status: 'idle'
   },
-  digby_claude: {
-    id: 'digby_claude',
-    name: 'Digby',
-    title: 'Chief Automation Officer',
-    avatar: '⚡',
-    color: '#ff9800',
-    status: 'idle'
-  }
 };
 
 // ACORN Executive profiles
@@ -262,7 +254,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
       initialParticipants,
       participantsSet: Array.from(participants),
       systemParticipants: Array.from(systemParticipants),
-      note: 'System agents (Thedra, Greta, Bradley, Digby) automatically included'
+      note: 'System agents (Thedra, Greta, Bradley) automatically included'
     });
   }, [roomId, initialParticipants, participants, systemParticipants]);
 

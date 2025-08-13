@@ -90,15 +90,6 @@ const AgentCollaborationHub: React.FC<AgentCollaborationHubProps> = ({
   const [session, setSession] = useState<CoordinationSession | null>(null);
   const [agents, setAgents] = useState<Agent[]>([
     {
-      id: 'digby_claude',
-      name: 'Digby',
-      avatar: '⚡',
-      color: '#ff9800',
-      title: 'Chief Automation Officer',
-      status: 'idle',
-      capabilities: ['code_development', 'task_planning', 'constraint_validation']
-    },
-    {
       id: 'bradley_sentinel',
       name: 'Bradley',
       avatar: '🛡️',
@@ -135,19 +126,19 @@ const AgentCollaborationHub: React.FC<AgentCollaborationHubProps> = ({
     if (!session) return;
 
     const simulateActivity = () => {
-      // Simulate Digby starting work
+      // Simulate Bradley starting work
       setAgents(prev => prev.map(agent => 
-        agent.id === 'digby_claude' 
-          ? { ...agent, status: 'active', currentTask: 'Implementing feature', progress: 45 }
+        agent.id === 'bradley_sentinel' 
+          ? { ...agent, status: 'active', currentTask: 'Security audit', progress: 45 }
           : agent
       ));
 
       // Add a message
       const newMessage: AgentMessage = {
         id: Date.now().toString(),
-        fromAgent: 'digby_claude',
+        fromAgent: 'bradley_sentinel',
         type: 'progress_update',
-        content: 'Feature implementation in progress. Core functionality 45% complete.',
+        content: 'Security audit in progress. Core functionality 45% complete.',
         timestamp: new Date()
       };
       setMessages(prev => [newMessage, ...prev]);
@@ -427,10 +418,10 @@ const AgentCollaborationHub: React.FC<AgentCollaborationHubProps> = ({
                   variant="outlined"
                   size="small"
                   startIcon={<HandoffIcon />}
-                  onClick={() => initiateHandoff('digby_claude', 'bradley_sentinel')}
-                  disabled={agents.find(a => a.id === 'digby_claude')?.status !== 'active'}
+                  onClick={() => initiateHandoff('bradley_sentinel', 'greta_praxis')}
+                  disabled={agents.find(a => a.id === 'bradley_sentinel')?.status !== 'active'}
                 >
-                  Digby → Bradley
+                  Bradley → Greta
                 </Button>
                 <Button
                   variant="outlined"
