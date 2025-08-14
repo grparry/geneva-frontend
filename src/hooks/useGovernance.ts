@@ -37,6 +37,7 @@ export const useGovernanceState = (roomId: string | null): UseGovernanceStateRet
 
     try {
       const governanceState = await governanceService.getRoomGovernanceState(roomId);
+      console.log('🏛️ Governance data received:', governanceState);
       setGovernance(governanceState);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch governance state';

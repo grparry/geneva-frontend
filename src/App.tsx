@@ -28,6 +28,7 @@ import { ConversationReplayPage } from './pages/ConversationReplayPage';
 import { GlobalSearchPage } from './pages/GlobalSearchPage';
 import { PatternAnalysisPage } from './pages/PatternAnalysisPage';
 import { AlertingSystemPage } from './pages/AlertingSystemPage';
+import { GovernanceTestComponent } from './components/governance/GovernanceTestComponent';
 import { ExecutionsPage } from './pages/ExecutionsPage';
 import { AgentsPage } from './pages/AgentsPage';
 import { ACORNTeamPage } from './pages/ACORNTeamPage';
@@ -270,6 +271,7 @@ const AppContent: React.FC<{ tenantConfig: { isSuperadmin: boolean } }> = ({ ten
             <Route path="/acorn/tasks" element={<ACORNTaskPage />} />
             <Route path="/acorn/chat" element={<ACORNChatPage />} />
             <Route path="/acorn/memory-chat" element={<ACORNChatMemoryPage />} />
+            <Route path="/acorn/governance" element={<GovernanceTestComponent />} />
             <Route path="/acorn/*" element={<Navigate to="/acorn/team" replace />} />
             </Routes>
           </TenantContextGuard>

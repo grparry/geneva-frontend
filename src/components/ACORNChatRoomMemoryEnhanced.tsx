@@ -44,6 +44,9 @@ import { useSystemAgentIntegration } from '../hooks/useSystemAgentIntegration';
 import { MemoryStatusIndicator } from './memory/MemoryStatusIndicator';
 import { ConversationMemoryPanel } from './memory/ConversationMemoryPanel';
 import { MemoryEnhancedMessage } from './memory/MemoryEnhancedMessage';
+// Governance Integration
+import { useRoomGovernance } from '../hooks/useGovernance';
+import { RoomStateIndicator, TrinityQueueIndicator, useACORNGovernanceContext } from './governance';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8400';
 const WS_BASE = API_BASE.replace(/^http/, 'ws');

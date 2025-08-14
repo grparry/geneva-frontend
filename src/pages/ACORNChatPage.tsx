@@ -129,8 +129,8 @@ export const ACORNChatPage: React.FC = () => {
   if (selectedRoom) {
     const room = rooms.find(r => r.room_id === selectedRoom);
     return (
-      <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ height: 'calc(100vh - 70px)', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ p: 0.5, borderBottom: 1, borderColor: 'divider' }}>
           <Button onClick={() => setSelectedRoom(null)} startIcon={<ChatIcon />}>
             Back to Rooms
           </Button>

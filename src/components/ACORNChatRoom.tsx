@@ -42,6 +42,9 @@ import { useSystemAgentIntegration } from '../hooks/useSystemAgentIntegration';
 import { chatApi } from '../api/chatApi';
 // Date utilities
 import { formatTimestamp } from '../utils/dateUtils';
+// Governance Integration
+import { useRoomGovernance } from '../hooks/useGovernance';
+import { RoomStateIndicator, TrinityQueueIndicator, useACORNGovernanceContext } from './governance';
 
 interface Message {
   type: 'user' | 'agent' | 'system';
@@ -243,6 +246,29 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   
   // Learning insights state
   const [showLearningInsights, setShowLearningInsights] = useState(false);
+  
+  // Governance integration
+  const {
+    governance,
+    isLoading: governanceLoading,
+    error: governanceError,
+    trinityQueue,
+    webSocket: governanceWebSocket,
+    refreshAll: refreshGovernance
+  } = useRoomGovernance(roomId || null);
+  
+  const {
+    canUserSend,
+    canUserRead,
+    areExecutiveAgentsActive,
+    isRoomBlocked,
+    getInputPlaceholder
+  } = useACORNGovernanceContext(roomId || '');
+  
+  // Debug governance context
+  useEffect(() => {
+    console.log('🔒 Governance context:', { canUserSend, canUserRead, areExecutiveAgentsActive, isRoomBlocked });
+  }, [canUserSend, canUserRead, areExecutiveAgentsActive, isRoomBlocked]);
   
   // History loading state
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -548,6 +574,8 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
       console.log('Sending message:', inputMessage);
       console.log('All participants:', allParticipants);
       console.log('Pending media:', pendingMedia.length);
+      console.log('🔌 WebSocket connected?', chatWs.isConnected);
+      console.log('🔌 WebSocket status:', chatWs);
       
       // Check for test commands
       if (inputMessage === '/test-clarification') {
@@ -613,6 +641,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
         return;
       }
       
+      console.log('📤 About to send message via WebSocket...');
       chatWs.send({
         type: 'user',
         content: inputMessage,
@@ -620,6 +649,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
         target_agents: allParticipants.length > 0 ? allParticipants : undefined,
         media_items: pendingMedia.length > 0 ? pendingMedia : undefined
       });
+      console.log('✅ Message sent successfully!');
       setInputMessage('');
       setPendingMedia([]);
       setShowMediaUpload(false);
@@ -827,10 +857,10 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   };
 
   return (
-    <Box sx={{ display: 'flex', gap: 2, height: '100vh', p: 2 }}>
+    <Box sx={{ display: 'flex', gap: 1, height: '100%', p: 0.5 }}>
       {/* Agent Selection Panel */}
       <Box sx={{ width: '25%' }}>
-        <Paper sx={{ p: 2, height: '100%', overflow: 'auto' }}>
+        <Paper sx={{ p: 1, height: '100%', overflow: 'auto' }}>
           <Typography variant="h6" gutterBottom>
             ACORN Executives
           </Typography>
@@ -881,6 +911,8 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                       : addParticipant(agent.id)
                   }
                   color={participants.has(agent.id) ? 'primary' : 'default'}
+                  disabled={!areExecutiveAgentsActive}
+                  title={!areExecutiveAgentsActive ? 'Executive agents suspended by governance' : ''}
                 >
                   {participants.has(agent.id) ? <CloseIcon /> : <AddIcon />}
                 </IconButton>
@@ -957,20 +989,36 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
       {/* Chat and Infrastructure Panel */}
       <Box sx={{ flex: 1 }}>
         <Paper sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={selectedTab} onChange={(_, newValue) => setSelectedTab(newValue)} variant="scrollable" scrollButtons="auto">
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center' }}>
+            <Tabs value={selectedTab} onChange={(_, newValue) => setSelectedTab(newValue)} variant="scrollable" scrollButtons="auto" sx={{ flex: 1 }}>
               <Tab label="Chat" />
               <Tab label="Infrastructure Events" />
               <Tab label="Constraints" icon={<SecurityIcon />} />
               <Tab label="Code Editor" icon={<EditIcon />} />
               <Tab label="Task Planner" icon={<TaskIcon />} />
             </Tabs>
+            
+            {governance && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2 }}>
+                <Chip 
+                  label={governance?.current_state || 'UNKNOWN'}
+                  color={governance?.current_state === 'READY' ? 'success' : governance?.current_state === 'TRINITY_REVIEW' ? 'warning' : 'default'}
+                  size="small"
+                />
+                
+                <Chip 
+                  label={`Queue: ${governance?.trinity_queue_length || 0}`}
+                  color={(governance?.trinity_queue_length || 0) > 0 ? 'warning' : 'default'}
+                  size="small"
+                />
+              </Box>
+            )}
           </Box>
 
           {/* Chat Messages */}
           {selectedTab === 0 && (
             <>
-              <List sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+              <List sx={{ flexGrow: 1, overflow: 'auto', p: 1 }}>
                 {isLoadingHistory && (
                   <ListItem>
                     <ListItemText 
@@ -1118,12 +1166,17 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                   <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder="Type your message... (try /capabilities, /create-task [description], /validate-security, /open-code [pattern], /monitor [metric])"
+                    placeholder={getInputPlaceholder()}
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                    disabled={!isConnected || (participants.size === 0 && systemParticipants.size === 0)}
+                    disabled={!isConnected || !canUserSend || (participants.size === 0 && systemParticipants.size === 0)}
                     inputRef={inputRef as any}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: canUserSend ? 'background.paper' : 'action.disabledBackground'
+                      }
+                    }}
                   />
                   
                   {/* Capability Hints */}

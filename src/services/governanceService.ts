@@ -170,7 +170,7 @@ export class GovernanceApiService {
    */
   async getRoomStatusWithGovernance(roomId: string): Promise<any> {
     try {
-      const response = await this.apiClient.get(`/rooms/${roomId}/status`);
+      const response = await this.apiClient.get(`/rooms/${roomId}/governance/status`);
       return response.data;
     } catch (error) {
       console.error(`Failed to get room status with governance for ${roomId}:`, error);
@@ -180,7 +180,7 @@ export class GovernanceApiService {
 
   /**
    * Create WebSocket URL for governance events
-   * Leverages existing infrastructure WebSocket with governance event filtering
+   * Uses existing chat WebSocket infrastructure for now
    */
   getGovernanceWebSocketUrl(roomId?: string): string {
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -188,11 +188,11 @@ export class GovernanceApiService {
     const tenantParams = this.getTenantQueryParams();
     
     if (roomId) {
-      // Room-specific governance events
-      return `${wsProtocol}//${wsHost}/api/chat/ws/${roomId}${tenantParams}&governance=true`;
+      // Use existing chat WebSocket - governance events will be filtered on frontend
+      return `${wsProtocol}//${wsHost}/api/chat/ws/${roomId}${tenantParams}`;
     } else {
       // System-wide governance events via infrastructure WebSocket
-      return `${wsProtocol}//${wsHost}/api/chat/infrastructure${tenantParams}&governance=true`;
+      return `${wsProtocol}//${wsHost}/api/chat/infrastructure${tenantParams}`;
     }
   }
 
