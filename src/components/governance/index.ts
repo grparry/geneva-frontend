@@ -1,48 +1,34 @@
 /**
- * Governance Components Index
+ * Simplified Governance Components Index
  * 
- * Exports all governance-related components for easy importing.
+ * Basic governance components for minimal state display.
+ * Complex WebSocket and Trinity components simplified to placeholders.
  */
 
-// Core Components
+// Core Components (simplified)
 export { RoomStateIndicator, RoomStateBadge, RoomStateDot } from './RoomStateIndicator';
+
+// Placeholder Components (for backward compatibility)
 export { TrinityQueueStatus, TrinityQueueIndicator } from './TrinityQueueStatus';
 export { 
   GovernanceNotifications, 
   GovernanceNotificationBadge, 
   GovernanceNotificationSummary 
 } from './GovernanceNotifications';
-
-// Integration Components
 export { 
   ACORNChatRoomGovernance, 
   useACORNGovernanceContext 
 } from './ACORNChatRoomGovernance';
-
-// Dashboard Components
 export { GovernanceDashboard } from './GovernanceDashboard';
-
-// Test Component (for development)
 export { GovernanceTestComponent } from './GovernanceTestComponent';
 
-// Re-export types and services for convenience
+// Re-export basic types
 export type {
   RoomState,
   ParticipationRules,
-  RoomGovernanceState,
-  TrinityQueueStatus as TrinityQueueStatusType,
-  GovernanceSystemSummary,
-  GovernanceNotification,
-  GovernanceWebSocketEvent
+  RoomGovernanceState
 } from '../../types/governance';
 
-export { governanceService, GovernanceWebSocketUtils } from '../../services/governanceService';
-
-export {
-  useGovernanceState,
-  useTrinityQueue,
-  useGovernanceSummary,
-  useGovernanceWebSocket,
-  useRoomGovernance,
-  useGovernanceNotifications
-} from '../../hooks/useGovernance';
+// Re-export simplified service and hook
+export { governanceService } from '../../services/governanceService';
+export { useGovernanceState, useRoomGovernance } from '../../hooks/useGovernance';

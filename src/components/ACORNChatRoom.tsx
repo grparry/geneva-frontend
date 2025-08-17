@@ -42,9 +42,8 @@ import { useSystemAgentIntegration } from '../hooks/useSystemAgentIntegration';
 import { chatApi } from '../api/chatApi';
 // Date utilities
 import { formatTimestamp } from '../utils/dateUtils';
-// Governance Integration
+// Basic Governance Integration
 import { useRoomGovernance } from '../hooks/useGovernance';
-import { RoomStateIndicator, TrinityQueueIndicator, useACORNGovernanceContext } from './governance';
 
 interface Message {
   type: 'user' | 'agent' | 'system';
@@ -247,28 +246,13 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   // Learning insights state
   const [showLearningInsights, setShowLearningInsights] = useState(false);
   
-  // Governance integration
-  const {
-    governance,
-    isLoading: governanceLoading,
-    error: governanceError,
-    trinityQueue,
-    webSocket: governanceWebSocket,
-    refreshAll: refreshGovernance
-  } = useRoomGovernance(roomId || null);
-  
-  const {
-    canUserSend,
-    canUserRead,
-    areExecutiveAgentsActive,
-    isRoomBlocked,
-    getInputPlaceholder
-  } = useACORNGovernanceContext(roomId || '');
+  // Basic governance state
+  const { governance } = useRoomGovernance(roomId || null);
   
   // Debug governance context
   useEffect(() => {
-    console.log('🔒 Governance context:', { canUserSend, canUserRead, areExecutiveAgentsActive, isRoomBlocked });
-  }, [canUserSend, canUserRead, areExecutiveAgentsActive, isRoomBlocked]);
+    console.log('🔒 Governance context:', { governance });
+  }, [governance]);
   
   // History loading state
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -911,8 +895,8 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                       : addParticipant(agent.id)
                   }
                   color={participants.has(agent.id) ? 'primary' : 'default'}
-                  disabled={!areExecutiveAgentsActive}
-                  title={!areExecutiveAgentsActive ? 'Executive agents suspended by governance' : ''}
+                  disabled={false}
+                  title=''
                 >
                   {participants.has(agent.id) ? <CloseIcon /> : <AddIcon />}
                 </IconButton>
@@ -998,17 +982,11 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
               <Tab label="Task Planner" icon={<TaskIcon />} />
             </Tabs>
             
-            {governance && (
+            {governance?.current_state && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2 }}>
                 <Chip 
-                  label={governance?.current_state || 'UNKNOWN'}
-                  color={governance?.current_state === 'READY' ? 'success' : governance?.current_state === 'TRINITY_REVIEW' ? 'warning' : 'default'}
-                  size="small"
-                />
-                
-                <Chip 
-                  label={`Queue: ${governance?.trinity_queue_length || 0}`}
-                  color={(governance?.trinity_queue_length || 0) > 0 ? 'warning' : 'default'}
+                  label={governance.current_state}
+                  color={governance.current_state === 'READY' ? 'success' : 'default'}
                   size="small"
                 />
               </Box>
@@ -1166,15 +1144,15 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                   <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder={getInputPlaceholder()}
+                    placeholder="Type your message..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                    disabled={!isConnected || !canUserSend || (participants.size === 0 && systemParticipants.size === 0)}
+                    disabled={!isConnected || (participants.size === 0 && systemParticipants.size === 0)}
                     inputRef={inputRef as any}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        backgroundColor: canUserSend ? 'background.paper' : 'action.disabledBackground'
+                        backgroundColor: 'background.paper'
                       }
                     }}
                   />

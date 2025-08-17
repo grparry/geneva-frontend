@@ -51,7 +51,7 @@ export const useTenantStore = create<TenantStore>()(
           
           // Also update project-store for backward compatibility with existing APIs
           try {
-            // Read existing project-store to understand the format, then update it
+            // Read existing project-store structure
             let existingProjectStore = {};
             try {
               const existing = localStorage.getItem('project-store');
@@ -62,13 +62,17 @@ export const useTenantStore = create<TenantStore>()(
               console.warn('🏪 TenantStore: Could not read existing project-store:', e);
             }
             
+            // Update the project-store with the correct structure
             const projectStoreData = {
               ...existingProjectStore,
               state: {
+                ...(existingProjectStore as any)?.state,
                 currentCustomer: customer,
                 currentProject: project
-              }
+              },
+              version: 0
             };
+            
             localStorage.setItem('project-store', JSON.stringify(projectStoreData));
             console.log('🏪 TenantStore: Updated project-store with new context:', {
               customerId: customer.id,
@@ -76,6 +80,15 @@ export const useTenantStore = create<TenantStore>()(
               customerName: customer.name,
               projectName: project.name
             });
+            
+            // Trigger a storage event to ensure ProjectStore notices the change
+            window.dispatchEvent(new StorageEvent('storage', {
+              key: 'project-store',
+              newValue: JSON.stringify(projectStoreData),
+              storageArea: localStorage
+            }));
+            console.log('🏪 TenantStore: Dispatched storage event for project-store sync');
+            
           } catch (error) {
             console.warn('🏪 TenantStore: Failed to update project-store:', error);
           }

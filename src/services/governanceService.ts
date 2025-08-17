@@ -1,20 +1,12 @@
 /**
- * Governance API Service
+ * Simplified Governance API Service
  * 
- * Service layer for Room State Governance API endpoints.
- * Handles governance state, Trinity queue management, and system monitoring.
- * Uses the same authentication and tenant context as the chat API.
+ * Basic REST API integration for room governance state.
+ * WebSocket functionality removed - governance is now request-scoped.
  */
 
 import axios, { AxiosResponse } from 'axios';
-import {
-  RoomGovernanceState,
-  TrinityQueueStatus,
-  GovernanceSystemSummary,
-  StateTransitionRequest,
-  StateTransitionResponse,
-  GovernanceWebSocketEvent
-} from '../types/governance';
+import { RoomGovernanceState } from '../types/governance';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8400';
 
@@ -116,114 +108,10 @@ export class GovernanceApiService {
     }
   }
 
-  /**
-   * Get Trinity review queue status for a specific room
-   */
-  async getTrinityQueueStatus(roomId: string): Promise<TrinityQueueStatus> {
-    try {
-      const response: AxiosResponse<TrinityQueueStatus> = await this.apiClient.get(
-        `/rooms/${roomId}/governance/trinity/queue`
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to get Trinity queue status for room ${roomId}:`, error);
-      throw new Error(`Failed to get Trinity queue status: ${this.getErrorMessage(error)}`);
-    }
-  }
 
-  /**
-   * Get system-wide governance health and statistics
-   */
-  async getGovernanceSystemSummary(): Promise<GovernanceSystemSummary> {
-    try {
-      const response: AxiosResponse<GovernanceSystemSummary> = await this.apiClient.get(
-        '/governance/summary'
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Failed to get governance system summary:', error);
-      throw new Error(`Failed to get governance summary: ${this.getErrorMessage(error)}`);
-    }
-  }
 
-  /**
-   * Manually transition room state (admin/testing use)
-   */
-  async transitionRoomState(
-    roomId: string, 
-    request: StateTransitionRequest
-  ): Promise<StateTransitionResponse> {
-    try {
-      const response: AxiosResponse<StateTransitionResponse> = await this.apiClient.post(
-        `/rooms/${roomId}/governance/state/transition`,
-        request
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to transition room ${roomId} state:`, error);
-      throw new Error(`Failed to transition room state: ${this.getErrorMessage(error)}`);
-    }
-  }
 
-  /**
-   * Get enhanced room status that includes governance information
-   */
-  async getRoomStatusWithGovernance(roomId: string): Promise<any> {
-    try {
-      const response = await this.apiClient.get(`/rooms/${roomId}/governance/status`);
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to get room status with governance for ${roomId}:`, error);
-      throw new Error(`Failed to get room status: ${this.getErrorMessage(error)}`);
-    }
-  }
 
-  /**
-   * Create WebSocket URL for governance events
-   * Uses existing chat WebSocket infrastructure for now
-   */
-  getGovernanceWebSocketUrl(roomId?: string): string {
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = API_BASE.replace(/^https?:\/\//, '');
-    const tenantParams = this.getTenantQueryParams();
-    
-    if (roomId) {
-      // Use existing chat WebSocket - governance events will be filtered on frontend
-      return `${wsProtocol}//${wsHost}/api/chat/ws/${roomId}${tenantParams}`;
-    } else {
-      // System-wide governance events via infrastructure WebSocket
-      return `${wsProtocol}//${wsHost}/api/chat/infrastructure${tenantParams}`;
-    }
-  }
-
-  private getTenantQueryParams(): string {
-    try {
-      const projectStoreData = localStorage.getItem('project-store');
-      if (projectStoreData) {
-        const store = JSON.parse(projectStoreData);
-        const state = store.state || store;
-        
-        if (state.currentCustomer?.id && state.currentProject?.id) {
-          return `?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
-        }
-      }
-      
-      const tenantStoreData = localStorage.getItem('tenant-store');
-      if (tenantStoreData) {
-        const store = JSON.parse(tenantStoreData);
-        const state = store.state || store;
-        
-        if (state.currentCustomer?.id && state.currentProject?.id) {
-          return `?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
-        }
-      }
-      
-    } catch (error) {
-      console.warn('Failed to get tenant context for governance WebSocket:', error);
-    }
-    
-    return '';
-  }
 
   private getErrorMessage(error: any): string {
     if (error.response?.data?.detail) {
@@ -237,77 +125,7 @@ export class GovernanceApiService {
     }
     return 'Unknown error occurred';
   }
-
-  /**
-   * Parse governance events from WebSocket messages
-   */
-  static parseGovernanceEvent(data: any): GovernanceWebSocketEvent | null {
-    try {
-      if (data.type === 'room_state_change' || data.type === 'trinity_queue_update') {
-        return data as GovernanceWebSocketEvent;
-      }
-      return null;
-    } catch (error) {
-      console.warn('Failed to parse governance event:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Check if a WebSocket message is a governance event
-   */
-  static isGovernanceEvent(data: any): boolean {
-    return data?.type === 'room_state_change' || data?.type === 'trinity_queue_update';
-  }
 }
 
 // Export singleton instance
 export const governanceService = new GovernanceApiService();
-
-// Export utility functions for WebSocket integration
-export const GovernanceWebSocketUtils = {
-  parseEvent: GovernanceApiService.parseGovernanceEvent,
-  isGovernanceEvent: GovernanceApiService.isGovernanceEvent,
-  
-  /**
-   * Filter governance events from a stream of WebSocket messages
-   */
-  filterGovernanceEvents: (messages: any[]): GovernanceWebSocketEvent[] => {
-    return messages
-      .filter(GovernanceApiService.isGovernanceEvent)
-      .map(GovernanceApiService.parseGovernanceEvent)
-      .filter(Boolean) as GovernanceWebSocketEvent[];
-  },
-
-  /**
-   * Create governance notification from WebSocket event
-   */
-  createNotificationFromEvent: (event: GovernanceWebSocketEvent) => {
-    switch (event.type) {
-      case 'room_state_change':
-        return {
-          id: `state-change-${Date.now()}`,
-          type: 'state_change' as const,
-          severity: event.new_state === 'BLOCKED' ? 'error' as const : 'info' as const,
-          title: 'Room State Changed',
-          message: `Room transitioned from ${event.previous_state} to ${event.new_state}: ${event.reason}`,
-          timestamp: event.timestamp,
-          room_id: event.room_id
-        };
-      
-      case 'trinity_queue_update':
-        return {
-          id: `queue-update-${Date.now()}`,
-          type: 'queue_update' as const,
-          severity: event.priority === 'critical' ? 'warning' as const : 'info' as const,
-          title: 'Trinity Queue Update',
-          message: `Position ${event.queue_position} of ${event.queue_length} (${event.estimated_wait_time})`,
-          timestamp: new Date().toISOString(),
-          room_id: event.room_id
-        };
-      
-      default:
-        return null;
-    }
-  }
-};
