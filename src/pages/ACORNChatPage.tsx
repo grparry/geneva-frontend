@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Paper, Button, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Chip, Avatar, Alert, Snackbar } from '@mui/material';
+import { Box, Container, Typography, Paper, Button, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Chip, Avatar, Alert, Snackbar, IconButton, Tooltip } from '@mui/material';
 import { Grid } from '@mui/material';
-import { Chat as ChatIcon, Add as AddIcon, Group as GroupIcon } from '@mui/icons-material';
+import { Chat as ChatIcon, Add as AddIcon, Group as GroupIcon, Edit as EditIcon, AdminPanelSettings as AdminIcon } from '@mui/icons-material';
 import { ACORNChatRoom } from '../components/ACORNChatRoom';
 import { ProjectContextValidator } from '../components/ProjectContextValidator';
 import { useProjectContext } from '../store/projectStore';
 import { chatApi, type ChatRoom, type CreateChatRoomRequest } from '../api/chatApi';
 import { formatTimestamp } from '../utils/dateUtils';
+import { useRoomStates } from '../hooks/useRoomStates';
+import { RoomStateCard } from '../components/governance/RoomStateCard';
+import { RoomGovernanceModal } from '../components/governance/RoomGovernanceModal';
 
 const ACORN_EXECUTIVES = [
   { id: 'sloan_ceo', name: 'Sloan', title: 'CEO' },
@@ -30,8 +33,20 @@ export const ACORNChatPage: React.FC = () => {
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
+  // Governance modal state
+  const [governanceModalOpen, setGovernanceModalOpen] = useState(false);
+  const [selectedGovernanceRoom, setSelectedGovernanceRoom] = useState<string | null>(null);
+  
   // Project context
   const projectContext = useProjectContext();
+  
+  // Room states management
+  const { 
+    roomsWithStates, 
+    isLoading: statesLoading, 
+    error: statesError,
+    refreshStates
+  } = useRoomStates(rooms);
 
   useEffect(() => {
     fetchRooms();
@@ -94,6 +109,8 @@ export const ACORNChatPage: React.FC = () => {
       console.log('Room created:', newRoom);
       
       await fetchRooms();
+      // Refresh room states after creating new room
+      setTimeout(() => refreshStates(), 500);
       setSelectedRoom(newRoom.room_id);
       setCreateDialogOpen(false);
       setSelectedParticipants([]);
@@ -126,8 +143,23 @@ export const ACORNChatPage: React.FC = () => {
       .join(', ');
   };
 
+  const handleGovernanceEdit = (roomId: string) => {
+    setSelectedGovernanceRoom(roomId);
+    setGovernanceModalOpen(true);
+  };
+
+  const handleGovernanceModalClose = () => {
+    setGovernanceModalOpen(false);
+    setSelectedGovernanceRoom(null);
+  };
+
+  const handleStateChanged = () => {
+    // Refresh room states when a state transition occurs
+    refreshStates();
+  };
+
   if (selectedRoom) {
-    const room = rooms.find(r => r.room_id === selectedRoom);
+    const room = roomsWithStates.find(r => r.room_id === selectedRoom);
     return (
       <Box sx={{ height: 'calc(100vh - 70px)', display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ p: 0.5, borderBottom: 1, borderColor: 'divider' }}>
@@ -175,6 +207,16 @@ export const ACORNChatPage: React.FC = () => {
           {errorMessage}
         </Alert>
       </Snackbar>
+      
+      {/* Room States Error */}
+      {statesError && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Failed to load room states: {statesError}
+          <Button size="small" onClick={refreshStates} sx={{ ml: 1 }}>
+            Retry
+          </Button>
+        </Alert>
+      )}
 
       {(() => {
         console.log('🔍 ACORN Chat: Rendering with rooms.length:', rooms.length);
@@ -182,6 +224,13 @@ export const ACORNChatPage: React.FC = () => {
         console.log('🔍 ACORN Chat: rooms array:', rooms);
         return null;
       })()}
+      {/* Loading indicator for room states */}
+      {statesLoading && rooms.length > 0 && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Loading room states...
+        </Alert>
+      )}
+      
       {rooms.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <ChatIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
@@ -202,15 +251,31 @@ export const ACORNChatPage: React.FC = () => {
         </Paper>
       ) : (
         <Grid container spacing={3}>
-          {rooms.map((room) => (
+          {roomsWithStates.map((room) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={room.room_id}>
               <Card>
                 <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <GroupIcon sx={{ mr: 1, color: 'primary.main' }} />
-                    <Typography variant="h6">
-                      {getParticipantNames(room.participants)}
-                    </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <GroupIcon sx={{ mr: 1, color: 'primary.main' }} />
+                      <Typography variant="h6">
+                        {getParticipantNames(room.participants)}
+                      </Typography>
+                    </Box>
+                    
+                    {/* Governance Edit Button */}
+                    <Tooltip title="Manage Room State">
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleGovernanceEdit(room.room_id);
+                        }}
+                        sx={{ color: 'text.secondary' }}
+                      >
+                        <AdminIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     {room.participants.map((participantId) => {
@@ -228,6 +293,17 @@ export const ACORNChatPage: React.FC = () => {
                       ) : null;
                     })}
                   </Box>
+                  
+                  {/* Room State Indicator */}
+                  <Box sx={{ mb: 2 }}>
+                    <RoomStateCard
+                      governanceState={room.governanceState}
+                      isLoading={room.governanceLoading}
+                      error={room.governanceError}
+                      size="small"
+                    />
+                  </Box>
+                  
                   <Typography variant="body2" color="text.secondary">
                     {room.message_count} messages • {room.room_type}
                   </Typography>
@@ -300,6 +376,21 @@ export const ACORNChatPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Governance Management Modal */}
+      {selectedGovernanceRoom && (
+        <RoomGovernanceModal
+          open={governanceModalOpen}
+          onClose={handleGovernanceModalClose}
+          roomId={selectedGovernanceRoom}
+          roomName={roomsWithStates.find(r => r.room_id === selectedGovernanceRoom)
+            ? getParticipantNames(roomsWithStates.find(r => r.room_id === selectedGovernanceRoom)!.participants)
+            : undefined
+          }
+          initialGovernanceState={roomsWithStates.find(r => r.room_id === selectedGovernanceRoom)?.governanceState}
+          onStateChanged={handleStateChanged}
+        />
+      )}
     </Container>
   );
 };

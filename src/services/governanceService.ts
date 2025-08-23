@@ -50,13 +50,17 @@ export class GovernanceApiService {
 
   private getTenantContext(): { customerId: string; projectId: string } | null {
     try {
-      // First try: project-store (superadmin selections)
+      // Check project-store (superadmin selections)
       const projectStoreData = localStorage.getItem('project-store');
       if (projectStoreData) {
         const store = JSON.parse(projectStoreData);
         const state = store.state || store;
         
         if (state.currentCustomer?.id && state.currentProject?.id) {
+          console.log('🏢 Governance API: Using project-store context:', {
+            customerId: state.currentCustomer.id,
+            projectId: state.currentProject.id
+          });
           return {
             customerId: state.currentCustomer.id,
             projectId: state.currentProject.id
@@ -64,13 +68,17 @@ export class GovernanceApiService {
         }
       }
       
-      // Fallback: tenant-store (detected tenant)
+      // Check tenant-store (detected tenant from subdomain)
       const tenantStoreData = localStorage.getItem('tenant-store');
       if (tenantStoreData) {
         const store = JSON.parse(tenantStoreData);
         const state = store.state || store;
         
         if (state.currentCustomer?.id && state.currentProject?.id) {
+          console.log('🏢 Governance API: Using tenant-store context:', {
+            customerId: state.currentCustomer.id,
+            projectId: state.currentProject.id
+          });
           return {
             customerId: state.currentCustomer.id,
             projectId: state.currentProject.id
@@ -78,16 +86,10 @@ export class GovernanceApiService {
         }
       }
       
-      // Localhost fallback
-      if (window.location.hostname === 'localhost') {
-        return {
-          customerId: 'superadmin',
-          projectId: 'default'
-        };
-      }
+      console.error('🏢 Governance API: No valid tenant context found in project-store or tenant-store');
       
     } catch (error) {
-      console.warn('Failed to get tenant context:', error);
+      console.error('🏢 Governance API: Failed to parse store data:', error);
     }
     
     return null;
@@ -99,12 +101,47 @@ export class GovernanceApiService {
   async getRoomGovernanceState(roomId: string): Promise<RoomGovernanceState> {
     try {
       const response: AxiosResponse<RoomGovernanceState> = await this.apiClient.get(
-        `/rooms/${roomId}/governance/state`
+        `/rooms/${roomId}/governance/state`,
+        {
+          params: {
+            admin_auth: 'admin'
+          }
+        }
       );
       return response.data;
     } catch (error) {
       console.error(`Failed to get governance state for room ${roomId}:`, error);
       throw new Error(`Failed to get governance state: ${this.getErrorMessage(error)}`);
+    }
+  }
+
+  /**
+   * Transition room state (admin function)
+   */
+  async transitionRoomState(
+    roomId: string, 
+    request: {
+      new_state: string;
+      transitioned_by: string;
+      authority_type: 'system_agent' | 'human_review' | 'auto_timeout' | 'governance_decision';
+      reason: string;
+      context?: Record<string, any>;
+    }
+  ): Promise<{ success: boolean; room_id: string; transition: any }> {
+    try {
+      const response = await this.apiClient.post(
+        `/rooms/${roomId}/governance/state/transition?admin_auth=admin`,
+        request
+      );
+      
+      console.log(`✅ Successfully transitioned room ${roomId} to state ${request.new_state}`);
+      return response.data;
+    } catch (error: any) {
+      console.error(`Failed to transition room ${roomId} state:`, error);
+      console.error('Error response data:', error.response?.data);
+      console.error('Error response status:', error.response?.status);
+      console.error('Request data sent:', request);
+      throw new Error(`Failed to transition room state: ${this.getErrorMessage(error)}`);
     }
   }
 

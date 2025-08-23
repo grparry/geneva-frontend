@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Box, Paper, Typography, TextField, Button, Avatar, Chip, List, ListItem, ListItemAvatar, ListItemText, Divider, IconButton, CircularProgress, Tabs, Tab, Snackbar, Alert, Stack } from '@mui/material';
 import { 
   Send as SendIcon, 
@@ -14,7 +14,8 @@ import {
   Assignment as TaskIcon,
   Speed as SpeedIcon
 } from '@mui/icons-material';
-import { useWebSocketSimple } from '../hooks/useWebSocketSimple';
+import { useACORNWebSocket } from '../hooks/useACORNWebSocket';
+import { acornChatWebSocketFactory, getACORNInfrastructureWebSocket } from '../services/acornWebSocket';
 import { ClaudeProgressBar, ProgressStage } from './claude/progress/ClaudeProgressBar';
 import { useClaudeProgress } from '../hooks/useClaudeProgress';
 import { ClarificationDialog } from './claude/clarification/ClarificationDialog';
@@ -44,6 +45,12 @@ import { chatApi } from '../api/chatApi';
 import { formatTimestamp } from '../utils/dateUtils';
 // Basic Governance Integration
 import { useRoomGovernance } from '../hooks/useGovernance';
+// ACORN Message Type Support
+import { useACORNMessages } from '../hooks/useACORNMessages';
+import { RoomStateIndicator } from './acorn/RoomStateIndicator';
+import { IntermediateStatusDisplay } from './acorn/IntermediateStatusDisplay';
+import { MessageTypeIndicator } from './acorn/MessageTypeIndicator';
+import { ACORNWebSocketMessage, ACORNMessageType } from '../types/acorn-messages';
 
 interface Message {
   type: 'user' | 'agent' | 'system';
@@ -52,6 +59,9 @@ interface Message {
   user_id?: string;
   agent_id?: string;
   media_items?: AnyMediaItem[];
+  message_type?: ACORNMessageType;
+  system_message?: boolean;
+  metadata?: any;
 }
 
 interface InfrastructureEvent {
@@ -249,10 +259,34 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   // Basic governance state
   const { governance } = useRoomGovernance(roomId || null);
   
+  // ACORN message handling
+  const {
+    messages: acornMessages,
+    roomState: acornRoomState,
+    intermediateStatuses,
+    processMessage: processACORNMessage,
+    removeIntermediateStatus,
+    clearIntermediateStatuses,
+    canUserSend,
+    areExecutiveAgentsActive
+  } = useACORNMessages({ roomId: roomId || undefined });
+  
   // Debug governance context
   useEffect(() => {
     console.log('🔒 Governance context:', { governance });
   }, [governance]);
+  
+  // Debug ACORN state
+  useEffect(() => {
+    console.log('🚀 ACORN Room State:', {
+      currentState: acornRoomState.currentState,
+      canUserSend: canUserSend(),
+      areExecutiveAgentsActive: areExecutiveAgentsActive(),
+      participationRules: acornRoomState.participationRules,
+      intermediateStatusCount: intermediateStatuses.length,
+      messageCount: acornMessages.length
+    });
+  }, [acornRoomState, intermediateStatuses, acornMessages, canUserSend, areExecutiveAgentsActive]);
   
   // History loading state
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -268,19 +302,36 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
     });
   }, [roomId, initialParticipants, participants, systemParticipants]);
 
-  // WebSocket for chat - only connect if we have a roomId
-  const chatWs = useWebSocketSimple({
+  // Get tenant parameters for WebSocket services
+  const tenantParams = useMemo(() => {
+    return chatApi.getWebSocketTenantParams();
+  }, []);
+
+  // Chat WebSocket with robust reconnection
+  const chatWs = useACORNWebSocket({
     url: roomId ? chatApi.getWebSocketUrl(roomId) : '',
     enabled: !!roomId,
+    reconnectInterval: 3000,
+    maxReconnectAttempts: 15,
     onConnect: () => {
       setIsConnected(true);
-      console.log('Connected to chat room');
+      console.log('✅ Connected to ACORN chat room:', roomId);
     },
     onDisconnect: () => {
       setIsConnected(false);
-      console.log('Disconnected from chat room');
+      console.log('❌ Disconnected from ACORN chat room:', roomId);
+    },
+    onError: (error) => {
+      console.error('🚫 ACORN chat WebSocket error:', error);
+    },
+    onReconnectFailed: () => {
+      console.error('💥 ACORN chat WebSocket failed to reconnect after maximum attempts');
     },
     onMessage: (message) => {
+      // Process with ACORN message handler
+      processACORNMessage(message as ACORNWebSocketMessage);
+      
+      // Legacy handling for backward compatibility
       setMessages(prev => [...prev, message]);
       
       // Update agent status based on message
@@ -296,10 +347,24 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
 
   // Chat WebSocket is now handled in the hook itself
 
-  // WebSocket for infrastructure events
-  const infraWs = useWebSocketSimple({
+  // Infrastructure WebSocket with robust reconnection
+  const infraWs = useACORNWebSocket({
     url: chatApi.getInfrastructureWebSocketUrl(),
     enabled: !!roomId,
+    reconnectInterval: 5000,
+    maxReconnectAttempts: 10,
+    onConnect: () => {
+      console.log('✅ Connected to ACORN infrastructure events');
+    },
+    onDisconnect: () => {
+      console.log('❌ Disconnected from ACORN infrastructure events');
+    },
+    onError: (error) => {
+      console.error('🚫 ACORN infrastructure WebSocket error:', error);
+    },
+    onReconnectFailed: () => {
+      console.error('💥 ACORN infrastructure WebSocket failed to reconnect');
+    },
     onMessage: (infraEvent) => {
       setInfrastructureEvents(prev => [...prev.slice(-50), infraEvent]); // Keep last 50 events
       
@@ -342,6 +407,24 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
   });
 
   // Infrastructure WebSocket is now handled in the hook itself
+  
+  // Debug WebSocket connection state
+  useEffect(() => {
+    console.log('🔌 WebSocket Status:', {
+      chat: {
+        isConnected: chatWs.isConnected,
+        isConnecting: chatWs.isConnecting,
+        reconnectAttempts: chatWs.reconnectAttempts,
+        lastError: chatWs.lastError
+      },
+      infrastructure: {
+        isConnected: infraWs.isConnected,
+        isConnecting: infraWs.isConnecting,
+        reconnectAttempts: infraWs.reconnectAttempts,
+        lastError: infraWs.lastError
+      }
+    });
+  }, [chatWs.isConnected, chatWs.isConnecting, chatWs.reconnectAttempts, chatWs.lastError, infraWs.isConnected, infraWs.isConnecting, infraWs.reconnectAttempts, infraWs.lastError]);
   
   // Load conversation history when entering a room
   useEffect(() => {
@@ -767,11 +850,20 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
             mr: isUser ? 0 : 2
           }}
         >
-          {agent && (
-            <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
-              {agent.name}
-            </Typography>
-          )}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+            {agent && (
+              <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+                {agent.name}
+              </Typography>
+            )}
+            {message.message_type && (
+              <MessageTypeIndicator 
+                messageType={message.message_type}
+                size="small"
+                variant="outlined"
+              />
+            )}
+          </Box>
           {message.content && (
             <Typography variant="body1" sx={{ mb: message.media_items ? 1 : 0 }}>
               {message.content}
@@ -794,9 +886,22 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
             </Box>
           )}
           
-          <Typography variant="caption" sx={{ opacity: 0.7, display: 'block', mt: 0.5 }}>
-            {formatTimestamp(message.timestamp)}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 0.5 }}>
+            <Typography variant="caption" sx={{ opacity: 0.7 }}>
+              {formatTimestamp(message.timestamp)}
+            </Typography>
+            {message.system_message && (
+              <Typography variant="caption" sx={{ 
+                bgcolor: 'rgba(0,0,0,0.1)', 
+                px: 0.5, 
+                py: 0.25, 
+                borderRadius: 0.5,
+                fontSize: '0.6rem'
+              }}>
+                SYSTEM
+              </Typography>
+            )}
+          </Box>
         </Box>
       </ListItem>
     );
@@ -982,15 +1087,33 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
               <Tab label="Task Planner" icon={<TaskIcon />} />
             </Tabs>
             
-            {governance?.current_state && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2 }}>
-                <Chip 
-                  label={governance.current_state}
-                  color={governance.current_state === 'READY' ? 'success' : 'default'}
+            {/* Enhanced Room State Indicator */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2 }}>
+              <RoomStateIndicator 
+                roomState={acornRoomState}
+                size="small"
+              />
+              
+              {/* WebSocket Connection Status */}
+              {(!chatWs.isConnected || chatWs.isConnecting) && (
+                <Chip
+                  label={chatWs.isConnecting ? 'Reconnecting...' : 'Disconnected'}
                   size="small"
+                  color={chatWs.isConnecting ? 'warning' : 'error'}
+                  variant="outlined"
+                  icon={chatWs.isConnecting ? <CircularProgress size={12} /> : undefined}
                 />
-              </Box>
-            )}
+              )}
+              
+              {intermediateStatuses.length > 0 && (
+                <Chip
+                  label={`${intermediateStatuses.length} active`}
+                  size="small"
+                  color="info"
+                  variant="outlined"
+                />
+              )}
+            </Box>
           </Box>
 
           {/* Chat Messages */}
@@ -1016,6 +1139,35 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
               </List>
 
               {/* Input Area */}
+              {/* Room State & Participation Rules Info */}
+              {acornRoomState.participationRules && !canUserSend() && (
+                <Box sx={{ p: 2, borderTop: 1, borderColor: 'warning.main', bgcolor: 'warning.light' }}>
+                  <Typography variant="body2" color="warning.dark" gutterBottom>
+                    ⚠️ {acornRoomState.participationRules.state_reason}
+                  </Typography>
+                  {acornRoomState.participationRules.restrictions && (
+                    <Box sx={{ mt: 1 }}>
+                      {acornRoomState.participationRules.restrictions.map((restriction, index) => (
+                        <Typography key={index} variant="caption" display="block" color="warning.dark">
+                          • {restriction}
+                        </Typography>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              )}
+              
+              {/* Intermediate Status Display */}
+              {intermediateStatuses.length > 0 && (
+                <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'action.hover' }}>
+                  <IntermediateStatusDisplay
+                    statuses={intermediateStatuses}
+                    onRemoveStatus={removeIntermediateStatus}
+                    maxVisible={3}
+                  />
+                </Box>
+              )}
+              
               <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
                 {/* Claude Progress Bar */}
                 {currentTaskId && currentProgress && (
@@ -1144,15 +1296,15 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                   <TextField
                     fullWidth
                     variant="outlined"
-                    placeholder="Type your message..."
+                    placeholder={canUserSend() ? "Type your message..." : "User input disabled in current room state"}
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                    disabled={!isConnected || (participants.size === 0 && systemParticipants.size === 0)}
+                    disabled={!isConnected || !canUserSend() || (participants.size === 0 && systemParticipants.size === 0)}
                     inputRef={inputRef as any}
                     sx={{
                       '& .MuiOutlinedInput-root': {
-                        backgroundColor: 'background.paper'
+                        backgroundColor: canUserSend() ? 'background.paper' : 'action.disabledBackground'
                       }
                     }}
                   />
@@ -1169,7 +1321,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                     variant="contained"
                     endIcon={<SendIcon />}
                     onClick={sendMessage}
-                    disabled={!isConnected || (participants.size === 0 && systemParticipants.size === 0) || (!inputMessage.trim() && pendingMedia.length === 0)}
+                    disabled={!isConnected || !canUserSend() || (participants.size === 0 && systemParticipants.size === 0) || (!inputMessage.trim() && pendingMedia.length === 0)}
                   >
                     Send
                   </Button>

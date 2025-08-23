@@ -67,6 +67,10 @@ export interface SendMessageResponse {
 }
 
 export class ChatApiService {
+  private cachedTenantParams: string | null = null;
+  private lastTenantParamCheck: number = 0;
+  private readonly TENANT_CACHE_TTL = 5000; // 5 seconds
+  
   private apiClient = axios.create({
     baseURL: API_BASE + '/api',
     headers: {
@@ -366,6 +370,14 @@ export class ChatApiService {
     const tenantParams = this.getTenantQueryParams();
     return `${wsProtocol}//${wsHost}/api/chat/ws/${roomId}${tenantParams}`;
   }
+  
+  /**
+   * Get tenant query parameters for WebSocket services
+   * Used by ACORN WebSocket services that need tenant context
+   */
+  getWebSocketTenantParams(): string {
+    return this.getTenantQueryParams();
+  }
 
   /**
    * Create WebSocket URL for infrastructure events with tenant context
@@ -379,8 +391,15 @@ export class ChatApiService {
 
   /**
    * Get tenant context query parameters for WebSocket URLs (use selected tenant, not superadmin)
+   * Cached to prevent excessive localStorage reads and logging
    */
   private getTenantQueryParams(): string {
+    // Use cache if valid (within TTL)
+    const now = Date.now();
+    if (this.cachedTenantParams !== null && (now - this.lastTenantParamCheck) < this.TENANT_CACHE_TTL) {
+      return this.cachedTenantParams;
+    }
+    
     try {
       // First try: Get tenant context from project store (for superadmin user selections)
       const projectStoreData = localStorage.getItem('project-store');
@@ -389,11 +408,19 @@ export class ChatApiService {
         const state = store.state || store;
         
         if (state.currentCustomer?.id && state.currentProject?.id) {
-          console.log('🏢 Chat WebSocket: Using selected tenant context for WebSocket:', {
-            customerId: state.currentCustomer.id,
-            projectId: state.currentProject.id
-          });
-          return `?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
+          const params = `?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
+          
+          // Only log if cache is stale or params changed
+          if (this.cachedTenantParams !== params) {
+            console.log('🏢 Chat WebSocket: Using selected tenant context for WebSocket:', {
+              customerId: state.currentCustomer.id,
+              projectId: state.currentProject.id
+            });
+          }
+          
+          this.cachedTenantParams = params;
+          this.lastTenantParamCheck = now;
+          return params;
         }
       }
       
@@ -404,21 +431,35 @@ export class ChatApiService {
         const state = store.state || store;
         
         if (state.currentCustomer?.id && state.currentProject?.id) {
-          console.log('🏢 Chat WebSocket: Using detected tenant context for WebSocket:', {
-            customerId: state.currentCustomer.id,
-            projectId: state.currentProject.id
-          });
-          return `?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
+          const params = `?customer_id=${encodeURIComponent(state.currentCustomer.id)}&project_id=${encodeURIComponent(state.currentProject.id)}`;
+          
+          // Only log if cache is stale or params changed
+          if (this.cachedTenantParams !== params) {
+            console.log('🏢 Chat WebSocket: Using detected tenant context for WebSocket:', {
+              customerId: state.currentCustomer.id,
+              projectId: state.currentProject.id
+            });
+          }
+          
+          this.cachedTenantParams = params;
+          this.lastTenantParamCheck = now;
+          return params;
         }
       }
       
       // No fallback to superadmin for data APIs - require explicit tenant selection
-      console.warn('🏢 Chat WebSocket: No tenant context available for WebSocket - connection may fail');
+      if (this.cachedTenantParams !== '') {
+        console.warn('🏢 Chat WebSocket: No tenant context available for WebSocket - connection may fail');
+      }
       
     } catch (error) {
-      console.warn('🏢 Chat WebSocket: Failed to get tenant context for WebSocket URL:', error);
+      if (this.cachedTenantParams !== '') {
+        console.warn('🏢 Chat WebSocket: Failed to get tenant context for WebSocket URL:', error);
+      }
     }
     
+    this.cachedTenantParams = '';
+    this.lastTenantParamCheck = now;
     return '';
   }
 }

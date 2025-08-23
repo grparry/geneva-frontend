@@ -7,6 +7,8 @@
 
 // Core Components (simplified)
 export { RoomStateIndicator, RoomStateBadge, RoomStateDot } from './RoomStateIndicator';
+export { RoomStateCard } from './RoomStateCard';
+export { RoomGovernanceModal } from './RoomGovernanceModal';
 
 // Placeholder Components (for backward compatibility)
 export { TrinityQueueStatus, TrinityQueueIndicator } from './TrinityQueueStatus';
@@ -32,3 +34,5 @@ export type {
 // Re-export simplified service and hook
 export { governanceService } from '../../services/governanceService';
 export { useGovernanceState, useRoomGovernance } from '../../hooks/useGovernance';
+export { useRoomStates } from '../../hooks/useRoomStates';
+export type { RoomWithState, UseRoomStatesReturn } from '../../hooks/useRoomStates';
