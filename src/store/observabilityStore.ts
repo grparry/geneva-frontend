@@ -7,9 +7,12 @@ import {
   StreamEntry, 
   Conversation, 
   ExecutionContext,
-  Alert
+  Alert,
+  HealthStatusResponse,
+  SystemOverviewResponse
 } from './types';
 import { api } from '../api/client';
+
 
 interface ObservabilityState {
   // System metrics
@@ -25,10 +28,7 @@ interface ObservabilityState {
   agents: Map<string, AgentMetrics>;
   selectedAgent: string | null;
   
-  // Executions
-  executions: Map<string, AgentExecution>;
-  selectedExecution: string | null;
-  executionContexts: Map<string, ExecutionContext>;
+  // Note: Executions not available in backend
   
   // Communications
   conversations: Map<string, Conversation>;
@@ -43,18 +43,14 @@ interface ObservabilityState {
   loading: {
     systemMetrics: boolean;
     agents: boolean;
-    executions: boolean;
     conversations: boolean;
-    executionContext: boolean;
   };
   
   // Error states
   errors: {
     systemMetrics: string | null;
     agents: string | null;
-    executions: string | null;
     conversations: string | null;
-    executionContext: string | null;
   };
 }
 
@@ -69,11 +65,7 @@ interface ObservabilityActions {
   updateAgent: (agentId: string, metrics: Partial<AgentMetrics>) => void;
   selectAgent: (agentId: string | null) => void;
   
-  // Execution actions
-  loadExecutions: (agentId?: string, timeRange?: string) => Promise<void>;
-  updateExecution: (execution: AgentExecution) => void;
-  selectExecution: (executionId: string | null) => void;
-  loadExecutionContext: (executionId: string) => Promise<void>;
+  // Note: Execution endpoints don't exist in backend, removing phantom API methods
   
   // Communication actions
   loadConversations: (hours?: number) => Promise<void>;
@@ -105,9 +97,6 @@ const initialState: ObservabilityState = {
   },
   agents: new Map(),
   selectedAgent: null,
-  executions: new Map(),
-  selectedExecution: null,
-  executionContexts: new Map(),
   conversations: new Map(),
   selectedConversation: null,
   streamCache: new Map(),
@@ -116,16 +105,12 @@ const initialState: ObservabilityState = {
   loading: {
     systemMetrics: false,
     agents: false,
-    executions: false,
-    conversations: false,
-    executionContext: false
+    conversations: false
   },
   errors: {
     systemMetrics: null,
     agents: null,
-    executions: null,
-    conversations: null,
-    executionContext: null
+    conversations: null
   }
 };
 
@@ -142,17 +127,20 @@ export const useObservabilityStore = create<ObservabilityStore>()(
         }));
         
         try {
-          // Mock data for now - replace with: const data = await api.getSystemHealth();
-          const mockMetrics: SystemMetrics = {
-            totalCommunications: 1247,
-            activeExecutions: 8,
-            successRate: 94.2,
-            avgResponseTime: 1.2,
-            lastUpdated: new Date().toISOString()
+          // Get real data from backend APIs
+          const [healthData, overviewData] = await Promise.all([
+            api.getSystemHealth(),
+            api.getSystemOverview()
+          ]);
+          
+          // Combine both API responses into SystemMetrics format
+          const systemMetrics: SystemMetrics = {
+            ...healthData,
+            ...overviewData
           };
           
           set((state) => ({
-            systemMetrics: mockMetrics,
+            systemMetrics,
             loading: { ...state.loading, systemMetrics: false }
           }));
         } catch (error) {
@@ -183,30 +171,13 @@ export const useObservabilityStore = create<ObservabilityStore>()(
         }));
         
         try {
-          // Mock data for now
-          const mockAgents: AgentMetrics[] = [
-            {
-              agentId: 'claude-agent-1',
-              name: 'Claude Primary',
-              status: 'active',
-              executionCount: 47,
-              successRate: 94.2,
-              lastActivity: '2 minutes ago',
-              avgResponseTime: 1.2
-            },
-            {
-              agentId: 'memory-service',
-              name: 'Memory Service',
-              status: 'active',
-              executionCount: 156,
-              successRate: 98.1,
-              lastActivity: '30 seconds ago',
-              avgResponseTime: 0.8
-            }
-          ];
+          // Get real agent data from backend
+          const agents: AgentMetrics[] = await api.getTopAgents();
           
           const agentsMap = new Map();
-          mockAgents.forEach(agent => agentsMap.set(agent.agentId, agent));
+          agents.forEach((agent: AgentMetrics) => {
+            agentsMap.set(agent.agent_id, agent);
+          });
           
           set((state) => ({
             agents: agentsMap,
@@ -235,110 +206,7 @@ export const useObservabilityStore = create<ObservabilityStore>()(
         set({ selectedAgent: agentId });
       },
       
-      // Execution actions
-      loadExecutions: async (agentId?: string, timeRange = '24h') => {
-        set((state) => ({ 
-          loading: { ...state.loading, executions: true },
-          errors: { ...state.errors, executions: null }
-        }));
-        
-        try {
-          // Mock data for now
-          const mockExecutions: AgentExecution[] = [
-            {
-              execution_id: 'exec-001',
-              agent_id: agentId || 'claude-agent-1',
-              conversation_id: 'conv-001',
-              started_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-              completed_at: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
-              status: 'completed',
-              action: 'Code Generation Task',
-              duration_ms: 300000,
-              has_claude_execution: true,
-              message_count: 15,
-              success_rate: 0.95
-            }
-          ];
-          
-          const executionsMap = new Map();
-          mockExecutions.forEach(exec => executionsMap.set(exec.execution_id, exec));
-          
-          set((state) => ({
-            executions: executionsMap,
-            loading: { ...state.loading, executions: false }
-          }));
-        } catch (error) {
-          set((state) => ({
-            loading: { ...state.loading, executions: false },
-            errors: { ...state.errors, executions: (error as Error).message }
-          }));
-        }
-      },
-      
-      updateExecution: (execution: AgentExecution) => {
-        set((state) => {
-          const newExecutions = new Map(state.executions);
-          newExecutions.set(execution.execution_id, execution);
-          return { executions: newExecutions };
-        });
-      },
-      
-      selectExecution: (executionId: string | null) => {
-        set({ selectedExecution: executionId });
-        
-        // Auto-load execution context when selected
-        if (executionId) {
-          get().loadExecutionContext(executionId);
-        }
-      },
-      
-      loadExecutionContext: async (executionId: string) => {
-        set((state) => ({ 
-          loading: { ...state.loading, executionContext: true },
-          errors: { ...state.errors, executionContext: null }
-        }));
-        
-        try {
-          // Mock data for now - replace with: const data = await api.getExecutionContext(executionId);
-          const mockContext: ExecutionContext = {
-            context_id: 'ctx-001',
-            execution_id: executionId,
-            working_directory: '/Users/Geneva/Documents/0_substrate/Geneva',
-            git_repository: 'https://github.com/geneva/platform.git',
-            initial_files: ['src/api/app.py', 'requirements.txt'],
-            modified_files: ['src/api/app.py'],
-            created_files: ['src/observability/stream_monitor.py'],
-            deleted_files: [],
-            environment_variables: {
-              'NODE_ENV': 'development',
-              'REACT_APP_API_URL': 'http://localhost:8400'
-            },
-            tool_availability: ['Read', 'Write', 'Edit', 'Bash'],
-            memory_context: {
-              'project_type': 'React + FastAPI',
-              'current_task': 'Communication stream enhancement'
-            },
-            final_state: {
-              'status': 'completed',
-              'files_changed': 3
-            }
-          };
-          
-          set((state) => {
-            const newContexts = new Map(state.executionContexts);
-            newContexts.set(executionId, mockContext);
-            return {
-              executionContexts: newContexts,
-              loading: { ...state.loading, executionContext: false }
-            };
-          });
-        } catch (error) {
-          set((state) => ({
-            loading: { ...state.loading, executionContext: false },
-            errors: { ...state.errors, executionContext: (error as Error).message }
-          }));
-        }
-      },
+      // Note: Execution endpoints removed - not available in backend
       
       // Communication actions
       loadConversations: async (hours = 24) => {

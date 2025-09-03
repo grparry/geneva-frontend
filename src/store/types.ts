@@ -1,20 +1,25 @@
-// Global store types
+// Global store types - aligned with backend API structure
 export interface SystemMetrics {
-  totalCommunications: number;
-  activeExecutions: number;
-  successRate: number;
-  avgResponseTime: number;
-  lastUpdated: string;
+  health_score: number;
+  health_status: string;
+  health_issues: string[];
+  timestamp: string;
+  total_agent_executions: number;
+  total_communications: number;
+  total_memory_operations: number;
+  total_llm_calls: number;
+  total_policy_violations: number;
+  active_traces: number;
 }
 
 export interface AgentMetrics {
-  agentId: string;
-  name: string;
-  status: 'active' | 'idle' | 'error';
-  executionCount: number;
-  successRate: number;
-  lastActivity: string;
-  avgResponseTime?: number;
+  agent_id: string;
+  total_executions: number;
+  successful_executions: number;
+  failed_executions: number;
+  success_rate: number;
+  average_duration_ms: number;
+  last_execution: string | null;
 }
 
 export interface AgentExecution {
@@ -90,4 +95,34 @@ export interface Notification {
   timestamp: string;
   autoHide?: boolean;
   duration?: number;
+}
+
+// Additional backend response types
+export interface HealthStatusResponse {
+  health_score: number;
+  health_status: string; 
+  health_issues: string[];
+  timestamp: string;
+}
+
+export interface SystemOverviewResponse {
+  timestamp: string;
+  total_agent_executions: number;
+  total_communications: number;
+  total_memory_operations: number;
+  total_llm_calls: number;
+  total_policy_violations: number;
+  active_traces: number;
+}
+
+export interface MemoryMetricsResponse {
+  project_id: string;
+  time_window_hours: number;
+  total_operations: number;
+  search_operations: number;
+  create_operations: number;
+  update_operations: number;
+  delete_operations: number;
+  average_search_duration_ms: number;
+  search_effectiveness: number;
 }

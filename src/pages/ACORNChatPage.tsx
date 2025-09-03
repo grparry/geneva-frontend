@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Paper, Button, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Chip, Avatar, Alert, Snackbar, IconButton, Tooltip } from '@mui/material';
+import { Box, Container, Typography, Paper, Button, Card, CardContent, CardActions, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Chip, Avatar, Alert, Snackbar, IconButton, Tooltip, Menu } from '@mui/material';
 import { Grid } from '@mui/material';
-import { Chat as ChatIcon, Add as AddIcon, Group as GroupIcon, Edit as EditIcon, AdminPanelSettings as AdminIcon } from '@mui/icons-material';
+import { Chat as ChatIcon, Add as AddIcon, Group as GroupIcon, Edit as EditIcon, AdminPanelSettings as AdminIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon } from '@mui/icons-material';
 import { ACORNChatRoom } from '../components/ACORNChatRoom';
 import { ProjectContextValidator } from '../components/ProjectContextValidator';
 import { useProjectContext } from '../store/projectStore';
@@ -36,6 +36,14 @@ export const ACORNChatPage: React.FC = () => {
   // Governance modal state
   const [governanceModalOpen, setGovernanceModalOpen] = useState(false);
   const [selectedGovernanceRoom, setSelectedGovernanceRoom] = useState<string | null>(null);
+  
+  // Delete confirmation state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [roomToDelete, setRoomToDelete] = useState<string | null>(null);
+  
+  // Menu state for room actions
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [menuRoomId, setMenuRoomId] = useState<string | null>(null);
   
   // Project context
   const projectContext = useProjectContext();
@@ -158,6 +166,59 @@ export const ACORNChatPage: React.FC = () => {
     refreshStates();
   };
 
+  const handleDeleteRoom = async (roomId: string) => {
+    try {
+      const result = await chatApi.deleteRoom(roomId);
+      if (result.success) {
+        // Refresh rooms list
+        await fetchRooms();
+        // Refresh room states
+        setTimeout(() => refreshStates(), 500);
+        setErrorMessage(null);
+        // Show success notification
+        console.log('✅ Room deleted successfully:', result.message);
+      }
+    } catch (error: any) {
+      console.error('❌ Failed to delete room:', error);
+      if (error.response?.status === 403) {
+        setErrorMessage('Permission denied. You may not have access to delete this room.');
+      } else if (error.response?.status === 404) {
+        setErrorMessage('Room not found. It may have already been deleted.');
+        // Still refresh the list in case it was deleted by another user
+        await fetchRooms();
+      } else {
+        setErrorMessage(`Failed to delete room: ${error.response?.data?.detail || error.message}`);
+      }
+    } finally {
+      setDeleteDialogOpen(false);
+      setRoomToDelete(null);
+    }
+  };
+
+  const handleDeleteClick = (roomId: string) => {
+    setRoomToDelete(roomId);
+    setDeleteDialogOpen(true);
+    setMenuAnchor(null);
+    setMenuRoomId(null);
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, roomId: string) => {
+    event.stopPropagation();
+    setMenuAnchor(event.currentTarget);
+    setMenuRoomId(roomId);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+    setMenuRoomId(null);
+  };
+
+  const getRoomToDeleteName = () => {
+    if (!roomToDelete) return '';
+    const room = roomsWithStates.find(r => r.room_id === roomToDelete);
+    return room ? getParticipantNames(room.participants) : roomToDelete.slice(0, 8) + '...';
+  };
+
   if (selectedRoom) {
     const room = roomsWithStates.find(r => r.room_id === selectedRoom);
     return (
@@ -263,17 +324,14 @@ export const ACORNChatPage: React.FC = () => {
                       </Typography>
                     </Box>
                     
-                    {/* Governance Edit Button */}
-                    <Tooltip title="Manage Room State">
+                    {/* Room Actions Menu */}
+                    <Tooltip title="Room Actions">
                       <IconButton
                         size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleGovernanceEdit(room.room_id);
-                        }}
+                        onClick={(e) => handleMenuOpen(e, room.room_id)}
                         sx={{ color: 'text.secondary' }}
                       >
-                        <AdminIcon fontSize="small" />
+                        <MoreVertIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                   </Box>
@@ -377,6 +435,64 @@ export const ACORNChatPage: React.FC = () => {
         </DialogActions>
       </Dialog>
       
+      {/* Room Actions Menu */}
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={handleMenuClose}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <MenuItem onClick={() => {
+          if (menuRoomId) {
+            handleGovernanceEdit(menuRoomId);
+            handleMenuClose();
+          }
+        }}>
+          <AdminIcon fontSize="small" sx={{ mr: 1 }} />
+          Manage State
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (menuRoomId) {
+            handleDeleteClick(menuRoomId);
+          }
+        }} sx={{ color: 'error.main' }}>
+          <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+          Delete Room
+        </MenuItem>
+      </Menu>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Delete Chat Room</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Are you sure you want to delete the chat room with <strong>{getRoomToDeleteName()}</strong>?
+          </Typography>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This action cannot be undone. All messages and conversation history will be permanently deleted.
+          </Alert>
+          <Typography variant="body2" color="text.secondary">
+            Active WebSocket connections will be closed and the room will be removed from the database.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => roomToDelete && handleDeleteRoom(roomToDelete)}
+            variant="contained"
+            color="error"
+            startIcon={<DeleteIcon />}
+          >
+            Delete Room
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       {/* Governance Management Modal */}
       {selectedGovernanceRoom && (
         <RoomGovernanceModal

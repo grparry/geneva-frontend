@@ -10,7 +10,6 @@ import oclReducer from './ocl/slice';
 import { cognitiveApi } from '../services/cognitive/api';
 import cognitiveReducer from './cognitive/slice';
 import { federationApi } from '../api/federation';
-import { analyticsApi } from '../api/analytics';
 
 // Import existing store if it exists
 let existingStore: any = null;
@@ -34,8 +33,6 @@ export const store = configureStore({
     [cognitiveApi.reducerPath]: cognitiveApi.reducer,
     // Federation API state
     [federationApi.reducerPath]: federationApi.reducer,
-    // Analytics API state
-    [analyticsApi.reducerPath]: analyticsApi.reducer,
     // Include any existing reducers
     ...(existingStore?.getState ? {} : {}),
   },
@@ -62,12 +59,6 @@ export const store = configureStore({
           'federationApi/executeMutation/pending',
           'federationApi/executeMutation/fulfilled',
           'federationApi/executeMutation/rejected',
-          'analyticsApi/executeQuery/pending',
-          'analyticsApi/executeQuery/fulfilled',
-          'analyticsApi/executeQuery/rejected',
-          'analyticsApi/executeMutation/pending',
-          'analyticsApi/executeMutation/fulfilled',
-          'analyticsApi/executeMutation/rejected',
         ],
         ignoredPaths: [
           // Ignore RTK Query state paths
@@ -77,15 +68,12 @@ export const store = configureStore({
           'cognitiveApi.mutations',
           'federationApi.queries',
           'federationApi.mutations',
-          'analyticsApi.queries',
-          'analyticsApi.mutations',
         ],
       },
     }).concat(
       oclApi.middleware, 
       cognitiveApi.middleware, 
-      federationApi.middleware, 
-      analyticsApi.middleware
+      federationApi.middleware
     ),
   devTools: process.env.NODE_ENV !== 'production',
 });

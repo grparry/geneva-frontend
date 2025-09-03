@@ -88,7 +88,7 @@ export const ObservabilityDashboard: React.FC = () => {
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricCard
             title="Total Communications"
-            value={systemMetrics?.totalCommunications.toLocaleString() || "Loading..."}
+            value={systemMetrics?.total_communications.toLocaleString() || "Loading..."}
             subtitle="Last 24 hours"
             icon={<ChatIcon />}
             color="primary"
@@ -97,9 +97,9 @@ export const ObservabilityDashboard: React.FC = () => {
         
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricCard
-            title="Active Executions"
-            value={systemMetrics?.activeExecutions || "Loading..."}
-            subtitle="Currently running"
+            title="Agent Executions"
+            value={systemMetrics?.total_agent_executions || "Loading..."}
+            subtitle="Total executions"
             icon={<SmartToyIcon />}
             color="success"
           />
@@ -107,9 +107,9 @@ export const ObservabilityDashboard: React.FC = () => {
         
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricCard
-            title="Success Rate"
-            value={systemMetrics ? `${systemMetrics.successRate}%` : "Loading..."}
-            subtitle="Last 24 hours"
+            title="Health Score"
+            value={systemMetrics ? `${systemMetrics.health_score}%` : "Loading..."}
+            subtitle={systemMetrics?.health_status || ""}
             icon={<TrendingUpIcon />}
             color="success"
           />
@@ -117,9 +117,9 @@ export const ObservabilityDashboard: React.FC = () => {
         
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricCard
-            title="Avg Response Time"
-            value={systemMetrics ? `${systemMetrics.avgResponseTime}s` : "Loading..."}
-            subtitle="Claude responses"
+            title="LLM Calls"
+            value={systemMetrics?.total_llm_calls || "Loading..."}
+            subtitle="Total API calls"
             icon={<SpeedIcon />}
             color="warning"
           />

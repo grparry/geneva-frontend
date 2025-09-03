@@ -29,7 +29,6 @@ import { GlobalSearchPage } from './pages/GlobalSearchPage';
 import { PatternAnalysisPage } from './pages/PatternAnalysisPage';
 import { AlertingSystemPage } from './pages/AlertingSystemPage';
 import { GovernanceTestComponent } from './components/governance/GovernanceTestComponent';
-import { ExecutionsPage } from './pages/ExecutionsPage';
 import { AgentsPage } from './pages/AgentsPage';
 import { ACORNTeamPage } from './pages/ACORNTeamPage';
 import { ACORNWorkflowPage } from './pages/ACORNWorkflowPage';
@@ -41,7 +40,6 @@ import { Phase6CheckpointsPage } from './pages/Phase6CheckpointsPage';
 import { Phase6RecoveryPage } from './pages/Phase6RecoveryPage';
 import { Phase6ResultsPage } from './pages/Phase6ResultsPage';
 import { AdminHealthPage } from './pages/AdminHealthPage';
-import { AdminAnalyticsPage } from './pages/AdminAnalyticsPage';
 import { OCLPage } from './pages/OCLPage';
 import { CognitiveMemoryPage } from './pages/CognitiveMemoryPage';
 
@@ -123,7 +121,6 @@ const AppContent: React.FC<{ tenantConfig: { isSuperadmin: boolean } }> = ({ ten
     if (path.startsWith('/observability/search')) return 'Search';
     if (path.startsWith('/observability/patterns')) return 'Pattern Analysis';
     if (path.startsWith('/observability/alerts')) return 'Alerts';
-    if (path.startsWith('/observability/executions')) return 'Executions';
     if (path.startsWith('/observability/agents')) return 'Agents';
     
     // ACORN
@@ -246,7 +243,6 @@ const AppContent: React.FC<{ tenantConfig: { isSuperadmin: boolean } }> = ({ ten
             
             {/* Admin routes */}
             <Route path="/admin/health" element={<AdminHealthPage />} />
-            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
             
             {/* OCL routes */}
             <Route path="/ocl" element={<OCLPage />} />
@@ -262,7 +258,6 @@ const AppContent: React.FC<{ tenantConfig: { isSuperadmin: boolean } }> = ({ ten
             <Route path="/observability/search" element={<GlobalSearchPage />} />
             <Route path="/observability/patterns" element={<PatternAnalysisPage />} />
             <Route path="/observability/alerts" element={<AlertingSystemPage />} />
-            <Route path="/observability/executions" element={<ExecutionsPage />} />
             <Route path="/observability/agents" element={<AgentsPage />} />
             
             {/* ACORN routes */}

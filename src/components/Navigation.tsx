@@ -124,7 +124,6 @@ const navigationItems = [
       { path: '/observability/search', label: 'Global Search', icon: <SearchIcon /> },
       { path: '/observability/patterns', label: 'Pattern Analysis', icon: <AnalyticsIcon /> },
       { path: '/observability/alerts', label: 'Alerting System', icon: <AlertIcon /> },
-      { path: '/observability/executions', label: 'Executions', icon: <TimelineIcon /> },
       { path: '/observability/agents', label: 'Agents', icon: <AgentIcon /> },
     ]
   },
