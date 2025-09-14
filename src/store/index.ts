@@ -10,6 +10,7 @@ import oclReducer from './ocl/slice';
 import { cognitiveApi } from '../services/cognitive/api';
 import cognitiveReducer from './cognitive/slice';
 import { federationApi } from '../api/federation';
+import { memory5dApi } from '../services/memory5d/api';
 
 // Import existing store if it exists
 let existingStore: any = null;
@@ -33,6 +34,8 @@ export const store = configureStore({
     [cognitiveApi.reducerPath]: cognitiveApi.reducer,
     // Federation API state
     [federationApi.reducerPath]: federationApi.reducer,
+    // 5D Memory API state
+    [memory5dApi.reducerPath]: memory5dApi.reducer,
     // Include any existing reducers
     ...(existingStore?.getState ? {} : {}),
   },
@@ -59,6 +62,12 @@ export const store = configureStore({
           'federationApi/executeMutation/pending',
           'federationApi/executeMutation/fulfilled',
           'federationApi/executeMutation/rejected',
+          'memory5dApi/executeQuery/pending',
+          'memory5dApi/executeQuery/fulfilled',
+          'memory5dApi/executeQuery/rejected',
+          'memory5dApi/executeMutation/pending',
+          'memory5dApi/executeMutation/fulfilled',
+          'memory5dApi/executeMutation/rejected',
         ],
         ignoredPaths: [
           // Ignore RTK Query state paths
@@ -68,12 +77,15 @@ export const store = configureStore({
           'cognitiveApi.mutations',
           'federationApi.queries',
           'federationApi.mutations',
+          'memory5dApi.queries',
+          'memory5dApi.mutations',
         ],
       },
     }).concat(
-      oclApi.middleware, 
-      cognitiveApi.middleware, 
-      federationApi.middleware
+      oclApi.middleware,
+      cognitiveApi.middleware,
+      federationApi.middleware,
+      memory5dApi.middleware
     ),
   devTools: process.env.NODE_ENV !== 'production',
 });

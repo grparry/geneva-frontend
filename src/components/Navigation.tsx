@@ -45,6 +45,11 @@ import {
   CloudUpload as DeployIcon,
   Speed as MetricsIcon,
   Schedule as ScheduleIcon,
+  Explore as ExploreIcon,
+  Security as SecurityIcon,
+  School as SchoolIcon,
+  Refresh as RefreshIcon,
+  ViewInAr as ViewInArIcon,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -112,6 +117,9 @@ const navigationItems = [
     section: 'Memory',
     items: [
       { path: '/cognitive', label: 'Cognitive Memory', icon: <PsychologyIcon /> },
+      { path: '/memory5d', label: '5D Memory Explorer', icon: <ViewInArIcon /> },
+      { path: '/memory5d/trinity', label: 'Trinity Agents', icon: <SecurityIcon /> },
+      { path: '/memory5d/analytics', label: 'Memory Analytics', icon: <InsightsIcon /> },
     ]
   },
   {
