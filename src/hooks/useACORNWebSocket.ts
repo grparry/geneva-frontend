@@ -108,14 +108,47 @@ export const useACORNWebSocket = (config: ACORNWebSocketConfig) => {
     let acornMessage: any;
     
     try {
-      // If payload is already parsed, use it directly
-      if (typeof message.payload === 'object') {
-        acornMessage = message.payload;
+      // Check if message is valid
+      if (!message || typeof message !== 'object') {
+        console.warn('Received invalid message in ACORN WebSocket:', message);
+        return;
+      }
+      
+      // Log message types to understand what Geneva is sending
+      if (!message.payload && message.type && message.content) {
+        const preview = message.content.length > 50 
+          ? message.content.substring(0, 50) + '...' 
+          : message.content;
+        console.log(`📨 Received ${message.type} message (flat format):`, preview);
+      }
+      
+      // Handle both wrapped and flat message formats from Geneva
+      if (message.payload) {
+        // If payload exists, use it (wrapped format)
+        if (typeof message.payload === 'object') {
+          acornMessage = message.payload;
+        } else {
+          // If payload is string, try to parse it
+          acornMessage = typeof message.payload === 'string' 
+            ? JSON.parse(message.payload) 
+            : message.payload;
+        }
+      } else if (message.type && message.content) {
+        // Geneva sends flat format: {type, content, user_id, ...}
+        // Use the entire message as the payload
+        acornMessage = message;
       } else {
-        // If payload is string, try to parse it
-        acornMessage = typeof message.payload === 'string' 
-          ? JSON.parse(message.payload) 
-          : message.payload;
+        // No valid message structure
+        acornMessage = null;
+      }
+      
+      // Check if acornMessage is valid after parsing
+      if (!acornMessage || typeof acornMessage !== 'object') {
+        // Don't warn for pong messages or other system messages without payloads
+        if (message.type !== 'pong' && message.type !== 'system') {
+          console.warn('Invalid ACORN message payload:', message.payload);
+        }
+        return;
       }
       
       // Ensure we have the required fields
@@ -194,13 +227,21 @@ export const useACORNWebSocket = (config: ACORNWebSocketConfig) => {
     }
 
     try {
-      const message: WebSocketMessage = {
-        type: data.type || 'chat_message',
-        payload: data,
-        timestamp: new Date().toISOString()
-      };
-
-      webSocketService.send(message);
+      // For chat messages and ping/pong, send directly without wrapping to match Geneva's expectations
+      // Geneva expects: { type: "message", content: "...", ... }
+      // Not: { type: "message", payload: { type: "message", content: "..." }, timestamp: "..." }
+      if (data.type === 'message' || data.type === 'ping' || data.type === 'pong') {
+        // Send these messages directly to Geneva without wrapping
+        webSocketService.send(data);
+      } else {
+        // For other message types, keep the wrapper format
+        const message: WebSocketMessage = {
+          type: data.type || 'chat_message',
+          payload: data,
+          timestamp: new Date().toISOString()
+        };
+        webSocketService.send(message);
+      }
       return true;
     } catch (error) {
       console.error('Failed to send ACORN WebSocket message:', error);

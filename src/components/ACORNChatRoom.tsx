@@ -3,7 +3,8 @@ import { Box, Paper, Typography, TextField, Button, Avatar, Chip, List, ListItem
 import { 
   Send as SendIcon, 
   Add as AddIcon, 
-  Close as CloseIcon, 
+  Close as CloseIcon,
+  Check as CheckIcon,
   Psychology as PsychologyIcon, 
   Memory as MemoryIcon, 
   Code as CodeIcon, 
@@ -710,7 +711,7 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
       
       console.log('📤 About to send message via WebSocket...');
       chatWs.send({
-        type: 'user',
+        type: 'message',  // Changed from 'user' to 'message' to match Geneva's expectation
         content: inputMessage,
         user_id: 'user',
         target_agents: allParticipants.length > 0 ? allParticipants : undefined,
@@ -1059,14 +1060,17 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                 />
                 <IconButton
                   size="small"
-                  onClick={() =>
-                    systemParticipants.has(agent.id)
-                      ? removeSystemParticipant(agent.id)
-                      : addSystemParticipant(agent.id)
-                  }
+                  onClick={() => {
+                    // Only allow adding system agents, not removing them
+                    if (!systemParticipants.has(agent.id)) {
+                      addSystemParticipant(agent.id);
+                    }
+                  }}
                   color={systemParticipants.has(agent.id) ? 'primary' : 'default'}
+                  disabled={systemParticipants.has(agent.id)} // Disable if already added
+                  title={systemParticipants.has(agent.id) ? 'System agents cannot be removed' : 'Add system agent'}
                 >
-                  {systemParticipants.has(agent.id) ? <CloseIcon /> : <AddIcon />}
+                  {systemParticipants.has(agent.id) ? <CheckIcon /> : <AddIcon />}
                 </IconButton>
               </ListItem>
               );
@@ -1212,7 +1216,8 @@ export const ACORNChatRoom: React.FC<ACORNChatRoomProps> = ({ roomId, initialPar
                         key={agentId}
                         avatar={<Avatar sx={{ bgcolor: agent.color }}>{agent.avatar}</Avatar>}
                         label={agent.name}
-                        onDelete={() => removeSystemParticipant(agentId)}
+                        // System agents cannot be removed - they are core infrastructure
+                        // onDelete={() => removeSystemParticipant(agentId)}
                         size="small"
                         variant="outlined"
                       />

@@ -190,7 +190,7 @@ export const ContextSelectionPage: React.FC = () => {
             <Button
               variant="contained"
               size="large"
-              onClick={commitContext}
+              onClick={() => commitContext()}
               disabled={!canContinue}
               startIcon={isLoading ? <CircularProgress size={20} /> : <CheckIcon />}
               fullWidth

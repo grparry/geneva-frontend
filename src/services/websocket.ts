@@ -2,8 +2,14 @@ import { EventEmitter } from 'events';
 
 export interface WebSocketMessage {
   type: string;
-  payload: any;
-  timestamp: string;
+  payload?: any;  // Made optional since Geneva sends flat messages without payload
+  timestamp?: string;  // Made optional for flexibility
+  // Geneva's flat format fields
+  content?: string;
+  user_id?: string;
+  agent_id?: string;
+  room_id?: string;
+  [key: string]: any;  // Allow additional properties
 }
 
 export interface WebSocketConfig {
@@ -61,9 +67,12 @@ export class WebSocketService extends EventEmitter {
     }
   }
 
-  send(message: WebSocketMessage): void {
+  send(message: WebSocketMessage | any): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(message));
+      // If message is already a string, send it directly, otherwise stringify
+      const dataToSend = typeof message === 'string' ? message : JSON.stringify(message);
+      console.log('🔍 WebSocket sending:', dataToSend);
+      this.ws.send(dataToSend);
     } else {
       console.warn('WebSocket is not connected');
     }
@@ -79,6 +88,18 @@ export class WebSocketService extends EventEmitter {
   private handleMessage(event: MessageEvent): void {
     try {
       const message: WebSocketMessage = JSON.parse(event.data);
+      
+      // Add null/undefined check to prevent accessing properties on undefined
+      if (!message || typeof message !== 'object') {
+        console.warn('Received invalid WebSocket message:', event.data);
+        return;
+      }
+      
+      // Debug log to see what messages we're receiving
+      if (message.type === 'pong' || message.type === 'system') {
+        console.log('📥 Received system message:', message.type);
+      }
+      
       this.emit('message', message);
       
       // Emit specific events based on message type
@@ -127,10 +148,9 @@ export class WebSocketService extends EventEmitter {
 
     this.heartbeatTimer = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
+        // Send ping directly without wrapper for Geneva compatibility
         this.send({
-          type: 'ping',
-          payload: {},
-          timestamp: new Date().toISOString(),
+          type: 'ping'
         });
       }
     }, this.config.heartbeatInterval);

@@ -20,7 +20,7 @@ export interface TenantContextValue {
   // Actions
   setSelectedCustomerId: (id: string) => void;
   setSelectedProjectId: (id: string) => void;
-  commitContext: () => Promise<void>;
+  commitContext: (customerId?: string, projectId?: string) => Promise<void>;
   loadCustomers: () => void;
   loadProjects: (customerId: string) => void;
   
@@ -164,9 +164,26 @@ export const TenantContextProvider: React.FC<TenantContextProviderProps> = ({ ch
   }, []);
   
   // Commit the context (only when both customer and project are selected)
-  const commitContext = useCallback(async () => {
-    if (!selectedCustomerId || !selectedProjectId) {
-      setError('Both customer and project must be selected');
+  const commitContext = useCallback(async (customerId?: string, projectId?: string) => {
+    // Use provided parameters or fall back to context state
+    const customerIdToUse = customerId || selectedCustomerId;
+    const projectIdToUse = projectId || selectedProjectId;
+    
+    console.log('🏢 TenantContext: commitContext called with:', {
+      providedCustomerId: customerId,
+      providedProjectId: projectId,
+      contextCustomerId: selectedCustomerId,
+      contextProjectId: selectedProjectId,
+      finalCustomerId: customerIdToUse,
+      finalProjectId: projectIdToUse,
+      hasCustomerId: !!customerIdToUse,
+      hasProjectId: !!projectIdToUse
+    });
+    
+    if (!customerIdToUse || !projectIdToUse) {
+      const errorMsg = `Both customer and project must be selected. Got customer: ${customerIdToUse}, project: ${projectIdToUse}`;
+      console.error('🏢 TenantContext: Commit failed -', errorMsg);
+      setError(errorMsg);
       return;
     }
     
@@ -174,10 +191,10 @@ export const TenantContextProvider: React.FC<TenantContextProviderProps> = ({ ch
     setError(null);
     
     try {
-      console.log('🏢 TenantContext: Validating and committing context:', { selectedCustomerId, selectedProjectId });
+      console.log('🏢 TenantContext: Validating and committing context:', { customerId: customerIdToUse, projectId: projectIdToUse });
       
       // Use service layer to validate the context
-      const { customer, project } = await tenantService.validateContext(selectedCustomerId, selectedProjectId);
+      const { customer, project } = await tenantService.validateContext(customerIdToUse, projectIdToUse);
       
       // Commit to the minimal store
       setCurrentContext(customer, project);

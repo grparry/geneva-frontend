@@ -86,10 +86,14 @@ export class ChatApiService {
       if (tenantContext) {
         config.headers['X-Customer-ID'] = tenantContext.customerId;
         config.headers['X-Project-ID'] = tenantContext.projectId;
-        console.log('Chat API: Added X-Customer-ID header:', tenantContext.customerId);
-        console.log('Chat API: Added X-Project-ID header:', tenantContext.projectId);
+        console.log('🌐 Chat API REQUEST HEADERS:', {
+          'X-Customer-ID': tenantContext.customerId,
+          'X-Project-ID': tenantContext.projectId,
+          url: config.url,
+          method: config.method?.toUpperCase()
+        });
       } else {
-        console.warn('Chat API: Missing tenant context - no customer/project headers added');
+        console.warn('🌐 Chat API: Missing tenant context - no customer/project headers added to:', config.url);
       }
       
       return config;
@@ -111,50 +115,52 @@ export class ChatApiService {
 
   private getTenantContext(): { customerId: string; projectId: string } | null {
     try {
-      // First try: Get tenant context from project store (for superadmin user selections)
+      // Check both stores and use tenant-store (primary context source) if it has valid data
+      const tenantStoreData = localStorage.getItem('tenant-store');
       const projectStoreData = localStorage.getItem('project-store');
-      if (projectStoreData) {
-        const store = JSON.parse(projectStoreData);
-        const state = store.state || store;
+      
+      // Priority 1: Use tenant-store if it has complete context (this is the primary store)
+      if (tenantStoreData) {
+        const tenantStore = JSON.parse(tenantStoreData);
+        const tenantState = tenantStore.state || tenantStore;
         
-        console.log('🏢 Chat API: project-store contents:', {
-          hasCurrentCustomer: !!state.currentCustomer,
-          customerId: state.currentCustomer?.id,
-          customerName: state.currentCustomer?.name,
-          hasCurrentProject: !!state.currentProject,
-          projectId: state.currentProject?.id,
-          projectName: state.currentProject?.name
+        console.log('🏢 Chat API: tenant-store contents:', {
+          hasCurrentCustomer: !!tenantState.currentCustomer,
+          customerId: tenantState.currentCustomer?.id,
+          customerName: tenantState.currentCustomer?.name,
+          hasCurrentProject: !!tenantState.currentProject,
+          projectId: tenantState.currentProject?.id,
+          projectName: tenantState.currentProject?.name
         });
         
-        if (state.currentCustomer?.id && state.currentProject?.id) {
-          console.log('🏢 Chat API: Using selected tenant context from project-store');
+        if (tenantState.currentCustomer?.id && tenantState.currentProject?.id) {
+          console.log('🏢 Chat API: Using primary tenant context from tenant-store');
           return {
-            customerId: state.currentCustomer.id,
-            projectId: state.currentProject.id
+            customerId: tenantState.currentCustomer.id,
+            projectId: tenantState.currentProject.id
           };
         }
       }
       
-      // Fallback: Use tenant-store for detected tenant (from subdomain)
-      const tenantStoreData = localStorage.getItem('tenant-store');
-      if (tenantStoreData) {
-        const store = JSON.parse(tenantStoreData);
-        const state = store.state || store;
+      // Priority 2: Fallback to project-store (for superadmin selections)
+      if (projectStoreData) {
+        const projectStore = JSON.parse(projectStoreData);
+        const projectState = projectStore.state || projectStore;
         
-        console.log('🏢 Chat API: tenant-store contents:', {
-          hasCurrentCustomer: !!state.currentCustomer,
-          customerId: state.currentCustomer?.id,
-          customerName: state.currentCustomer?.name,
-          hasCurrentProject: !!state.currentProject,
-          projectId: state.currentProject?.id,
-          projectName: state.currentProject?.name
+        console.log('🏢 Chat API: project-store contents:', {
+          hasCurrentCustomer: !!projectState.currentCustomer,
+          customerId: projectState.currentCustomer?.id,
+          customerName: projectState.currentCustomer?.name,
+          hasCurrentProject: !!projectState.currentProject,
+          projectId: projectState.currentProject?.id,
+          projectName: projectState.currentProject?.name
         });
         
-        if (state.currentCustomer?.id && state.currentProject?.id) {
-          console.log('🏢 Chat API: Using detected tenant context from tenant-store');
+        if (projectState.currentCustomer?.id && projectState.currentProject?.id) {
+          console.log('🏢 Chat API: Using fallback tenant context from project-store');
           return {
-            customerId: state.currentCustomer.id,
-            projectId: state.currentProject.id
+            customerId: projectState.currentCustomer.id,
+            projectId: projectState.currentProject.id
           };
         }
       }

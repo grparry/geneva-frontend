@@ -105,8 +105,8 @@ export const CustomerProjectSelector: React.FC<CustomerProjectSelectorProps> = (
       // Update context with selections
       contextSetSelectedCustomerId(localSelectedCustomerId);
       contextSetSelectedProjectId(localSelectedProjectId);
-      // Commit the context
-      await commitContext();
+      // Commit the context with explicit values to avoid async state issues
+      await commitContext(localSelectedCustomerId, localSelectedProjectId);
       // Notify parent
       onContextSelected(localSelectedCustomerId, localSelectedProjectId);
     } catch (error) {
