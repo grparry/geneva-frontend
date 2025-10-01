@@ -23,6 +23,9 @@ import {
   MenuItem,
   Divider,
   Badge,
+  Tabs,
+  Tab,
+  Paper,
 } from '@mui/material';
 import {
   MoreVert as MoreVertIcon,
@@ -45,6 +48,8 @@ import { format, formatDistanceToNow } from 'date-fns';
 import type {
   Memory5D,
   Memory5DCardProps,
+} from '../../types/memory5d';
+import {
   getDimensionColor,
   getDimensionIcon,
   formatDimensionValue,
@@ -67,6 +72,7 @@ const Memory5DCard: React.FC<Memory5DCardProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
 
   // Mutations
   const [deleteMemory, { isLoading: isDeleting }] = useDeleteMemory5DMutation();
@@ -271,7 +277,7 @@ const Memory5DCard: React.FC<Memory5DCardProps> = ({
       )}
 
       {/* Concept Tags */}
-      {memory.concept_tags.length > 0 && (
+      {memory.concept_tags && memory.concept_tags.length > 0 && (
         <Box mt={1}>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
             Concepts:
@@ -414,84 +420,162 @@ const Memory5DCard: React.FC<Memory5DCardProps> = ({
         <DialogTitle>
           Memory Details
         </DialogTitle>
-        <DialogContent>
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Content
-            </Typography>
-            <Typography variant="body1" paragraph>
-              {memory.content}
-            </Typography>
-          </Box>
+        <DialogContent sx={{ p: 0 }}>
+          <Tabs
+            value={activeTab}
+            onChange={(_, newValue) => setActiveTab(newValue)}
+            sx={{ borderBottom: 1, borderColor: 'divider', px: 3, pt: 2 }}
+          >
+            <Tab label="Content" />
+            <Tab label="Metadata" />
+          </Tabs>
 
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Dimensional Classification
-            </Typography>
-            <Box display="flex" flexWrap="wrap" gap={1}>
-              {getDimensionChips().map((dimension) => (
-                <Chip
-                  key={dimension.key}
-                  icon={dimension.icon}
-                  label={`${dimension.key.replace('_', ' ')}: ${formatDimensionValue(dimension.key as any, dimension.value)}`}
+          {/* Content Tab */}
+          {activeTab === 0 && (
+            <Box sx={{ px: 3, py: 2 }}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  maxHeight: '400px',
+                  overflowY: 'auto',
+                  bgcolor: 'grey.50',
+                }}
+              >
+                <Box
                   sx={{
-                    backgroundColor: getDimensionColor(dimension.key as any, dimension.value),
+                    fontFamily: 'monospace',
+                    fontSize: '0.95rem',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    lineHeight: 1.6,
                   }}
-                />
-              ))}
-            </Box>
-          </Box>
-
-          {memory.concept_tags.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Concept Tags
-              </Typography>
-              <Box display="flex" flexWrap="wrap" gap={1}>
-                {memory.concept_tags.map((tag, index) => (
-                  <Chip
-                    key={index}
-                    label={tag}
-                    variant="outlined"
-                    size="small"
-                  />
-                ))}
-              </Box>
-            </Box>
-          )}
-
-          {relatedMemories && relatedMemories.memories.length > 0 && (
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Related Memories ({relatedMemories.memories.length})
-              </Typography>
-              {relatedMemories.memories.map((relatedMemory) => (
-                <Box key={relatedMemory.id} sx={{ mb: 1, p: 1, bgcolor: 'grey.50', borderRadius: 1 }}>
-                  <Typography variant="body2">
-                    {relatedMemory.content.substring(0, 100)}...
-                  </Typography>
+                >
+                  {memory.content || '(No content)'}
                 </Box>
-              ))}
+              </Paper>
+
+              {memory.concept_tags && memory.concept_tags.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Concept Tags
+                  </Typography>
+                  <Box display="flex" flexWrap="wrap" gap={1}>
+                    {memory.concept_tags.map((tag, index) => (
+                      <Chip
+                        key={index}
+                        label={tag}
+                        variant="outlined"
+                        size="small"
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {relatedMemories && relatedMemories.memories.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Related Memories ({relatedMemories.memories.length})
+                  </Typography>
+                  {relatedMemories.memories.map((relatedMemory) => (
+                    <Box key={relatedMemory.id} sx={{ mb: 1, p: 1, bgcolor: 'grey.100', borderRadius: 1 }}>
+                      <Typography variant="body2">
+                        {relatedMemory.content}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              )}
             </Box>
           )}
 
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              Metadata
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              ID: {memory.id}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Created: {format(new Date(memory.created_at), 'PPpp')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Updated: {format(new Date(memory.updated_at), 'PPpp')}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Version: {memory.version}
-            </Typography>
-          </Box>
+          {/* Metadata Tab */}
+          {activeTab === 1 && (
+            <Box sx={{ px: 3, py: 2 }}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Dimensional Classification
+                </Typography>
+                <Box display="flex" flexWrap="wrap" gap={1}>
+                  {getDimensionChips().map((dimension) => (
+                    <Chip
+                      key={dimension.key}
+                      icon={dimension.icon}
+                      label={`${dimension.key.replace('_', ' ')}: ${formatDimensionValue(dimension.key as any, dimension.value)}`}
+                      sx={{
+                        backgroundColor: getDimensionColor(dimension.key as any, dimension.value),
+                      }}
+                    />
+                  ))}
+                </Box>
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Scores & Metrics
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Importance: {(memory.importance_score * 100).toFixed(0)}%
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Confidence: {(memory.confidence_score * 100).toFixed(0)}%
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Coherence: {(coherenceScore * 100).toFixed(0)}%
+                </Typography>
+              </Box>
+
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  System Information
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                  ID: {memory.id}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Created: {format(new Date(memory.created_at), 'PPpp')}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Updated: {format(new Date(memory.updated_at), 'PPpp')}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Version: {memory.version}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Status: {memory.processing_status}
+                </Typography>
+                {memory.project_id && (
+                  <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                    Project: {memory.project_id}
+                  </Typography>
+                )}
+              </Box>
+
+              {(memory.bradley_processed_at || memory.greta_processed_at || memory.thedra_processed_at) && (
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Trinity Processing
+                  </Typography>
+                  {memory.bradley_processed_at && (
+                    <Typography variant="body2" color="text.secondary">
+                      🛡️ Bradley: {format(new Date(memory.bradley_processed_at), 'PPpp')}
+                    </Typography>
+                  )}
+                  {memory.greta_processed_at && (
+                    <Typography variant="body2" color="text.secondary">
+                      🎓 Greta: {format(new Date(memory.greta_processed_at), 'PPpp')}
+                    </Typography>
+                  )}
+                  {memory.thedra_processed_at && (
+                    <Typography variant="body2" color="text.secondary">
+                      🔄 Thedra: {format(new Date(memory.thedra_processed_at), 'PPpp')}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowDetails(false)}>Close</Button>
@@ -509,9 +593,21 @@ const Memory5DCard: React.FC<Memory5DCardProps> = ({
           <Typography>
             Are you sure you want to delete this memory? This action cannot be undone.
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2, fontStyle: 'italic' }}>
-            "{memory.content.substring(0, 100)}..."
-          </Typography>
+          <Paper
+            variant="outlined"
+            sx={{
+              mt: 2,
+              p: 2,
+              maxHeight: '200px',
+              overflowY: 'auto',
+              bgcolor: 'grey.50',
+              fontStyle: 'italic',
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              "{memory.content}"
+            </Typography>
+          </Paper>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>

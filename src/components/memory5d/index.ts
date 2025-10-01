@@ -18,6 +18,7 @@ export { default as TrinityAgentPanel } from './TrinityAgentPanel';
 // Demo and testing
 export { default as Memory5DDemo } from './Memory5DDemo';
 
-// Re-export types and services for convenience
+// Re-export types, services, and WebSocket for convenience
 export * from '../../types/memory5d';
 export * from '../../services/memory5d/api';
+export * from '../../services/memory5d/websocket';

@@ -58,7 +58,7 @@ import {
   School as SchoolIcon,
   ExpandMore as ExpandMoreIcon,
   Refresh as RefreshIcon,
-  RestoreIcon,
+  Restore as RestoreIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 
@@ -66,6 +66,8 @@ import type {
   Memory5D,
   Memory5DContent,
   Memory5DEditRequest,
+} from '../../types/memory5d';
+import {
   validateMemory5D,
   getDimensionColor,
   formatDimensionValue,
@@ -643,11 +645,11 @@ const Memory5DContentViewer: React.FC<Memory5DContentViewerProps> = ({
         autoHideDuration={6000}
         onClose={() => setSnackbar(null)}
       >
-        {snackbar && (
+        {snackbar ? (
           <Alert severity={snackbar.severity} onClose={() => setSnackbar(null)}>
             {snackbar.message}
           </Alert>
-        )}
+        ) : undefined}
       </Snackbar>
     </Box>
   );

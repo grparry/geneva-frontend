@@ -30,13 +30,15 @@ import {
   Business as BusinessIcon,
   Security as SecurityIcon,
   School as SchoolIcon,
-  TuneIcon,
+  Tune as TuneIcon,
 } from '@mui/icons-material';
 import { debounce } from 'lodash';
 
 import type {
   Memory5DFilters,
   Memory5DSearchRequest,
+} from '../../types/memory5d';
+import {
   COGNITIVE_TYPE_DEFINITIONS,
   TEMPORAL_TIER_DEFINITIONS,
   ORGANIZATIONAL_SCOPE_DEFINITIONS,
@@ -271,10 +273,10 @@ const Memory5DSearchBar: React.FC<Memory5DSearchBarProps> = ({
                 options={getAutocompleteOptions('cognitive_type')}
                 getOptionLabel={(option) => option.label}
                 value={getAutocompleteOptions('cognitive_type').filter(option =>
-                  filters.cognitive_type?.includes(option.value)
+                  filters.cognitive_type?.includes(option.value as any)
                 )}
                 onChange={(_, newValue) => {
-                  updateFilter('cognitive_type', newValue.map(v => v.value));
+                  updateFilter('cognitive_type', newValue.map(v => v.value) as any);
                 }}
                 renderTags={(tagValue, getTagProps) =>
                   tagValue.map((option, index) => (
@@ -311,10 +313,10 @@ const Memory5DSearchBar: React.FC<Memory5DSearchBarProps> = ({
                 options={getAutocompleteOptions('temporal_tier')}
                 getOptionLabel={(option) => option.label}
                 value={getAutocompleteOptions('temporal_tier').filter(option =>
-                  filters.temporal_tier?.includes(option.value)
+                  filters.temporal_tier?.includes(option.value as any)
                 )}
                 onChange={(_, newValue) => {
-                  updateFilter('temporal_tier', newValue.map(v => v.value));
+                  updateFilter('temporal_tier', newValue.map(v => v.value) as any);
                 }}
                 renderTags={(tagValue, getTagProps) =>
                   tagValue.map((option, index) => (
@@ -351,10 +353,10 @@ const Memory5DSearchBar: React.FC<Memory5DSearchBarProps> = ({
                 options={getAutocompleteOptions('organizational_scope')}
                 getOptionLabel={(option) => option.label}
                 value={getAutocompleteOptions('organizational_scope').filter(option =>
-                  filters.organizational_scope?.includes(option.value)
+                  filters.organizational_scope?.includes(option.value as any)
                 )}
                 onChange={(_, newValue) => {
-                  updateFilter('organizational_scope', newValue.map(v => v.value));
+                  updateFilter('organizational_scope', newValue.map(v => v.value) as any);
                 }}
                 renderTags={(tagValue, getTagProps) =>
                   tagValue.map((option, index) => (
@@ -391,10 +393,10 @@ const Memory5DSearchBar: React.FC<Memory5DSearchBarProps> = ({
                 options={getAutocompleteOptions('security_classification')}
                 getOptionLabel={(option) => option.label}
                 value={getAutocompleteOptions('security_classification').filter(option =>
-                  filters.security_classification?.includes(option.value)
+                  filters.security_classification?.includes(option.value as any)
                 )}
                 onChange={(_, newValue) => {
-                  updateFilter('security_classification', newValue.map(v => v.value));
+                  updateFilter('security_classification', newValue.map(v => v.value) as any);
                 }}
                 renderTags={(tagValue, getTagProps) =>
                   tagValue.map((option, index) => (
@@ -431,10 +433,10 @@ const Memory5DSearchBar: React.FC<Memory5DSearchBarProps> = ({
                 options={getAutocompleteOptions('ontological_schema')}
                 getOptionLabel={(option) => option.label}
                 value={getAutocompleteOptions('ontological_schema').filter(option =>
-                  filters.ontological_schema?.includes(option.value)
+                  filters.ontological_schema?.includes(option.value as any)
                 )}
                 onChange={(_, newValue) => {
-                  updateFilter('ontological_schema', newValue.map(v => v.value));
+                  updateFilter('ontological_schema', newValue.map(v => v.value) as any);
                 }}
                 renderTags={(tagValue, getTagProps) =>
                   tagValue.map((option, index) => (

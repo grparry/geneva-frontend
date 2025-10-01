@@ -53,11 +53,8 @@ import type {
   Memory5D,
   Memory5DFilters,
   Memory5DBrowserProps,
-  COGNITIVE_TYPE_DEFINITIONS,
-  TEMPORAL_TIER_DEFINITIONS,
-  ORGANIZATIONAL_SCOPE_DEFINITIONS,
-  SECURITY_CLASSIFICATION_DEFINITIONS,
-  ONTOLOGICAL_SCHEMA_DEFINITIONS,
+} from '../../types/memory5d';
+import {
   getDimensionColor,
   getDimensionIcon,
   formatDimensionValue,

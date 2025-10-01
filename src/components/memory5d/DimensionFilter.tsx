@@ -26,6 +26,8 @@ import {
 import type {
   Memory5DFilters,
   DimensionFilterProps,
+} from '../../types/memory5d';
+import {
   COGNITIVE_TYPE_DEFINITIONS,
   TEMPORAL_TIER_DEFINITIONS,
   ORGANIZATIONAL_SCOPE_DEFINITIONS,
@@ -228,7 +230,7 @@ const DimensionFilter: React.FC<DimensionFilterProps> = ({
             {availableValues.map((value) => {
               const count = getValueCount(value);
               const isSelected = selectedValues.includes(value);
-              const isDisabled = maxSelections && !isSelected && selectedValues.length >= maxSelections;
+              const isDisabled = !!(maxSelections && !isSelected && selectedValues.length >= maxSelections);
 
               return (
                 <Box key={value} sx={{ mb: 1 }}>

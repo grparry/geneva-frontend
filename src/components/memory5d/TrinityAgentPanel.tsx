@@ -29,7 +29,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  ListItemSecondary,
   Divider,
   Tooltip,
   Badge,
@@ -614,11 +613,11 @@ const TrinityAgentPanel: React.FC<TrinityAgentPanelProps> = ({
         autoHideDuration={6000}
         onClose={() => setSnackbar(null)}
       >
-        {snackbar && (
+        {snackbar ? (
           <Alert severity={snackbar.severity} onClose={() => setSnackbar(null)}>
             {snackbar.message}
           </Alert>
-        )}
+        ) : undefined}
       </Snackbar>
     </Box>
   );

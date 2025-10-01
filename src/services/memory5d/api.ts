@@ -18,23 +18,28 @@ import type {
   TrinityAgentAction,
   Memory5DContent,
   Memory5DEditRequest,
-  validateMemory5D,
 } from '../../types/memory5d';
+import { validateMemory5D } from '../../types/memory5d';
 
 // Enhanced base query with project ID header and security token
 const memory5dBaseQuery = fetchBaseQuery({
   baseUrl: '/api/v1/memory',
   prepareHeaders: (headers, { getState }) => {
-    // Get project ID from state or use system default
+    // Get project and customer context from state or use defaults
     const state = getState() as any;
     const projectId = state?.auth?.currentProject?.id || '00000000-0000-0000-0000-000000000000';
+    const customerId = state?.auth?.currentCustomer?.id || 'default-customer';
     const authToken = state?.auth?.token;
 
     headers.set('X-Project-ID', projectId);
+    headers.set('X-Customer-ID', customerId);
     headers.set('Content-Type', 'application/json');
 
     if (authToken) {
       headers.set('Authorization', `Bearer ${authToken}`);
+    } else {
+      // Use dev token if no auth token available
+      headers.set('Authorization', 'Bearer geneva-sdk-token');
     }
 
     return headers;

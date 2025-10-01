@@ -44,7 +44,7 @@ import { OCLPage } from './pages/OCLPage';
 import { CognitiveMemoryPage } from './pages/CognitiveMemoryPage';
 
 // 5D Memory components
-import { Memory5DDemo } from './components/memory5d';
+import { Memory5DBrowserPage } from './pages/memory5d/Memory5DBrowserPage';
 import { Memory5DAnalyticsPage } from './pages/memory5d/Memory5DAnalyticsPage';
 import { TrinityAgentsPage } from './pages/memory5d/TrinityAgentsPage';
 
@@ -262,7 +262,7 @@ const AppContent: React.FC<{ tenantConfig: { isSuperadmin: boolean } }> = ({ ten
             <Route path="/cognitive" element={<CognitiveMemoryPage />} />
 
             {/* 5D Memory routes */}
-            <Route path="/memory5d" element={<Memory5DDemo />} />
+            <Route path="/memory5d" element={<Memory5DBrowserPage />} />
             <Route path="/memory5d/trinity" element={<TrinityAgentsPage />} />
             <Route path="/memory5d/analytics" element={<Memory5DAnalyticsPage />} />
             
